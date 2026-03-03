@@ -1,8 +1,11 @@
+---
+// Astroの干渉を防ぐ完全版コード
+---
 <!DOCTYPE html>
 <html lang="ja" prefix="og: http://ogp.me/ns#">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LGXBBWLCPN"></script>
-    <script>
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-LGXBBWLCPN"></script>
+    <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -40,17 +43,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script is:inline src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script is:inline src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
-    <style>
+    <style is:inline>
         :root {
             --palette-blue: #004098;
             --palette-blue-light: #e1f5fe;
@@ -463,7 +466,7 @@
         </div>
     </div>
 
-    <script>
+    <script is:inline>
         let currentLang = 'jp';
         let isRPGMode = false;
 
@@ -1137,7 +1140,7 @@
 
             const mapBtn = document.getElementById('modal-map-btn');
             if (mapBtn) {
-                mapBtn.href = spot.map_url && spot.map_url.trim() !== "" ? spot.map_url.trim() : (spot.lat && spot.lng ? `https://www.google.com/maps/search/?api=1&query=${spot.lat},${spot.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("三原市 " + spot.title)}`);
+                mapBtn.href = spot.map_url && spot.map_url.trim() !== "" ? spot.map_url.trim() : (spot.lat && spot.lng ? `https://maps.google.com/?q=${spot.lat},${spot.lng}` : `https://maps.google.com/?q=${encodeURIComponent("三原市 " + spot.title)}`);
             }
 
             const shareUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?spot=' + encodeURIComponent(spot.title) + '&lang=' + currentLang;
