@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja" prefix="og: http://ogp.me/ns#">
 <head>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LGXBBWLCPN"></script>
+    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-LGXBBWLCPN"></script>
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -16,7 +16,7 @@
     <meta name="description" content="広島県三原市の魅力を再発見するフォトマッププロジェクト。地元の人だけが知る絶景や隠れたスポットを写真と地図で紹介しています。">
     <meta name="keywords" content="三原市, 観光, 写真, マップ, 絶景, グルメ, 広島県, 瀬戸内海">
     
-    <link rel="canonical" href="https://mihara-rediscover.pages.dev/" id="canonical-tag">
+    <link rel="canonical" href="https://photomap-mihara-walk.pages.dev/" id="canonical-tag">
 
     <meta property="og:type" content="website">
     <meta property="og:title" content="三原市まち歩き - PHOTO MAP">
@@ -43,17 +43,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script is:inline src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script is:inline src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
-    <style>
+    <style is:inline>
         :root {
             --palette-blue: #004098;
             --palette-blue-light: #e1f5fe;
@@ -115,9 +115,6 @@
             border-radius: 20px; cursor: pointer; font-size: 10px; font-weight: 700;
             transition: all 0.3s; display: flex; align-items: center; gap: 6px; white-space: nowrap;
         }
-        #rpg-toggle-btn { background: var(--palette-blue); color: white; padding: 6px 14px; margin-left: 4px; box-shadow: 0 2px 6px rgba(0, 64, 152, 0.2); }
-        #rpg-toggle-btn:hover { background: #00337a; transform: translateY(-1px); }
-        #rpg-toggle-btn i { color: var(--palette-gold); font-size: 12px; }
         #lang-toggle-btn { background: transparent; color: var(--text-sub); border-color: var(--border-soft); padding: 5px 10px; }
         #lang-toggle-btn:hover { background: #f1f5f9; color: var(--palette-blue); }
 
@@ -129,7 +126,7 @@
         @media (max-width: 640px) {
             .nav-simple-link { font-size: 9px; }
             .nav-links-wrap { gap: 6px; } 
-            #rpg-toggle-btn, #lang-toggle-btn { padding: 4px 8px; font-size: 9px; }
+            #lang-toggle-btn { padding: 4px 8px; font-size: 9px; }
             @media (max-width: 380px) { .header-logo { display: none; } .fixed-nav { justify-content: center; } }
         }
 
@@ -243,10 +240,6 @@
             border-color: var(--palette-blue);
             box-shadow: 0 12px 30px rgba(0,64,152,0.15);
         }
-        body.rpg-mode .local-card-horizontal.active-card {
-            border-color: #ff0 !important;
-            box-shadow: 0 0 15px rgba(255, 255, 0, 0.4);
-        }
         
         @media (min-width: 640px) {
             .local-card-horizontal { flex: 0 0 45%; scroll-snap-align: start; }
@@ -301,10 +294,6 @@
                 min-height: 550px;
             }
         }
-        body.rpg-mode #local-map-container {
-            border: 3px double #fff !important;
-            box-shadow: 0 0 0 2px #000;
-        }
 
         /* --- 募集セクション --- */
         .h2-one-line { font-size: 1.6rem; font-weight: 700 !important; margin-bottom: 50px; line-height: 1.2; text-align: center; white-space: nowrap; letter-spacing: -0.07em; color: var(--palette-blue); }
@@ -339,39 +328,6 @@
         
         #copy-success-msg { font-size: 10px; font-weight: bold; color: var(--palette-blue); opacity: 0; transition: opacity 0.3s ease; height: 14px; }
         #copy-success-msg.show { opacity: 1; }
-
-        /* --- 冒険の書モード (RPG Mode) --- */
-        body.rpg-mode { background-color: #000 !important; color: #fff !important; font-family: 'DotGothic16', sans-serif !important; }
-        body.rpg-mode *:not(i) { font-family: 'DotGothic16', sans-serif !important; letter-spacing: 0.1em; }
-        body.rpg-mode img { filter: none; image-rendering: auto; }
-        body.rpg-mode .leaflet-layer { filter: contrast(120%) saturate(200%); image-rendering: pixelated; image-rendering: crisp-edges; }
-        body.rpg-mode .card-frame, body.rpg-mode .fixed-nav, body.rpg-mode .sticky-tab-bar, body.rpg-mode .popup-info, body.rpg-mode .insta-cta-box, body.rpg-mode .footer-main, body.rpg-mode .section-wrap:nth-child(even), body.rpg-mode .local-card-horizontal { background: #00008b !important; border: 3px double #fff !important; border-radius: 4px !important; color: #fff !important; box-shadow: 0 0 0 2px #000; }
-        body.rpg-mode #modal-content-area { background: #00008b !important; border: 3px double #fff !important; box-shadow: 0 0 0 2px #000; color: #fff !important; }
-        body.rpg-mode .modal-wrap { background: rgba(0,0,0,0.85) !important; }
-        body.rpg-mode .modal-close { background: #000 !important; border: 2px solid #fff !important; color: #fff !important; }
-        body.rpg-mode #modal-map-btn { background: #000 !important; border: 2px solid #fff !important; color: #ff0 !important; }
-        body.rpg-mode .section-wrap { background-color: #000 !important; }
-        body.rpg-mode #contact { border-top: none !important; }
-        body.rpg-mode h1, body.rpg-mode h2, body.rpg-mode h3, body.rpg-mode h4, body.rpg-mode h5, body.rpg-mode p, body.rpg-mode span, body.rpg-mode a, body.rpg-mode div, body.rpg-mode li, body.rpg-mode #modal-title, body.rpg-mode #modal-desc, body.rpg-mode #modal-author, body.rpg-mode .share-label { color: #fff !important; text-shadow: 2px 2px 0 #000; }
-        body.rpg-mode .text-blue-900, body.rpg-mode .section-tag-label, body.rpg-mode h4, body.rpg-mode #modal-area, body.rpg-mode #modal-sns, body.rpg-mode #copy-success-msg { color: #f5d76e !important; border-color: #f5d76e !important; }
-        body.rpg-mode .view-switch, body.rpg-mode .view-btn, body.rpg-mode .tab-item, body.rpg-mode .share-btn { background: #000 !important; border: 2px solid #fff !important; color: #fff !important; margin: 2px; border-radius: 4px; }
-        body.rpg-mode .view-btn.active, body.rpg-mode .tab-item.active { background: #a52a2a !important; color: #ff0 !important; border-color: #ff0 !important; }
-        body.rpg-mode #rpg-toggle-btn, body.rpg-mode #lang-toggle-btn { background: #000 !important; border: 2px solid #fff !important; color: #fff !important; border-radius: 4px; }
-        body.rpg-mode .local-tag-badge { background: #000 !important; color: #ff0 !important; border: 1px solid #fff; box-shadow: none; }
-        body.rpg-mode .local-card-footer { border-top-color: #fff !important; }
-
-        body.rpg-mode #weather-widget { background: #00008b !important; border: 3px double #fff !important; margin-bottom: 30px; }
-        body.rpg-mode #weather-widget * { border-color: #fff !important; }
-        body.rpg-mode #weather-icon-bg { background: transparent !important; color: #ff0 !important; border: 2px solid #fff !important; box-shadow: none; }
-        body.rpg-mode #weather-temp-text { color: #fff !important; }
-        body.rpg-mode #weather-desc { background: #000 !important; color: #fff !important; border-color: #fff !important; }
-        body.rpg-mode .weather-magic-box { background: #000 !important; border: 1px solid #fff !important; }
-        body.rpg-mode .weather-magic-box .text-orange-500, body.rpg-mode .weather-magic-box .text-orange-400, body.rpg-mode .weather-magic-box .text-blue-400 { color: #f5d76e !important; }
-        body.rpg-mode .weather-magic-box .text-slate-800, body.rpg-mode .weather-magic-box .text-slate-600 { color: #fff !important; }
-        body.rpg-mode #weekly-toggle-wrap { border-color: #fff !important; }
-        body.rpg-mode #weekly-toggle-btn { color: #f5d76e !important; }
-        body.rpg-mode .weekly-day-label { color: #fff !important; }
-        body.rpg-mode #weekly-forecast-list i { color: #fff !important; }
     </style>
 </head>
 <body id="top">
@@ -384,9 +340,6 @@
             <div class="nav-simple-link" onclick="scrollToId('contact')" data-i18n="nav-submit">掲載募集</div>
             <div class="nav-simple-link hidden sm:block" onclick="scrollToId('guideline')" data-i18n="nav-guide">掲載案内</div>
             
-            <button id="rpg-toggle-btn" class="header-btn" onclick="toggleRPGMode()">
-                <i id="rpg-btn-icon" class="fa-solid fa-dungeon"></i> <span id="rpg-btn-text">冒険の扉</span>
-            </button>
             <button id="lang-toggle-btn" class="header-btn" onclick="toggleLanguage()">
                 <i class="fa-solid fa-globe"></i> <span id="lang-text">EN</span>
             </button>
@@ -652,7 +605,6 @@
             'loading-text': { normal: { jp: 'Collecting memories...', en: 'Collecting memories...' }, rpg: { jp: 'ローディングちゅう...', en: 'Loading...' } },
             'load-more-btn': { normal: { jp: 'MORE PHOTOS', en: 'MORE PHOTOS' }, rpg: { jp: 'もっと さがす', en: 'EXPLORE MORE' } },
             
-            // ▼ ブログ風タイトルへ変更、および改行設定（sm:hiddenでスマホのみ改行）
             'label-local': { normal: { jp: 'PARENT & CHILD LOG', en: 'PARENT & CHILD LOG' }, rpg: { jp: 'SECRET LORE', en: 'SECRET LORE' } },
             'title-local': { normal: { jp: 'みはら親子さんぽログ', en: 'Mihara Family Walk Log' }, rpg: { jp: '酒場のうわさばなし', en: 'TAVERN RUMORS' } },
             'desc-local': { normal: { jp: '公式ガイドには載らない、<br class="block sm:hidden">パパママ目線のリアルな遊び場マップ。', en: 'Real playground maps from a parent\'s perspective,<br class="block sm:hidden">not found in official guides.' }, rpg: { jp: 'おうこくの ちずには のっていない、<br class="block sm:hidden">ひみつの じょうほう だ。', en: 'Secret lore hidden from the<br class="block sm:hidden">Kingdom\'s official maps.' } },
@@ -681,14 +633,12 @@
             'share-label': { normal: { jp: 'SHARE THIS SPOT', en: 'SHARE THIS SPOT' }, rpg: { jp: 'SHARE THIS SPOT', en: 'SEND RAVEN' } },
             'copy-success-msg': { normal: { jp: 'リンクをコピーしました！', en: 'Link copied to clipboard!' }, rpg: { jp: 'ふしぎなじゅもんを コピーした！', en: 'Thou hast learned a new SPELL! (Copied)' } },
 
-            // 天気用辞書
             'weather-mihara': { normal: { jp: '三原市の今の天気', en: 'CURRENT WEATHER' }, rpg: { jp: 'ミハラの そらもよう', en: 'MIHARA SKIES' } },
             'weather-magic-hour': { normal: { jp: 'MAGIC HOUR', en: 'MAGIC HOUR' }, rpg: { jp: 'ゆうぐれの とき', en: 'TWILIGHT' } },
             'weather-sunrise': { normal: { jp: 'SUNRISE', en: 'SUNRISE' }, rpg: { jp: 'よあけ', en: 'DAWN' } },
             'weather-weekly-toggle': { normal: { jp: '週間天気を見る', en: 'Weekly Forecast' }, rpg: { jp: 'このさきの そらもよう', en: 'Future Skies' } }
         };
 
-        // --- ウェザー API 連携機能 ---
         let weatherDataCache = null;
         async function fetchWeather() {
             try {
@@ -793,7 +743,6 @@
             }
         };
 
-        // --- UI更新処理 ---
         function updateUI() {
             const mode = isRPGMode ? 'rpg' : 'normal';
             
@@ -808,13 +757,6 @@
                 const area = el.getAttribute('data-area');
                 if (areaLabels[area]) el.textContent = areaLabels[area][currentLang];
             });
-
-            const rpgBtnText = isRPGMode ? (currentLang === 'en' ? 'RETURN' : '現代に戻る') : (currentLang === 'en' ? 'QUEST MODE' : '冒険の扉');
-            const rpgBtnTextEl = document.getElementById('rpg-btn-text');
-            if (rpgBtnTextEl) rpgBtnTextEl.textContent = rpgBtnText;
-            
-            const rpgBtnIconEl = document.getElementById('rpg-btn-icon');
-            if (rpgBtnIconEl) rpgBtnIconEl.className = isRPGMode ? 'fa-solid fa-book-open' : 'fa-solid fa-dungeon';
             
             const langTextEl = document.getElementById('lang-text');
             if (langTextEl) langTextEl.textContent = currentLang === 'jp' ? 'EN' : 'JP';
@@ -831,12 +773,6 @@
                 updateModalText(modal._currentSpot);
             }
         }
-
-        window.toggleRPGMode = function() {
-            isRPGMode = !isRPGMode;
-            document.body.classList.toggle('rpg-mode', isRPGMode);
-            updateUI();
-        };
 
         window.toggleLanguage = function() {
             currentLang = currentLang === 'jp' ? 'en' : 'jp';
@@ -881,14 +817,7 @@
             }, 6000);
         }
 
-        // ==========================================
-        // ▼ データの読み込み設定 (CSV URLs)
-        // ==========================================
-        
-        // 1. 既存のギャラリー用データURL
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33pmO60BCd0hIr_v5xh34cJ_IWAHkF0pTaj855pzicmNoVx6W8CPK3MEhlp-irodPSE/pub?gid=1232979489&single=true&output=csv";
-        
-        // 2. 新しい「親子でお散歩」コーナー用のデータURL（フォーム回答用シート）
         const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
 
         let spotsData = [];
@@ -906,21 +835,18 @@
         let markersClusterGroup = null; 
         let currentViewMode = 'grid'; 
 
-        // ▼ ドライブ画像のIDを取得する関数
         function getDriveId(urlOrId) {
             if (!urlOrId) return '';
             const match = urlOrId.toString().match(/[-\w]{25,}/);
             return match ? match[0] : '';
         }
 
-        // ▼ 最初に使用する画像URLを生成する関数
         function getPrimaryImgUrl(driveId, urlOrId, size = 'w1000') {
-            if (driveId) return `https://lh3.googleusercontent.com/d/$${driveId}=${size}`;
+            if (driveId) return `https://drive.google.com/thumbnail?id=${driveId}&sz=${size}`;
             if (urlOrId && urlOrId.toString().startsWith('http')) return urlOrId.toString().replace('http://', 'https://');
             return '';
         }
 
-        // ▼ 画像読み込みエラー時に別のURL形式を試す（フォールバック）関数
         window.handleImgErr = function(img, driveId) {
             if (!img || !driveId) {
                 if (img) { img.onerror = null; img.src = 'https://placehold.co/600x800/e2e8f0/94a3b8?text=No+Image'; }
@@ -929,12 +855,9 @@
             const step = parseInt(img.dataset.fStep || '0');
             if (step === 0) {
                 img.dataset.fStep = '1';
-                img.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000`; // 2つ目の候補を試す
-            } else if (step === 1) {
-                img.dataset.fStep = '2';
-                img.src = `https://drive.google.com/uc?export=view&id=${driveId}`; // 3つ目の候補を試す
+                img.src = `https://drive.google.com/uc?export=view&id=${driveId}`;
             } else {
-                img.onerror = null; // 全部ダメならプレースホルダーを表示
+                img.onerror = null; 
                 img.src = 'https://placehold.co/600x800/e2e8f0/94a3b8?text=Image+Blocked';
             }
         };
@@ -984,7 +907,7 @@
                     const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                     const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                     
-                    const safeTitle = (spot.title || '').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                    const safeTitle = (spot.title || '').replace(/'/g, "\\'").replace(/"/g, """).replace(/\n/g, " ");
                     const popupContent = `
                         <div onclick="openModalFromMap('${safeTitle}')" style="cursor:pointer;">
                             <div class="popup-img-wrap"><img src="${imgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
@@ -1061,17 +984,14 @@
             }
         };
 
-        // --- 親子でお散歩・横スクロール＆マップ連動描画 ---
         function initLocalMap() {
             if (localMapInstance) return;
             const initPos = AREA_POSITIONS['all'];
-            // scrollWheelZoomをfalseにして、ページスクロール時の誤操作を防止
             localMapInstance = L.map('local-map-container', { scrollWheelZoom: false }).setView([initPos.lat, initPos.lng], initPos.zoom);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OSM', subdomains: 'abcd', maxZoom: 19 }).addTo(localMapInstance);
             localMarkersGroup = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 50, spiderfyOnMaxZoom: true });
             localMapInstance.addLayer(localMarkersGroup);
 
-            // マップをクリックしたらズーム可能にする（UX配慮）
             localMapInstance.once('focus', function() { localMapInstance.scrollWheelZoom.enable(); });
         }
 
@@ -1081,7 +1001,6 @@
             if (!container) return;
             container.innerHTML = '';
 
-            // データがまだ無い場合の「枠だけ」表示
             if (localInsightsData.length === 0) {
                 container.innerHTML = `
                     <div class="w-full py-20 text-center bg-white rounded-xl border border-dashed border-gray-300 mx-6 sm:mx-0 flex flex-col items-center justify-center">
@@ -1104,7 +1023,6 @@
             localMarkersMap = {};
             let hasMarkers = false;
 
-            // スクロール時にカードとマップを連動させるObserver
             const observerOptions = { root: container, rootMargin: '0px', threshold: 0.8 };
             const cardObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -1112,11 +1030,9 @@
                         const title = entry.target.dataset.title;
                         const marker = localMarkersMap[title];
                         
-                        // アクティブなカードのスタイル更新
                         document.querySelectorAll('.local-card-horizontal').forEach(c => c.classList.remove('active-card'));
                         entry.target.classList.add('active-card');
 
-                        // マップの中心を移動してポップアップを開く
                         if (marker) {
                             localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
                             marker.openPopup();
@@ -1132,17 +1048,15 @@
                 const title = (lang === 'en' && spot.title_en) ? spot.title_en : spot.title;
                 const desc = (lang === 'en' && spot.desc_en) ? spot.desc_en : spot.desc;
                 
-                // ▼ タグの英語対応（tag_enが設定されていればそれを表示）
                 const defaultTagJp = "🎒 親子でお散歩";
                 const defaultTagEn = "🎒 Family Walk";
                 const tag = lang === 'en' ? (spot.tag_en || spot.tag || defaultTagEn) : (spot.tag || defaultTagJp);
                 
                 const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][lang] : (lang==='en'?'MIHARA':'三原');
 
-                // カードの生成
                 const card = document.createElement('div');
                 card.className = 'local-card-horizontal';
-                card.dataset.title = spot.title; // 紐付け用
+                card.dataset.title = spot.title; 
                 
                 card.onclick = (e) => {
                     if (window.isDragged) { e.preventDefault(); return; }
@@ -1167,13 +1081,12 @@
                 container.appendChild(card);
                 cardObserver.observe(card);
 
-                // マップマーカーの生成
                 if (spot.lat && spot.lng) {
                     const lat = parseFloat(spot.lat); const lng = parseFloat(spot.lng);
                     if (!isNaN(lat) && !isNaN(lng)) {
                         hasMarkers = true;
                         const popupImgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
-                        const safeTitle = (spot.title || '').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                        const safeTitle = (spot.title || '').replace(/'/g, "\\'").replace(/"/g, """).replace(/\n/g, " ");
                         
                         const popupContent = `
                             <div style="cursor:pointer;" onclick="scrollToLocalCard('${safeTitle}')">
@@ -1190,7 +1103,6 @@
                             localMarkersGroup.addLayer(marker);
                             localMarkersMap[spot.title] = marker;
 
-                            // ピンクリック時にカードへスクロール
                             marker.on('click', () => {
                                 window.scrollToLocalCard(spot.title);
                             });
@@ -1199,24 +1111,20 @@
                 }
             });
 
-            // マップのサイズ調整と初期位置
             if (hasMarkers && localMapInstance && localMarkersGroup) {
                 setTimeout(() => {
                     localMapInstance.invalidateSize();
                     localMapInstance.fitBounds(localMarkersGroup.getBounds(), { padding: [30, 30], maxZoom: 14 });
-                    // 最初のカードをアクティブにする
                     const firstCard = container.querySelector('.local-card-horizontal');
                     if (firstCard) firstCard.classList.add('active-card');
                 }, 300);
             }
         }
 
-        // --- マップ連動用：指定したカードまで横スクロールする関数 ---
         window.scrollToLocalCard = function(title) {
             const container = document.getElementById('local-scroll-container');
             if (!container) return;
             
-            // CSSセレクタでエスケープが必要な文字を処理
             const safeSelector = title.replace(/"/g, '\\"');
             const targetCard = container.querySelector(`.local-card-horizontal[data-title="${safeSelector}"]`);
             
@@ -1229,7 +1137,6 @@
             }
         };
 
-        // --- PC用：マウストラッグでの横スクロール制御 ---
         window.isDown = false;
         window.startX = 0;
         window.scrollLeft = 0;
@@ -1270,13 +1177,11 @@
             }
         });
 
-        // --- URLとモーダルの連動 ---
         function updateUrlParams(spotTitle) {
             if (!history.pushState) return;
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?spot=' + encodeURIComponent(spotTitle) + '&lang=' + currentLang;
             window.history.pushState({path: newUrl}, '', newUrl);
             
-            // localInsightsDataからも検索
             let spot = spotsData.find(s => s.title === spotTitle);
             if (!spot) spot = localInsightsData.find(s => s.title === spotTitle);
 
@@ -1320,14 +1225,12 @@
             const areaKey = spot.area || 'all';
             document.getElementById('modal-area').textContent = areaLabels[areaKey] ? areaLabels[areaKey][currentLang] : (currentLang === 'en' ? 'MIHARA' : '三原');
             
-            // ▼ 撮影者名の処理（スプレッドシートの author 列を優先）
             const authorEl = document.getElementById('modal-author');
             if (authorEl) {
                 authorEl.textContent = 'PHOTO BY ' + (spot.author || spot.nickname || spot.name || (currentLang === 'en' ? 'Admin' : '管理者'));
             }
         }
 
-        // --- モーダル ---
         window.openModal = function(spot) {
             const driveId = getDriveId(spot.image);
             const modalImg = document.getElementById('modal-img');
@@ -1343,7 +1246,6 @@
             if (modal) modal._currentSpot = spot;
             updateModalText(spot);
 
-            // ▼ SNSリンクの処理（スプレッドシートの sns 列を優先）
             const snsLink = spot.sns || spot.snsurl || spot.url || spot.link;
             const snsEl = document.getElementById('modal-sns');
             if (snsEl) {
@@ -1366,7 +1268,7 @@
 
             const mapBtn = document.getElementById('modal-map-btn');
             if (mapBtn) {
-                mapBtn.href = spot.map_url && spot.map_url.trim() !== "" ? spot.map_url.trim() : (spot.lat && spot.lng ? `https://www.google.com/maps/search/?api=1&query=$${spot.lat},${spot.lng}` : `https://www.google.com/maps/search/?api=1&query=$${encodeURIComponent("三原市 " + spot.title)}`);
+                mapBtn.href = spot.map_url && spot.map_url.trim() !== "" ? spot.map_url.trim() : (spot.lat && spot.lng ? `http://googleusercontent.com/maps.google.com/4{spot.lat},${spot.lng}` : `http://googleusercontent.com/maps.google.com/4{encodeURIComponent("三原市 " + spot.title)}`);
             }
 
             const shareUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?spot=' + encodeURIComponent(spot.title) + '&lang=' + currentLang;
@@ -1381,7 +1283,6 @@
             const shareLine = document.getElementById('share-line');
             if(shareLine) shareLine.href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`;
             
-            // クリップボードコピー処理の安全化
             const copyBtn = document.getElementById('share-copy');
             const copyMsg = document.getElementById('copy-success-msg');
             if (copyMsg) copyMsg.classList.remove('show');
@@ -1395,7 +1296,6 @@
                                     setTimeout(() => copyMsg.classList.remove('show'), 2000);
                                 }
                             }).catch(err => {
-                                console.warn('Clipboard write error', err);
                                 fallbackCopyText(shareUrl, copyMsg);
                             });
                         } else {
@@ -1410,7 +1310,6 @@
             updateUrlParams(spot.title);
         };
 
-        // コピー機能のフォールバック
         function fallbackCopyText(text, copyMsg) {
             try {
                 const textArea = document.createElement("textarea");
@@ -1439,7 +1338,6 @@
             clearUrlParams();
         };
 
-        // --- 起動時のデータ読み込み ---
         window.addEventListener('load', () => {
             fetchWeather();
             
@@ -1457,7 +1355,6 @@
             if (closeBtn) closeBtn.addEventListener('click', window.closeModal);
             if (modalContent) modalContent.addEventListener('click', (e) => e.stopPropagation());
 
-            // 1. ギャラリー用CSVの読み込み
             if (typeof Papa !== 'undefined') {
                 Papa.parse(CSV_URL, {
                     download: true, header: true, skipEmptyLines: true,
@@ -1470,7 +1367,6 @@
                                     clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
                                 });
 
-                                // lat_lng_rawの自動分割処理 (Stringに変換してエラー防止)
                                 if (clean.lat_lng_raw) {
                                     const parts = String(clean.lat_lng_raw).split(',');
                                     if (parts.length >= 2) {
@@ -1488,13 +1384,11 @@
                         } catch(e) { console.warn('Data parse warning:', e); }
                     },
                     error: function(err) {
-                        console.error("Gallery CSV Error:", err);
                         const grid = document.getElementById('gallery-grid');
                         if (grid) grid.innerHTML = '<div class="col-span-3 py-10 text-center text-xs text-red-400">データの読み込みに失敗しました。</div>';
                     }
                 });
 
-                // 2. 新しい「親子でお散歩」用CSVの読み込み
                 if (LOCAL_CSV_URL && LOCAL_CSV_URL.startsWith("http")) {
                     Papa.parse(LOCAL_CSV_URL, {
                         download: true, header: true, skipEmptyLines: true,
@@ -1507,7 +1401,6 @@
                                         clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
                                     });
 
-                                    // lat_lng_rawの自動分割処理
                                     if (clean.lat_lng_raw) {
                                         const parts = String(clean.lat_lng_raw).split(',');
                                         if (parts.length >= 2) {
@@ -1517,16 +1410,15 @@
                                     }
 
                                     return clean;
-                                }).filter(s => s.title); // titleが存在するものだけ
+                                }).filter(s => s.title); 
                                 
                                 renderLocalInsights();
                                 checkAndOpenModalFromUrl();
                             } catch (e) { console.warn('Local Data parse warning:', e); }
                         },
                         error: function(err) {
-                            console.error("Local CSV Error (URL not set or invalid):", err);
                             localInsightsData = [];
-                            renderLocalInsights(); // 空の状態を描画
+                            renderLocalInsights(); 
                         }
                     });
                 } else {
