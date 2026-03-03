@@ -4,6 +4,7 @@
 <!DOCTYPE html>
 <html lang="ja" prefix="og: http://ogp.me/ns#">
 <head>
+    <!-- Google tag (gtag.js) -->
     <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-LGXBBWLCPN"></script>
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
@@ -466,6 +467,7 @@
         </div>
     </div>
 
+    <!-- プログラム部分 -->
     <script is:inline>
         let currentLang = 'jp';
         let isRPGMode = false;
@@ -710,7 +712,7 @@
         let currentViewMode = 'grid'; 
 
         // ==========================================
-        // ▼ ここが修正済みの最強画像読み込みルートです ▼
+        // ▼ 新しい強力な画像読み込みルート ▼
         // ==========================================
         function getDriveId(urlOrId) {
             if (!urlOrId) return '';
@@ -719,8 +721,8 @@
         }
 
         function getPrimaryImgUrl(driveId, urlOrId, size = 'w1000') {
-            // 第1ルート：Google公式の最も強力なサムネイルサーバー
-            if (driveId) return `https://drive.google.com/thumbnail?id=${driveId}&sz=${size}`;
+            // 第1ルート：Google公式の最強画像配信サーバー
+            if (driveId) return `https://lh3.googleusercontent.com/d/${driveId}=${size}`;
             if (urlOrId && urlOrId.toString().startsWith('http')) return urlOrId.toString().replace('http://', 'https://');
             return '';
         }
@@ -733,8 +735,16 @@
             const step = parseInt(img.dataset.fStep || '0');
             if (step === 0) {
                 img.dataset.fStep = '1';
-                // 予備ルート：従来のダウンロード用
+                // 第2ルート：従来のダウンロード用
                 img.src = `https://drive.google.com/uc?export=view&id=${driveId}`;
+            } else if (step === 1) {
+                img.dataset.fStep = '2';
+                // 第3ルート：サムネイル用
+                img.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000`;
+            } else if (step === 2) {
+                img.dataset.fStep = '3';
+                // 第4ルート：Instagramのブロック回避用の外部画像中継サーバー
+                img.src = `https://wsrv.nl/?url=https://drive.google.com/uc?export=view%26id=${driveId}`;
             } else {
                 img.onerror = null; 
                 img.src = 'https://placehold.co/600x800/e2e8f0/94a3b8?text=Image+Blocked';
@@ -772,15 +782,15 @@
             mapInstance.addLayer(markersClusterGroup);
         }
 
-        // ▼ 文字化けやエラーを防ぐための安全な変換機能
+        // ▼ 【修正済】文字化けやエラーを防ぐための安全な変換機能
         function escapeHtml(str) {
             if (!str) return '';
-            return str.toString()
-                .replace(/&/g, '&')
-                .replace(/</g, '<')
-                .replace(/>/g, '>')
-                .replace(/"/g, '"')
-                .replace(/'/g, ''');
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
         function updateMapMarkers() {
@@ -798,7 +808,7 @@
                     const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                     const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                     
-                    const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, """).replace(/\n/g, " ");
+                    const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
                     const displayTitle = escapeHtml(getLocalizedSpotField(spot, 'title'));
                     
                     const popupContent = `
@@ -818,7 +828,7 @@
         }
 
         window.openModalFromMap = function(targetTitle) {
-            const safeTarget = targetTitle.replace(/"/g, '"');
+            const safeTarget = targetTitle.replace(/&quot;/g, '"');
             const target = spotsData.find(s => s.title === safeTarget);
             if (target) openModal(target);
         };
@@ -985,7 +995,7 @@
                         hasMarkers = true;
                         const popupImgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                         
-                        const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, """).replace(/\n/g, " ");
+                        const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
                         
                         const popupContent = `
                             <div style="cursor:pointer;" onclick="scrollToLocalCard('${safeTitleForJS}')">
@@ -1021,7 +1031,7 @@
         }
 
         window.scrollToLocalCard = function(targetTitle) {
-            const safeTarget = targetTitle.replace(/"/g, '"');
+            const safeTarget = targetTitle.replace(/&quot;/g, '"');
             const container = document.getElementById('local-scroll-container');
             if (!container) return;
             
