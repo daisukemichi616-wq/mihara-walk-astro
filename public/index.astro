@@ -1,5 +1,5 @@
 ---
-// Astroの干渉を防ぐ完全版コード
+// Astroの干渉を防ぐための設定
 ---
 <!DOCTYPE html>
 <html lang="ja" prefix="og: http://ogp.me/ns#">
@@ -781,7 +781,9 @@
                     const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                     const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                     
-                    const safeTitle = (spot.title || '').replace(/'/g, "\\'").replace(/"/g, """).replace(/\n/g, " ");
+                    // 【修正箇所】" や ' が原因のエラーを完全に防ぐ処理
+                    const safeTitle = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                    
                     const popupContent = `
                         <div onclick="openModalFromMap('${safeTitle}')" style="cursor:pointer;">
                             <div class="popup-img-wrap"><img src="${imgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
@@ -841,8 +843,11 @@
                 const item = document.createElement('div');
                 item.className = 'photo-item';
                 item.onclick = () => openModal(spot);
+                
+                const safeAlt = getLocalizedSpotField(spot, 'title').replace(/"/g, '&quot;');
+                
                 item.innerHTML = `
-                    <img src="${imgUrl}" loading="lazy" alt="${getLocalizedSpotField(spot, 'title')}" data-f-step="0" onerror="handleImgErr(this, '${driveId}')">
+                    <img src="${imgUrl}" loading="lazy" alt="${safeAlt}" data-f-step="0" onerror="handleImgErr(this, '${driveId}')">
                     <div class="photo-overlay">
                         <span class="text-[9px] text-white font-bold tracking-widest uppercase mb-1">${areaName}</span>
                         <span class="text-sm text-white font-bold serif-custom drop-shadow-md">${getLocalizedSpotField(spot, 'title')}</span>
@@ -936,10 +941,12 @@
                     window.openModal(modalSpotData);
                 }; 
 
+                const safeAlt = title.replace(/"/g, '&quot;');
+
                 card.innerHTML = `
                     <div class="local-card-img-wrap">
                         <div class="local-tag-badge">${tag}</div>
-                        <img src="${imgUrl}" loading="lazy" alt="${title}" data-f-step="0" onerror="handleImgErr(this, '${driveId}')">
+                        <img src="${imgUrl}" loading="lazy" alt="${safeAlt}" data-f-step="0" onerror="handleImgErr(this, '${driveId}')">
                     </div>
                     <div class="local-card-content">
                         <h4 class="local-card-title">${title}</h4>
@@ -958,7 +965,9 @@
                     if (!isNaN(lat) && !isNaN(lng)) {
                         hasMarkers = true;
                         const popupImgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
-                        const safeTitle = (spot.title || '').replace(/'/g, "\\'").replace(/"/g, """).replace(/\n/g, " ");
+                        
+                        // 【修正箇所】" や ' が原因のエラーを完全に防ぐ処理
+                        const safeTitle = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
                         
                         const popupContent = `
                             <div style="cursor:pointer;" onclick="scrollToLocalCard('${safeTitle}')">
