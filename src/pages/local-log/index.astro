@@ -1,5 +1,5 @@
 ---
-// Astroの干渉を防ぐための設定
+// Astroの干渉を防ぐ完全版コード
 ---
 <!DOCTYPE html>
 <html lang="ja" prefix="og: http://ogp.me/ns#">
@@ -766,6 +766,17 @@
             mapInstance.addLayer(markersClusterGroup);
         }
 
+        // ▼ 文字化けやエラーを防ぐための安全な変換機能
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.toString()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
         function updateMapMarkers() {
             if (!mapInstance || !markersClusterGroup) return;
             markersClusterGroup.clearLayers();
@@ -781,15 +792,16 @@
                     const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                     const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                     
-                    // 【修正箇所】" や ' が原因のエラーを完全に防ぐ処理
-                    const safeTitle = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                    // 記号でプログラムが壊れないようにする処理
+                    const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                    const displayTitle = escapeHtml(getLocalizedSpotField(spot, 'title'));
                     
                     const popupContent = `
-                        <div onclick="openModalFromMap('${safeTitle}')" style="cursor:pointer;">
+                        <div onclick="openModalFromMap('${safeTitleForJS}')" style="cursor:pointer;">
                             <div class="popup-img-wrap"><img src="${imgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
                             <div class="popup-info">
                                 <span class="popup-area">${areaLabel}</span>
-                                <div class="popup-title">${getLocalizedSpotField(spot, 'title')}</div>
+                                <div class="popup-title">${displayTitle}</div>
                                 <div class="popup-more">${currentLang === 'en' ? 'Details' : '詳細を見る'} <i class="fa-solid fa-chevron-right text-[8px] ml-1"></i></div>
                             </div>
                         </div>`;
@@ -801,7 +813,8 @@
         }
 
         window.openModalFromMap = function(targetTitle) {
-            const target = spotsData.find(s => s.title === targetTitle);
+            const safeTarget = targetTitle.replace(/&quot;/g, '"');
+            const target = spotsData.find(s => s.title === safeTarget);
             if (target) openModal(target);
         };
 
@@ -844,13 +857,13 @@
                 item.className = 'photo-item';
                 item.onclick = () => openModal(spot);
                 
-                const safeAlt = getLocalizedSpotField(spot, 'title').replace(/"/g, '&quot;');
+                const safeAlt = escapeHtml(getLocalizedSpotField(spot, 'title'));
                 
                 item.innerHTML = `
                     <img src="${imgUrl}" loading="lazy" alt="${safeAlt}" data-f-step="0" onerror="handleImgErr(this, '${driveId}')">
                     <div class="photo-overlay">
                         <span class="text-[9px] text-white font-bold tracking-widest uppercase mb-1">${areaName}</span>
-                        <span class="text-sm text-white font-bold serif-custom drop-shadow-md">${getLocalizedSpotField(spot, 'title')}</span>
+                        <span class="text-sm text-white font-bold serif-custom drop-shadow-md">${safeAlt}</span>
                     </div>
                 `;
                 grid.appendChild(item);
@@ -941,16 +954,17 @@
                     window.openModal(modalSpotData);
                 }; 
 
-                const safeAlt = title.replace(/"/g, '&quot;');
+                const safeAlt = escapeHtml(title);
+                const safeDesc = escapeHtml(desc);
 
                 card.innerHTML = `
                     <div class="local-card-img-wrap">
-                        <div class="local-tag-badge">${tag}</div>
+                        <div class="local-tag-badge">${escapeHtml(tag)}</div>
                         <img src="${imgUrl}" loading="lazy" alt="${safeAlt}" data-f-step="0" onerror="handleImgErr(this, '${driveId}')">
                     </div>
                     <div class="local-card-content">
-                        <h4 class="local-card-title">${title}</h4>
-                        <p class="local-card-desc">${desc}</p>
+                        <h4 class="local-card-title">${safeAlt}</h4>
+                        <p class="local-card-desc">${safeDesc}</p>
                         <div class="local-card-footer">
                             <span class="local-area"><i class="fa-solid fa-location-dot mr-1"></i> ${areaLabel}</span>
                             <span class="local-btn">${lang === 'en' ? 'Details' : '詳細を見る'} <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i></span>
@@ -966,15 +980,14 @@
                         hasMarkers = true;
                         const popupImgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                         
-                        // 【修正箇所】" や ' が原因のエラーを完全に防ぐ処理
-                        const safeTitle = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                        const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
                         
                         const popupContent = `
-                            <div style="cursor:pointer;" onclick="scrollToLocalCard('${safeTitle}')">
+                            <div style="cursor:pointer;" onclick="scrollToLocalCard('${safeTitleForJS}')">
                                 <div class="popup-img-wrap"><img src="${popupImgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
                                 <div class="popup-info">
                                     <span class="popup-area">${areaLabel}</span>
-                                    <div class="popup-title">${title}</div>
+                                    <div class="popup-title">${safeAlt}</div>
                                     <div class="popup-more">${lang === 'en' ? 'Details' : '詳細を見る'} <i class="fa-solid fa-chevron-right text-[8px] ml-1"></i></div>
                                 </div>
                             </div>`;
@@ -1002,11 +1015,12 @@
             }
         }
 
-        window.scrollToLocalCard = function(title) {
+        window.scrollToLocalCard = function(targetTitle) {
+            const safeTarget = targetTitle.replace(/&quot;/g, '"');
             const container = document.getElementById('local-scroll-container');
             if (!container) return;
             
-            const safeSelector = title.replace(/"/g, '\\"');
+            const safeSelector = safeTarget.replace(/"/g, '\\"');
             const targetCard = container.querySelector(`.local-card-horizontal[data-title="${safeSelector}"]`);
             
             if (targetCard) {
@@ -1102,13 +1116,13 @@
 
         function updateModalText(spot) {
             document.getElementById('modal-title').textContent = getLocalizedSpotField(spot, 'title');
-            document.getElementById('modal-desc').innerHTML = getLocalizedSpotField(spot, 'desc').replace(/\n/g, '<br>');
+            document.getElementById('modal-desc').innerHTML = escapeHtml(getLocalizedSpotField(spot, 'desc')).replace(/\n/g, '<br>');
             const areaKey = spot.area || 'all';
             document.getElementById('modal-area').textContent = areaLabels[areaKey] ? areaLabels[areaKey][currentLang] : (currentLang === 'en' ? 'MIHARA' : '三原');
             
             const authorEl = document.getElementById('modal-author');
             if (authorEl) {
-                authorEl.textContent = 'PHOTO BY ' + (spot.author || spot.nickname || spot.name || (currentLang === 'en' ? 'Admin' : '管理者'));
+                authorEl.textContent = 'PHOTO BY ' + escapeHtml((spot.author || spot.nickname || spot.name || (currentLang === 'en' ? 'Admin' : '管理者')));
             }
         }
 
@@ -1120,7 +1134,7 @@
                 modalImg.src = getPrimaryImgUrl(driveId, spot.image, 'w1600');
                 modalImg.dataset.fStep = '0';
                 modalImg.onerror = function() { handleImgErr(this, driveId); };
-                modalImg.alt = getLocalizedSpotField(spot, 'title');
+                modalImg.alt = escapeHtml(getLocalizedSpotField(spot, 'title'));
             }
             
             const modal = document.getElementById('photo-modal');
