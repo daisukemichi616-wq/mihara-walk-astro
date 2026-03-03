@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja" prefix="og: http://ogp.me/ns#">
 <head>
-    <script is:inline async src="https://www.googletagmanager.com/gtag/js?id=G-LGXBBWLCPN"></script>
-    <script is:inline>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LGXBBWLCPN"></script>
+    <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -36,24 +36,21 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#004098">
 
-    <meta name="referrer" content="no-referrer">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
     
-    <script is:inline src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-    <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-    <script is:inline src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
-    <style is:inline>
+    <style>
         :root {
             --palette-blue: #004098;
             --palette-blue-light: #e1f5fe;
@@ -63,23 +60,16 @@
             --text-sub: #4b5563;
             --border-soft: #e2e8f0;
         }
-
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
-
+        *, *::before, *::after { box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-
         *:not(i):not(svg):not(polyline):not(rect):not(path):not(circle):not(line) {
             font-family: 'Zen Maru Gothic', sans-serif !important;
             font-weight: 500;
         }
-
         .serif-custom {
             font-family: 'Noto Serif JP', serif !important;
             font-weight: 700 !important;
         }
-
         body {
             color: var(--text-main);
             background-color: #fff;
@@ -90,8 +80,6 @@
             line-height: 1.8;
             transition: background-color 0.5s ease, color 0.5s ease;
         }
-
-        /* --- ナビゲーション --- */
         .fixed-nav {
             position: fixed; top: 0; left: 0; width: 100%; height: 60px;
             background: rgba(255, 255, 255, 0.98);
@@ -109,7 +97,6 @@
             text-decoration: none; white-space: nowrap;
         }
         .nav-simple-link:active, .nav-simple-link:hover { color: var(--palette-blue); }
-
         .header-btn {
             border: 1px solid var(--palette-blue);
             border-radius: 20px; cursor: pointer; font-size: 10px; font-weight: 700;
@@ -117,7 +104,6 @@
         }
         #lang-toggle-btn { background: transparent; color: var(--text-sub); border-color: var(--border-soft); padding: 5px 10px; }
         #lang-toggle-btn:hover { background: #f1f5f9; color: var(--palette-blue); }
-
         @media (min-width: 640px) {
             .header-logo { font-size: 1rem; letter-spacing: 0.1em; }
             .nav-links-wrap { gap: 15px; }
@@ -129,8 +115,6 @@
             #lang-toggle-btn { padding: 4px 8px; font-size: 9px; }
             @media (max-width: 380px) { .header-logo { display: none; } .fixed-nav { justify-content: center; } }
         }
-
-        /* --- ヒーロー --- */
         .hero-view { position: relative; width: 100%; height: 80vh; height: 80dvh; background-color: #f7f7f7; overflow: hidden; }
         .slider-container { position: absolute; inset: 0; z-index: 1; }
         .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 2s ease-in-out; }
@@ -142,30 +126,23 @@
         .hero-title { font-size: 1.65rem; line-height: 1.8; text-shadow: 0 0 20px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5); }
         .mobile-br { display: block; }
         @media (min-width: 640px) { .hero-title { font-size: 2.8rem; line-height: 1.6; } .mobile-br { display: none; } }
-
-        /* --- セクション全般 --- */
         .section-wrap { padding: 100px 24px; scroll-margin-top: 60px; position: relative; transition: background-color 0.5s ease; }
         .inner-limit { max-width: 800px; margin: 0 auto; text-align: center; }
         .section-tag-label { font-size: 0.8rem; font-weight: 700 !important; color: var(--palette-blue); letter-spacing: 0.25em; margin-bottom: 40px; display: block; text-transform: uppercase; }
         .card-frame { background: white; border-radius: 12px; padding: 40px 25px; margin-bottom: 30px; text-align: left; border: 1px solid var(--border-soft); box-shadow: 0 10px 30px rgba(0,64,152,0.03); transition: all 0.5s ease; }
         .card-frame h4 { font-weight: 700 !important; color: var(--palette-blue); margin-bottom: 12px; font-size: 1rem; border-left: 5px solid var(--palette-blue); padding-left: 15px; }
         .card-frame p { font-size: 0.85rem; font-weight: 500 !important; line-height: 2.3; color: var(--text-sub); }
-
-        /* --- ギャラリー / MAP --- */
         .sticky-tab-bar { position: sticky; top: 60px; background: rgba(255,255,255,0.98); z-index: 900; border-bottom: 2px solid var(--palette-blue); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
         .sticky-tab-bar::-webkit-scrollbar { display: none; }
         .tab-flex { display: flex; padding: 0 10px; justify-content: center; }
         .tab-item { padding: 22px 18px; font-size: 0.85rem; font-weight: 700 !important; color: #9ca3af; border-bottom: 4px solid transparent; cursor: pointer; }
         .tab-item.active { color: var(--palette-blue); border-bottom-color: var(--palette-blue); }
         @media (max-width: 640px) { .tab-flex { justify-content: flex-start; } }
-
         .view-switch { display: inline-flex; background: #f1f5f9; padding: 4px; border-radius: 50px; margin-bottom: 20px; transition: all 0.5s ease; }
         .view-btn { padding: 8px 24px; border-radius: 40px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s; color: #64748b; display: flex; align-items: center; }
         .view-btn.active { background: white; color: var(--palette-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-
         .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border-soft); }
         @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); } }
-        
         .photo-item { position: relative; aspect-ratio: 1/1; background: #f3f4f6; overflow: hidden; cursor: pointer; }
         .photo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 80%); opacity: 0; transition: opacity 0.6s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; pointer-events: none; }
@@ -181,7 +158,6 @@
             .photo-item.in-view .photo-overlay span { transform: translateY(0); opacity: 1; transition-delay: 0.3s; }
             .photo-item.in-view .photo-overlay span:nth-child(2) { transition-delay: 0.4s; }
         }
-        
         #map-container { height: 60vh; min-height: 500px; width: 100%; z-index: 1; display: none; border-bottom: 1px solid var(--border-soft); }
         #map-container.active { display: block; }
         .leaflet-popup-content-wrapper { border-radius: 8px; overflow: hidden; padding: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
@@ -194,138 +170,60 @@
         .popup-more { font-size: 10px; color: var(--palette-blue); display: flex; align-items: center; justify-content: flex-end; gap: 4px; font-weight: 700; margin-top: 5px; }
         .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: rgba(0, 64, 152, 0.2) !important; }
         .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { background-color: var(--palette-blue) !important; color: #fff !important; font-family: 'Zen Maru Gothic', sans-serif !important; font-weight: 900 !important; box-shadow: 0 4px 10px rgba(0, 64, 152, 0.3); }
-
-        /* --- 新設：ローカルインサイト（横スクロール ＆ PCドラッグ対応） --- */
         .horizontal-scroll-container {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            gap: 16px;
-            padding: 10px 0 30px 0;
-            margin-left: -24px;
-            margin-right: -24px;
-            padding-left: 24px;
-            padding-right: 24px;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE/Edge */
-            cursor: grab; /* PC向け: ドラッグできることをアピール */
+            display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px;
+            padding: 10px 0 30px 0; margin-left: -24px; margin-right: -24px; padding-left: 24px; padding-right: 24px;
+            scrollbar-width: none; cursor: grab;
         }
-        .horizontal-scroll-container::-webkit-scrollbar {
-            display: none; /* Chrome/Safari */
-        }
-        .horizontal-scroll-container.active {
-            cursor: grabbing;
-        }
-        
+        .horizontal-scroll-container::-webkit-scrollbar { display: none; }
+        .horizontal-scroll-container.active { cursor: grabbing; }
         .local-card-horizontal {
-            flex: 0 0 85%;
-            scroll-snap-align: center;
-            display: flex;
-            flex-direction: column;
-            background: #fff;
-            border: 2px solid transparent;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.03);
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            user-select: none; /* ドラッグ中のテキスト選択防止 */
+            flex: 0 0 85%; scroll-snap-align: center; display: flex; flex-direction: column; background: #fff;
+            border: 2px solid transparent; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.03);
+            cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; user-select: none;
         }
         .local-card-horizontal:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,64,152,0.08); }
-        .horizontal-scroll-container.active .local-card-horizontal {
-            transition: none; /* ドラッグ中はホバーアニメーションを止めて軽くする */
-            transform: none;
-        }
-        .local-card-horizontal.active-card {
-            border-color: var(--palette-blue);
-            box-shadow: 0 12px 30px rgba(0,64,152,0.15);
-        }
-        
+        .horizontal-scroll-container.active .local-card-horizontal { transition: none; transform: none; }
+        .local-card-horizontal.active-card { border-color: var(--palette-blue); box-shadow: 0 12px 30px rgba(0,64,152,0.15); }
         @media (min-width: 640px) {
             .local-card-horizontal { flex: 0 0 45%; scroll-snap-align: start; }
             .horizontal-scroll-container { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }
         }
-        @media (min-width: 1024px) {
-            .local-card-horizontal { flex: 0 0 31%; scroll-snap-align: start; }
-        }
-
-        /* ▼ 縦長写真枠 (3:4) */
+        @media (min-width: 1024px) { .local-card-horizontal { flex: 0 0 31%; scroll-snap-align: start; } }
         .local-card-img-wrap { position: relative; width: 100%; aspect-ratio: 3/4; background: #f1f5f9; overflow: hidden; pointer-events: none; }
         .local-card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; pointer-events: none; }
         .local-card-horizontal:hover .local-card-img-wrap img { transform: scale(1.05); }
-        
         .local-tag-badge { position: absolute; top: 12px; left: 12px; background: rgba(0,64,152,0.9); color: white; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 4px; z-index: 2; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        
         .local-card-content { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: flex-start; pointer-events: none; }
         .local-card-title { font-size: 1.1rem; font-weight: 700; color: var(--palette-blue); margin-bottom: 8px; font-family: 'Noto Serif JP', serif !important; }
-        
-        /* ▼ カードの説明文を3行で省略表示（...）する設定 */
-        .local-card-desc { 
-            font-size: 0.85rem; 
-            font-weight: 500; 
-            color: var(--text-sub); 
-            line-height: 1.8; 
-            margin-bottom: 15px; 
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 3; 
-            overflow: hidden;
-        }
-        
+        .local-card-desc { font-size: 0.85rem; font-weight: 500; color: var(--text-sub); line-height: 1.8; margin-bottom: 15px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
         .local-card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; border-top: 1px dashed var(--border-soft); padding-top: 15px; }
         .local-area { font-size: 10px; font-weight: 700; color: #9ca3af; letter-spacing: 0.1em; text-transform: uppercase; }
         .local-btn { font-size: 10px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 4px; }
-        
-        /* ▼ ローカルインサイト用 マップとカードの連動スタイル (PCで高さ拡大) */
-        #local-map-container {
-            height: 50vh;
-            min-height: 400px;
-            width: 100%;
-            border-radius: 12px;
-            border: 1px solid var(--border-soft);
-            margin-top: 10px;
-            z-index: 1;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.03);
-            display: none; /* 初期は非表示 */
-        }
-        @media (min-width: 1024px) {
-            #local-map-container {
-                height: 65vh; /* PCではより大きく */
-                min-height: 550px;
-            }
-        }
-
-        /* --- 募集セクション --- */
+        #local-map-container { height: 50vh; min-height: 400px; width: 100%; border-radius: 12px; border: 1px solid var(--border-soft); margin-top: 10px; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
+        @media (min-width: 1024px) { #local-map-container { height: 65vh; min-height: 550px; } }
         .h2-one-line { font-size: 1.6rem; font-weight: 700 !important; margin-bottom: 50px; line-height: 1.2; text-align: center; white-space: nowrap; letter-spacing: -0.07em; color: var(--palette-blue); }
         .insta-cta-box { margin-top: 60px; padding: 40px 20px; background: #fff; border: 2px dashed var(--palette-blue-light); border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
         .insta-btn-final { display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white !important; padding: 18px 45px; border-radius: 100px; font-weight: 700 !important; text-decoration: none; font-size: 1rem; box-shadow: 0 10px 25px rgba(220, 39, 67, 0.25); white-space: nowrap; }
-
         .img-divider-box { position: relative; width: 100%; height: auto; min-height: 320px; aspect-ratio: 16/9; overflow: hidden; border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); background: #f3f4f6; }
         .img-divider-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
         .img-divider-content { position: relative; z-index: 2; height: 100%; display: flex; align-items: flex-end; padding: 25px; }
-
         .bottom-view-container { position: relative; width: 100%; height: auto; min-height: 450px; aspect-ratio: 4/5; overflow: hidden; border-top: 1px solid var(--border-soft); background: #f3f4f6; }
         @media (min-width: 640px) { .bottom-view-container { aspect-ratio: 16/7; } }
         .bottom-view-container img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
         .bottom-view-overlay { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 50px; }
         .floating-badge { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 20px 35px; text-align: center; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; }
-
-        /* フッター */
         .footer-main { text-align: center; background-color: #fff; border-top: 1px solid var(--border-soft); padding: 60px 20px 60px 20px; transition: background-color 0.5s ease; }
         .footer-copy { font-size: 9px; font-weight: 700 !important; color: #9ca3af; letter-spacing: 0.3em; margin-bottom: 12px; text-transform: uppercase; }
         .footer-produced { font-size: 8px; font-weight: 500 !important; color: #cbd5e1; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
-
-        /* モーダル */
         .modal-wrap { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; background: white; overflow-y: auto; transition: background-color 0.5s ease; }
         .modal-wrap.active { display: block; }
         .modal-close { position: fixed; top: 15px; right: 15px; background: white; border: 1px solid #eee; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 11000; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s, background-color 0.5s ease; }
         .modal-close:hover { transform: rotate(90deg); }
-
         .share-btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
         .share-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 16px; transition: all 0.3s; text-decoration: none; border: 1px solid transparent; }
         .share-btn:hover { transform: translateY(-2px); color: white; }
         .share-btn.x-twitter:hover { background: #000; color: #fff !important; }
-        
         #copy-success-msg { font-size: 10px; font-weight: bold; color: var(--palette-blue); opacity: 0; transition: opacity 0.3s ease; height: 14px; }
         #copy-success-msg.show { opacity: 1; }
     </style>
@@ -339,7 +237,6 @@
             <div class="nav-simple-link" onclick="scrollToId('local-insights')" data-i18n="nav-local">さんぽログ</div>
             <div class="nav-simple-link" onclick="scrollToId('contact')" data-i18n="nav-submit">掲載募集</div>
             <div class="nav-simple-link hidden sm:block" onclick="scrollToId('guideline')" data-i18n="nav-guide">掲載案内</div>
-            
             <button id="lang-toggle-btn" class="header-btn" onclick="toggleLanguage()">
                 <i class="fa-solid fa-globe"></i> <span id="lang-text">EN</span>
             </button>
@@ -393,7 +290,6 @@
                     </div>
                     <div class="text-[11px] font-bold text-gray-600 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 shadow-sm" id="weather-desc">取得中...</div>
                 </div>
-                
                 <div class="weather-magic-box bg-gradient-to-r from-orange-50/80 to-blue-50/80 rounded-[8px] p-3 flex items-center gap-3 border border-orange-100/50">
                     <div class="w-8 h-8 flex items-center justify-center text-orange-400">
                         <i class="fa-solid fa-camera-retro text-lg"></i>
@@ -407,7 +303,6 @@
                         <span class="block text-[13px] font-bold text-slate-600" id="sunrise-text">--:--</span>
                     </div>
                 </div>
-
                 <div class="mt-3 pt-2 border-t border-dashed border-blue-100" id="weekly-toggle-wrap">
                     <button onclick="toggleWeeklyWeather()" class="w-full text-[10px] font-bold text-gray-500 hover:text-blue-600 transition-colors flex items-center justify-center gap-1.5" id="weekly-toggle-btn">
                         <span data-i18n="weather-weekly-toggle">週間天気を見る</span>
@@ -455,13 +350,10 @@
         <div class="inner-limit max-w-5xl px-0 sm:px-6">
             <span class="section-tag-label" id="label-local" data-i18n="label-local">PARENT & CHILD LOG</span>
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-local" data-i18n="title-local">みはら親子さんぽログ</h2>
-            
             <p class="text-sm font-bold text-gray-500 mb-6 px-6" id="desc-local" data-i18n="desc-local">公式ガイドには載らない、<br class="block sm:hidden">パパママ目線のリアルな遊び場マップ。</p>
-            
             <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-2">
                 <div class="w-full text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
-
             <div id="local-map-container" class="mx-6 sm:mx-0"></div>
         </div>
     </section>
@@ -544,24 +436,19 @@
     <div id="photo-modal" class="modal-wrap">
         <button id="modal-close-btn" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
         <div id="modal-content-area" class="max-w-[600px] mx-auto pb-24 bg-white min-h-screen sm:min-h-0">
-            
             <img id="modal-img" src="" class="w-full aspect-[4/5] sm:aspect-square object-cover" alt="Photo" onerror="this.onerror=null; this.style.display='none'">
-            
             <div class="px-8 py-12 text-left">
                 <span id="modal-area" class="text-[9px] font-bold tracking-widest text-blue-600 border border-blue-600 px-3 py-1 mb-6 inline-block uppercase">AREA</span>
                 <h2 id="modal-title" class="serif-custom text-2xl mb-4 leading-normal text-slate-800">タイトル</h2>
                 <p id="modal-desc" class="text-sm font-medium leading-loose mb-8 text-slate-600">紹介文</p>
-                
                 <a id="modal-map-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-10 flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition">
                     <i class="fa-solid fa-location-dot"></i>
                     <span data-i18n="modal-map-btn-text">この場所をGoogleマップで見る</span>
                 </a>
-
                 <div class="flex items-center justify-between border-t border-slate-200 pt-8 mb-8">
                     <span id="modal-author" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">PHOTO BY 管理者</span>
                     <a id="modal-sns" href="#" target="_blank" rel="noopener noreferrer" class="text-gray-900 font-bold text-[10px] border-b border-gray-900 pb-1 uppercase hover:opacity-70 transition">Instagram Link</a>
                 </div>
-
                 <div class="pt-6 border-t border-slate-200 text-center">
                     <p id="share-label" class="share-label text-[9px] font-bold text-slate-400 mb-4 tracking-widest uppercase" data-i18n="share-label">SHARE THIS SPOT</p>
                     <div class="share-btn-group">
@@ -576,9 +463,8 @@
         </div>
     </div>
 
-    <script is:inline>
-        // --- 言語・モード管理と辞書データ ---
-        let currentLang = 'jp'; // 'jp' or 'en'
+    <script>
+        let currentLang = 'jp';
         let isRPGMode = false;
 
         const areaLabels = {
@@ -588,55 +474,52 @@
         };
 
         const i18nData = {
-            'header-logo': { normal: { jp: 'MIHARA REDISCOVER', en: 'MIHARA REDISCOVER' }, rpg: { jp: 'MIHARA QUEST', en: 'MIHARA QUEST' } },
-            'nav-map': { normal: { jp: 'マップ', en: 'MAP' }, rpg: { jp: 'ちず', en: 'MAP' } },
-            'nav-local': { normal: { jp: 'さんぽログ', en: 'WALK LOG' }, rpg: { jp: 'うわさばなし', en: 'RUMORS' } },
-            'nav-submit': { normal: { jp: '掲載募集', en: 'SUBMIT' }, rpg: { jp: 'ギルドへ', en: 'GUILD' } },
-            'nav-guide': { normal: { jp: '掲載案内', en: 'GUIDES' }, rpg: { jp: 'おきて', en: 'RULES' } },
-            'hero-label': { normal: { jp: 'MIHARA REDISCOVER PROJECT', en: 'MIHARA REDISCOVER PROJECT' }, rpg: { jp: 'MIHARA QUEST PROJECT', en: 'MIHARA QUEST PROJECT' } },
-            'hero-title': { normal: { jp: 'まだ知らない三原の景色を、<br class="mobile-br">みんなで描くフォトマップ', en: 'Discovering the unseen Mihara,<br class="mobile-br">a community photo map.' }, rpg: { jp: '勇者よ、まだ見ぬ三原の<br>地図を完成させるのだ', en: 'O HERO!<br>THOU MUST COMPLETE THE UNSEEN MAP OF MIHARA.' } },
-            'label-about': { normal: { jp: 'About Project', en: 'About Project' }, rpg: { jp: 'QUEST INFO', en: 'QUEST INFO' } },
-            'title-about': { normal: { jp: 'みんなで描く、三原の未来', en: 'Mapping the Future of Mihara' }, rpg: { jp: '冒険の目的', en: 'THY MISSION' } },
-            'desc-about': { normal: { jp: '広島県三原市（みはらし）は、瀬戸内海の穏やかな気候と豊かな自然に恵まれた、歴史と文化が息づく街です。陸・海・空の交通の要衝として知られ、「広島空港」がある空の玄関口でもあります。<br><br>このプロジェクトは、そんな三原の日常にある「美しさ」を再発見するためのもの。地元の人だけが知る特別な場所や、日常のふとした風景を写真で紡ぎ、共有していきます。', en: 'Mihara City in Hiroshima Prefecture is a town full of history and culture, blessed with the mild climate and rich nature of the Seto Inland Sea. It is known as a transportation hub for land, sea, and air, serving as the gateway to the sky with Hiroshima Airport.<br><br>This project aims to rediscover the everyday "beauty" of Mihara. We collect and share photos of special places known only to locals and casual everyday landscapes.' }, rpg: { jp: 'ここ ミハラは いにしえより つづく まち。<br><br>ゆうしゃよ、このせかいに かくれた<br>「うるわしきもの」を さがしだすのだ。<br><br>それが みつかりしとき、<br>あらたな でんせつが はじまるのだ。<br><br>さあ ゆくがよい！<br>ぼうけんの たびは はじまった！', en: 'Welcome to MIHARA, an ancient realm.<br><br>Brave traveler, seek out the HIDDEN BEAUTY scattered across this land.<br><br>When it is found, a new LEGEND shall begin.<br><br>Now, go forth! Thy QUEST has begun!' } },
-            'title-map': { normal: { jp: 'PHOTO MAP', en: 'PHOTO MAP' }, rpg: { jp: 'WORLD MAP', en: 'WORLD MAP' } },
-            'sub-map': { normal: { jp: 'Find Your Favorite Spot', en: 'Find Your Favorite Spot' }, rpg: { jp: 'Find Hidden Treasures', en: 'Find Hidden Treasures' } },
-            'btn-view-grid-text': { normal: { jp: 'PHOTO', en: 'PHOTO' }, rpg: { jp: 'しらべる', en: 'SEARCH' } },
-            'btn-view-map-text': { normal: { jp: 'MAP', en: 'MAP' }, rpg: { jp: 'ちず', en: 'MAP' } },
-            'loading-text': { normal: { jp: 'Collecting memories...', en: 'Collecting memories...' }, rpg: { jp: 'ローディングちゅう...', en: 'Loading...' } },
-            'load-more-btn': { normal: { jp: 'MORE PHOTOS', en: 'MORE PHOTOS' }, rpg: { jp: 'もっと さがす', en: 'EXPLORE MORE' } },
-            
-            'label-local': { normal: { jp: 'PARENT & CHILD LOG', en: 'PARENT & CHILD LOG' }, rpg: { jp: 'SECRET LORE', en: 'SECRET LORE' } },
-            'title-local': { normal: { jp: 'みはら親子さんぽログ', en: 'Mihara Family Walk Log' }, rpg: { jp: '酒場のうわさばなし', en: 'TAVERN RUMORS' } },
-            'desc-local': { normal: { jp: '公式ガイドには載らない、<br class="block sm:hidden">パパママ目線のリアルな遊び場マップ。', en: 'Real playground maps from a parent\'s perspective,<br class="block sm:hidden">not found in official guides.' }, rpg: { jp: 'おうこくの ちずには のっていない、<br class="block sm:hidden">ひみつの じょうほう だ。', en: 'Secret lore hidden from the<br class="block sm:hidden">Kingdom\'s official maps.' } },
-            'local-empty': { normal: { jp: '現在、お散歩コースを準備中です...', en: 'Walking routes are currently being prepared...' }, rpg: { jp: 'ただいま じょうほうを あつめている...', en: 'Gathering intel...' } },
-
-            'label-contact': { normal: { jp: 'Photo Submission', en: 'Photo Submission' }, rpg: { jp: 'Guild Request', en: 'GUILD REQUEST' } },
-            'title-contact': { normal: { jp: '三原の魅力を教えてください', en: 'Share the Charm of Mihara' }, rpg: { jp: '情報をギルドに送る', en: 'REPORT TO GUILD' } },
-            'desc-contact': { normal: { jp: '隠れた名所、美味しいグルメ、四季折々の風景、まちのイベント、あるいは何気ない日常のひとコマなど、三原の魅力が伝わる写真を幅広く募集しています。', en: 'We are looking for a wide range of photos that convey the charm of Mihara, such as hidden spots, delicious food, seasonal scenery, local events, or just casual everyday moments.' }, rpg: { jp: 'ミハラには まだみぬ 「うるわしき ケシキ」や<br>「ウマいもの」が かくされている。<br><br>たびびとよ、そなたのみつけた<br>「ミハラのキオク」を ギルドにおしえてくれ！', en: 'Undiscovered VISTAS and DELICACIES are hidden in MIHARA.<br><br>Brave traveler, share thy MEMORIES with the GUILD!' } },
-            'contact-step-1': { normal: { jp: '以下の情報を添えて、Instagram<br>（<a href="https://www.instagram.com/mihara_sampo" target="_blank" rel="noopener noreferrer" class="underline decoration-blue-300">@mihara_sampo</a>）のDMよりお送りください。<br>内容を確認の上、サイトに追加させていただきます！', en: 'Please send a DM to our Instagram<br>(<a href="https://www.instagram.com/mihara_sampo" target="_blank" rel="noopener noreferrer" class="underline decoration-blue-300">@mihara_sampo</a>) with the following info.<br>We will add it to the map after review!' }, rpg: { jp: 'いかの じょうほうを そえて、Instagram<br>（<a href="https://www.instagram.com/mihara_sampo" target="_blank" rel="noopener noreferrer" class="text-[#f5d76e] underline">@mihara_sampo</a>）の DMより おくってくれ。<br>ギルドが かくにんしたのち、ちずに追加されるぞ！', en: 'Send a Raven (DM) to our Instagram<br>(<a href="https://www.instagram.com/mihara_sampo" target="_blank" rel="noopener noreferrer" class="text-[#f5d76e] underline">@mihara_sampo</a>) with the details below.<br>The GUILD shall record it on the map!' } },
-            'req-info-title': { normal: { jp: 'Required Information', en: 'Required Information' }, rpg: { jp: 'ひつような もの', en: 'REQUIRED ITEMS' } },
-            'req-info-1': { normal: { jp: '写真データ (JPEG/PNGなど)', en: 'Photo Data (JPEG/PNG)' }, rpg: { jp: 'うつしえ（しゃしんデータ）', en: 'Thy Picture (Photo)' } },
-            'req-info-2': { normal: { jp: 'スポット名 / 紹介コメント', en: 'Spot Name / Comment' }, rpg: { jp: 'ばしょのなまえ / じょうほう', en: 'Location Name / Lore' } },
-            'req-info-3': { normal: { jp: '撮影者名 / SNSリンク (任意)', en: 'Photographer / SNS Link (Optional)' }, rpg: { jp: 'そなたのなまえ / SNSリンク (にんい)', en: 'Thy Name / SNS Link (Optional)' } },
-            'contact-via-insta': { normal: { jp: 'Contact via Instagram', en: 'Contact via Instagram' }, rpg: { jp: 'Contact via Instagram', en: 'Contact via Instagram' } },
-            'insta-btn-text': { normal: { jp: 'InstagramでDMを送る', en: 'Send DM on Instagram' }, rpg: { jp: 'でんしょばと をおくる', en: 'SEND RAVEN' } },
-            'label-guideline': { normal: { jp: 'Guidelines', en: 'Guidelines' }, rpg: { jp: 'Rules', en: 'RULES' } },
-            'title-guideline': { normal: { jp: '写真掲載についてのご案内', en: 'Submission Guidelines' }, rpg: { jp: '冒険の掟', en: 'GUILD RULES' } },
-            'guide-1-title': { normal: { jp: '写真掲載のルール', en: 'Rules for Publication' }, rpg: { jp: 'けいさいの おきて', en: 'RULES OF RECORDING' } },
-            'guide-1-desc': { normal: { jp: '地域の魅力を伝えることを目的に、風景やお店、日常のひとコマを掲載しています。どなたでも自由に掲載できる仕組みではなく、ご連絡をいただいた内容を確認した上で掲載を行っています。', en: 'We post landscapes, shops, and everyday moments to convey the charm of the region. It is not a system where anyone can post freely; we review the submissions before publishing.' }, rpg: { jp: 'ちいきの みりょくを つたえるため、ふうけいや おみせの じょうほうを けいさいしている。だれでも じゆうに かきこめる わけではなく、ギルドが かくにんしてから けいさいするぞ。', en: 'To share the realm\'s beauty, we record vistas and merchants. Not just anyone may write in the tome; the GUILD reviews all lore before it is inscribed.' } },
-            'guide-2-title': { normal: { jp: '権利とマナー', en: 'Rights and Manners' }, rpg: { jp: 'けんりと マナー', en: 'HONOR AND CONDUCT' } },
-            'guide-2-desc': { normal: { jp: '著作権は撮影者本人にあります。人物や私有地が写る場合は、必ず権利者の許可を得てからご投稿ください。不適切な写真は掲載を見送る場合がございます。', en: 'The copyright belongs to the photographer. If people or private property are included, please obtain permission before submitting. Inappropriate photos may not be published.' }, rpg: { jp: 'ちょさくけん（けんり）は さつえいしゃに ある。ひとや しゆうちは、かならず きょか（ゆるし）を えてから ほうこくしてくれ。ふさわしくない うつしえは けいさいされないぞ。', en: 'The creator holds the rights. If folks or private realms appear, seek their blessing first. Unworthy imagery shall be rejected by the GUILD.' } },
-            'guide-3-title': { normal: { jp: '写真の取り扱い', en: 'Handling of Photos' }, rpg: { jp: 'うつしえの あつかい', en: 'HANDLING OF RELICS' } },
-            'guide-3-desc': { normal: { jp: 'ご提供いただいた写真は、当サイトや関連SNSにおいて三原を盛り上げる広報活動に大切に使用させていただきます。投稿者さんの意思を尊重し、丁寧に扱わせていただきます。', en: 'The provided photos will be carefully used on this site and related SNS to promote Mihara. We respect the photographer\'s intentions and handle them with care.' }, rpg: { jp: 'ていきょうされた うつしえは、このちずや SNSで ミハラを もりあげるために たいせつに つかわせてもらうぞ。さつえいしゃの いしを そんちょうし、ていねいに あつかうことを ちかおう。', en: 'Thy offered relics shall be carefully used in this map and beyond to spread the glory of MIHARA. We swear to respect thy will and handle them with utmost care.' } },
-            'footer-copy': { normal: { jp: '© 2026 Mihara Walk Photo Map', en: '© 2026 Mihara Walk Photo Map' }, rpg: { jp: '© 2026 Mihara Quest', en: '© 2026 Mihara Quest' } },
-            'modal-map-btn-text': { normal: { jp: 'この場所をGoogleマップで見る', en: 'View on Google Maps' }, rpg: { jp: 'ちずを ひらく', en: 'OPEN WORLD MAP' } },
-            'share-label': { normal: { jp: 'SHARE THIS SPOT', en: 'SHARE THIS SPOT' }, rpg: { jp: 'SHARE THIS SPOT', en: 'SEND RAVEN' } },
-            'copy-success-msg': { normal: { jp: 'リンクをコピーしました！', en: 'Link copied to clipboard!' }, rpg: { jp: 'ふしぎなじゅもんを コピーした！', en: 'Thou hast learned a new SPELL! (Copied)' } },
-
-            'weather-mihara': { normal: { jp: '三原市の今の天気', en: 'CURRENT WEATHER' }, rpg: { jp: 'ミハラの そらもよう', en: 'MIHARA SKIES' } },
-            'weather-magic-hour': { normal: { jp: 'MAGIC HOUR', en: 'MAGIC HOUR' }, rpg: { jp: 'ゆうぐれの とき', en: 'TWILIGHT' } },
-            'weather-sunrise': { normal: { jp: 'SUNRISE', en: 'SUNRISE' }, rpg: { jp: 'よあけ', en: 'DAWN' } },
-            'weather-weekly-toggle': { normal: { jp: '週間天気を見る', en: 'Weekly Forecast' }, rpg: { jp: 'このさきの そらもよう', en: 'Future Skies' } }
+            'header-logo': { normal: { jp: 'MIHARA REDISCOVER', en: 'MIHARA REDISCOVER' } },
+            'nav-map': { normal: { jp: 'マップ', en: 'MAP' } },
+            'nav-local': { normal: { jp: 'さんぽログ', en: 'WALK LOG' } },
+            'nav-submit': { normal: { jp: '掲載募集', en: 'SUBMIT' } },
+            'nav-guide': { normal: { jp: '掲載案内', en: 'GUIDES' } },
+            'hero-label': { normal: { jp: 'MIHARA REDISCOVER PROJECT', en: 'MIHARA REDISCOVER PROJECT' } },
+            'hero-title': { normal: { jp: 'まだ知らない三原の景色を、<br class="mobile-br">みんなで描くフォトマップ', en: 'Discovering the unseen Mihara,<br class="mobile-br">a community photo map.' } },
+            'label-about': { normal: { jp: 'About Project', en: 'About Project' } },
+            'title-about': { normal: { jp: 'みんなで描く、三原の未来', en: 'Mapping the Future of Mihara' } },
+            'desc-about': { normal: { jp: '広島県三原市（みはらし）は、瀬戸内海の穏やかな気候と豊かな自然に恵まれた、歴史と文化が息づく街です。陸・海・空の交通の要衝として知られ、「広島空港」がある空の玄関口でもあります。<br><br>このプロジェクトは、そんな三原の日常にある「美しさ」を再発見するためのもの。地元の人だけが知る特別な場所や、日常のふとした風景を写真で紡ぎ、共有していきます。', en: 'Mihara City in Hiroshima Prefecture is a town full of history and culture, blessed with the mild climate and rich nature of the Seto Inland Sea. It is known as a transportation hub for land, sea, and air, serving as the gateway to the sky with Hiroshima Airport.<br><br>This project aims to rediscover the everyday "beauty" of Mihara. We collect and share photos of special places known only to locals and casual everyday landscapes.' } },
+            'title-map': { normal: { jp: 'PHOTO MAP', en: 'PHOTO MAP' } },
+            'sub-map': { normal: { jp: 'Find Your Favorite Spot', en: 'Find Your Favorite Spot' } },
+            'btn-view-grid-text': { normal: { jp: 'PHOTO', en: 'PHOTO' } },
+            'btn-view-map-text': { normal: { jp: 'MAP', en: 'MAP' } },
+            'loading-text': { normal: { jp: 'Collecting memories...', en: 'Collecting memories...' } },
+            'load-more-btn': { normal: { jp: 'MORE PHOTOS', en: 'MORE PHOTOS' } },
+            'label-local': { normal: { jp: 'PARENT & CHILD LOG', en: 'PARENT & CHILD LOG' } },
+            'title-local': { normal: { jp: 'みはら親子さんぽログ', en: 'Mihara Family Walk Log' } },
+            'desc-local': { normal: { jp: '公式ガイドには載らない、<br class="block sm:hidden">パパママ目線のリアルな遊び場マップ。', en: 'Real playground maps from a parent\'s perspective,<br class="block sm:hidden">not found in official guides.' } },
+            'local-empty': { normal: { jp: '現在、お散歩コースを準備中です...', en: 'Walking routes are currently being prepared...' } },
+            'label-contact': { normal: { jp: 'Photo Submission', en: 'Photo Submission' } },
+            'title-contact': { normal: { jp: '三原の魅力を教えてください', en: 'Share the Charm of Mihara' } },
+            'desc-contact': { normal: { jp: '隠れた名所、美味しいグルメ、四季折々の風景、まちのイベント、あるいは何気ない日常のひとコマなど、三原の魅力が伝わる写真を幅広く募集しています。', en: 'We are looking for a wide range of photos that convey the charm of Mihara, such as hidden spots, delicious food, seasonal scenery, local events, or just casual everyday moments.' } },
+            'contact-step-1': { normal: { jp: '以下の情報を添えて、Instagram<br>（<a href="https://www.instagram.com/mihara_sampo" target="_blank" rel="noopener noreferrer" class="underline decoration-blue-300">@mihara_sampo</a>）のDMよりお送りください。<br>内容を確認の上、サイトに追加させていただきます！', en: 'Please send a DM to our Instagram<br>(<a href="https://www.instagram.com/mihara_sampo" target="_blank" rel="noopener noreferrer" class="underline decoration-blue-300">@mihara_sampo</a>) with the following info.<br>We will add it to the map after review!' } },
+            'req-info-title': { normal: { jp: 'Required Information', en: 'Required Information' } },
+            'req-info-1': { normal: { jp: '写真データ (JPEG/PNGなど)', en: 'Photo Data (JPEG/PNG)' } },
+            'req-info-2': { normal: { jp: 'スポット名 / 紹介コメント', en: 'Spot Name / Comment' } },
+            'req-info-3': { normal: { jp: '撮影者名 / SNSリンク (任意)', en: 'Photographer / SNS Link (Optional)' } },
+            'contact-via-insta': { normal: { jp: 'Contact via Instagram', en: 'Contact via Instagram' } },
+            'insta-btn-text': { normal: { jp: 'InstagramでDMを送る', en: 'Send DM on Instagram' } },
+            'label-guideline': { normal: { jp: 'Guidelines', en: 'Guidelines' } },
+            'title-guideline': { normal: { jp: '写真掲載についてのご案内', en: 'Submission Guidelines' } },
+            'guide-1-title': { normal: { jp: '写真掲載のルール', en: 'Rules for Publication' } },
+            'guide-1-desc': { normal: { jp: '地域の魅力を伝えることを目的に、風景やお店、日常のひとコマを掲載しています。どなたでも自由に掲載できる仕組みではなく、ご連絡をいただいた内容を確認した上で掲載を行っています。', en: 'We post landscapes, shops, and everyday moments to convey the charm of the region. It is not a system where anyone can post freely; we review the submissions before publishing.' } },
+            'guide-2-title': { normal: { jp: '権利とマナー', en: 'Rights and Manners' } },
+            'guide-2-desc': { normal: { jp: '著作権は撮影者本人にあります。人物や私有地が写る場合は、必ず権利者の許可を得てからご投稿ください。不適切な写真は掲載を見送る場合がございます。', en: 'The copyright belongs to the photographer. If people or private property are included, please obtain permission before submitting. Inappropriate photos may not be published.' } },
+            'guide-3-title': { normal: { jp: '写真の取り扱い', en: 'Handling of Photos' } },
+            'guide-3-desc': { normal: { jp: 'ご提供いただいた写真は、当サイトや関連SNSにおいて三原を盛り上げる広報活動に大切に使用させていただきます。投稿者さんの意思を尊重し、丁寧に扱わせていただきます。', en: 'The provided photos will be carefully used on this site and related SNS to promote Mihara. We respect the photographer\'s intentions and handle them with care.' } },
+            'footer-copy': { normal: { jp: '© 2026 Mihara Walk Photo Map', en: '© 2026 Mihara Walk Photo Map' } },
+            'modal-map-btn-text': { normal: { jp: 'この場所をGoogleマップで見る', en: 'View on Google Maps' } },
+            'share-label': { normal: { jp: 'SHARE THIS SPOT', en: 'SHARE THIS SPOT' } },
+            'copy-success-msg': { normal: { jp: 'リンクをコピーしました！', en: 'Link copied to clipboard!' } },
+            'weather-mihara': { normal: { jp: '三原市の今の天気', en: 'CURRENT WEATHER' } },
+            'weather-magic-hour': { normal: { jp: 'MAGIC HOUR', en: 'MAGIC HOUR' } },
+            'weather-sunrise': { normal: { jp: 'SUNRISE', en: 'SUNRISE' } },
+            'weather-weekly-toggle': { normal: { jp: '週間天気を見る', en: 'Weekly Forecast' } }
         };
 
         let weatherDataCache = null;
@@ -665,7 +548,7 @@
             try {
                 const current = data.current_weather;
                 const daily = data.daily;
-                const currentInfo = getWeatherInfo(current.weathercode, currentLang, isRPGMode);
+                const currentInfo = getWeatherInfo(current.weathercode, currentLang);
 
                 const mainIcon = document.getElementById('weather-main-icon');
                 if(mainIcon) mainIcon.className = `fa-solid ${currentInfo.iconClass}`;
@@ -680,7 +563,7 @@
                 const sunriseStr = formatTime(new Date(daily.sunrise[0]));
                 const sunsetStr = formatTime(new Date(daily.sunset[0]));
 
-                let magicHourPreText = isRPGMode ? (currentLang === 'en' ? 'Best View: ' : 'シャッターチャンス: ') : (currentLang === 'en' ? 'Sunset Time: ' : '夕焼けチャンス: ');
+                let magicHourPreText = currentLang === 'en' ? 'Sunset Time: ' : '夕焼けチャンス: ';
                 
                 const magicText = document.getElementById('magic-hour-text');
                 if(magicText) magicText.textContent = magicHourPreText + sunsetStr;
@@ -698,7 +581,7 @@
                         const dayLabel = currentLang === 'en' ? dayEn : dayJp;
                         const maxT = Math.round(daily.temperature_2m_max[i]);
                         const minT = Math.round(daily.temperature_2m_min[i]);
-                        const wInfo = getWeatherInfo(daily.weathercode[i], currentLang, isRPGMode);
+                        const wInfo = getWeatherInfo(daily.weathercode[i], currentLang);
                         
                         const dayEl = document.createElement('div');
                         dayEl.className = "flex flex-col items-center flex-1 min-w-[42px]";
@@ -717,18 +600,18 @@
             }
         }
 
-        function getWeatherInfo(code, lang, isRpg) {
+        function getWeatherInfo(code, lang) {
             let iconClass = 'fa-cloud text-gray-400';
-            let weatherTextJp = '曇り'; let weatherTextEn = 'Cloudy'; let weatherTextRpgJp = 'くもり'; let weatherTextRpgEn = 'Cloudy';
-            if (code === 0) { iconClass = 'fa-sun text-orange-500'; weatherTextJp = '晴れ'; weatherTextEn = 'Clear'; weatherTextRpgJp = 'はれ'; weatherTextRpgEn = 'Clear'; }
-            else if (code === 1 || code === 2) { iconClass = 'fa-cloud-sun text-orange-400'; weatherTextJp = '晴れ時々曇り'; weatherTextEn = 'Partly Cloudy'; weatherTextRpgJp = 'はれ ときどき くもり'; weatherTextRpgEn = 'Partly Cloudy'; }
-            else if (code === 3) { iconClass = 'fa-cloud text-gray-400'; weatherTextJp = '曇り'; weatherTextEn = 'Cloudy'; weatherTextRpgJp = 'くもり'; weatherTextRpgEn = 'Cloudy'; }
-            else if (code === 45 || code === 48) { iconClass = 'fa-smog text-gray-400'; weatherTextJp = '霧'; weatherTextEn = 'Fog'; weatherTextRpgJp = 'きり'; weatherTextRpgEn = 'Fog'; }
-            else if (code >= 51 && code <= 67) { iconClass = 'fa-umbrella text-blue-500'; weatherTextJp = '雨'; weatherTextEn = 'Rain'; weatherTextRpgJp = 'あめ'; weatherTextRpgEn = 'Rain'; }
-            else if (code >= 71 && code <= 77) { iconClass = 'fa-snowflake text-blue-300'; weatherTextJp = '雪'; weatherTextEn = 'Snow'; weatherTextRpgJp = 'ゆき'; weatherTextRpgEn = 'Snow'; }
-            else if (code >= 80 && code <= 82) { iconClass = 'fa-cloud-showers-heavy text-blue-600'; weatherTextJp = 'にわか雨'; weatherTextEn = 'Showers'; weatherTextRpgJp = 'にわかあめ'; weatherTextRpgEn = 'Showers'; }
-            else if (code >= 95) { iconClass = 'fa-bolt text-yellow-500'; weatherTextJp = '雷雨'; weatherTextEn = 'Thunderstorm'; weatherTextRpgJp = 'らいう'; weatherTextRpgEn = 'Storm'; }
-            return { iconClass, text: isRpg ? (lang === 'en' ? weatherTextRpgEn : weatherTextRpgJp) : (lang === 'en' ? weatherTextEn : weatherTextJp) };
+            let weatherTextJp = '曇り'; let weatherTextEn = 'Cloudy';
+            if (code === 0) { iconClass = 'fa-sun text-orange-500'; weatherTextJp = '晴れ'; weatherTextEn = 'Clear'; }
+            else if (code === 1 || code === 2) { iconClass = 'fa-cloud-sun text-orange-400'; weatherTextJp = '晴れ時々曇り'; weatherTextEn = 'Partly Cloudy'; }
+            else if (code === 3) { iconClass = 'fa-cloud text-gray-400'; weatherTextJp = '曇り'; weatherTextEn = 'Cloudy'; }
+            else if (code === 45 || code === 48) { iconClass = 'fa-smog text-gray-400'; weatherTextJp = '霧'; weatherTextEn = 'Fog'; }
+            else if (code >= 51 && code <= 67) { iconClass = 'fa-umbrella text-blue-500'; weatherTextJp = '雨'; weatherTextEn = 'Rain'; }
+            else if (code >= 71 && code <= 77) { iconClass = 'fa-snowflake text-blue-300'; weatherTextJp = '雪'; weatherTextEn = 'Snow'; }
+            else if (code >= 80 && code <= 82) { iconClass = 'fa-cloud-showers-heavy text-blue-600'; weatherTextJp = 'にわか雨'; weatherTextEn = 'Showers'; }
+            else if (code >= 95) { iconClass = 'fa-bolt text-yellow-500'; weatherTextJp = '雷雨'; weatherTextEn = 'Thunderstorm'; }
+            return { iconClass, text: lang === 'en' ? weatherTextEn : weatherTextJp };
         }
 
         window.toggleWeeklyWeather = function() {
@@ -744,28 +627,22 @@
         };
 
         function updateUI() {
-            const mode = isRPGMode ? 'rpg' : 'normal';
-            
+            const mode = 'normal';
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (i18nData[key] && i18nData[key][mode] && i18nData[key][mode][currentLang]) {
                     el.innerHTML = i18nData[key][mode][currentLang];
                 }
             });
-
             document.querySelectorAll('.tab-item').forEach(el => {
                 const area = el.getAttribute('data-area');
                 if (areaLabels[area]) el.textContent = areaLabels[area][currentLang];
             });
-            
             const langTextEl = document.getElementById('lang-text');
             if (langTextEl) langTextEl.textContent = currentLang === 'jp' ? 'EN' : 'JP';
 
             updateWeatherUI();
-
-            if(spotsData.length > 0) {
-                render(currentActiveArea);
-            }
+            if(spotsData.length > 0) render(currentActiveArea);
             renderLocalInsights(); 
             
             const modal = document.getElementById('photo-modal');
@@ -781,19 +658,13 @@
 
         function getLocalizedSpotField(spot, field) {
             const lang = currentLang;
-            const mode = isRPGMode ? 'rpg' : 'normal';
             if (field === 'title') {
-                if (mode === 'rpg' && lang === 'en') return spot.rpg_title_en || spot.title_en || spot.rpg_title || spot.title || 'Unknown Area';
-                if (mode === 'rpg' && lang === 'jp') return spot.rpg_title || spot.title || '名もなき場所';
-                if (mode === 'normal' && lang === 'en') return spot.title_en || spot.title || 'Unknown Area';
+                if (lang === 'en') return spot.title_en || spot.title || 'Unknown Area';
                 return spot.title || '名称未設定';
             }
             if (field === 'desc') {
-                const defaultDesc = { normal: { jp: '紹介文はありません。', en: 'No description available.' }, rpg: { jp: 'まだ だれも しらない ばしょのようだ...', en: 'An uncharted territory...' } };
-                const def = defaultDesc[mode][lang];
-                if (mode === 'rpg' && lang === 'en') return spot.rpg_desc_en || spot.desc_en || spot.rpg_desc || spot.desc || def;
-                if (mode === 'rpg' && lang === 'jp') return spot.rpg_desc || spot.desc || def;
-                if (mode === 'normal' && lang === 'en') return spot.desc_en || spot.desc || def;
+                const def = lang === 'en' ? 'No description available.' : '紹介文はありません。';
+                if (lang === 'en') return spot.desc_en || spot.desc || def;
                 return spot.desc || def;
             }
             return '';
@@ -991,7 +862,6 @@
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OSM', subdomains: 'abcd', maxZoom: 19 }).addTo(localMapInstance);
             localMarkersGroup = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 50, spiderfyOnMaxZoom: true });
             localMapInstance.addLayer(localMarkersGroup);
-
             localMapInstance.once('focus', function() { localMapInstance.scrollWheelZoom.enable(); });
         }
 
@@ -1008,10 +878,9 @@
                         <span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest" data-i18n="local-empty">現在、お散歩コースを準備中です...</span>
                     </div>
                 `;
-                const mode = isRPGMode ? 'rpg' : 'normal';
                 const el = container.querySelector('[data-i18n="local-empty"]');
-                if (el && i18nData['local-empty'][mode][currentLang]) {
-                    el.innerHTML = i18nData['local-empty'][mode][currentLang];
+                if (el && i18nData['local-empty']['normal'][currentLang]) {
+                    el.innerHTML = i18nData['local-empty']['normal'][currentLang];
                 }
                 if (mapContainer) mapContainer.style.display = 'none';
                 return;
@@ -1268,7 +1137,7 @@
 
             const mapBtn = document.getElementById('modal-map-btn');
             if (mapBtn) {
-                mapBtn.href = spot.map_url && spot.map_url.trim() !== "" ? spot.map_url.trim() : (spot.lat && spot.lng ? `http://googleusercontent.com/maps.google.com/4{spot.lat},${spot.lng}` : `http://googleusercontent.com/maps.google.com/4{encodeURIComponent("三原市 " + spot.title)}`);
+                mapBtn.href = spot.map_url && spot.map_url.trim() !== "" ? spot.map_url.trim() : (spot.lat && spot.lng ? `https://www.google.com/maps/search/?api=1&query=${spot.lat},${spot.lng}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("三原市 " + spot.title)}`);
             }
 
             const shareUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?spot=' + encodeURIComponent(spot.title) + '&lang=' + currentLang;
