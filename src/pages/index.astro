@@ -709,6 +709,9 @@
         let markersClusterGroup = null; 
         let currentViewMode = 'grid'; 
 
+        // ==========================================
+        // ▼ ここが修正済みの最強画像読み込みルートです ▼
+        // ==========================================
         function getDriveId(urlOrId) {
             if (!urlOrId) return '';
             const match = urlOrId.toString().match(/[-\w]{25,}/);
@@ -716,6 +719,7 @@
         }
 
         function getPrimaryImgUrl(driveId, urlOrId, size = 'w1000') {
+            // 第1ルート：Google公式の最も強力なサムネイルサーバー
             if (driveId) return `https://drive.google.com/thumbnail?id=${driveId}&sz=${size}`;
             if (urlOrId && urlOrId.toString().startsWith('http')) return urlOrId.toString().replace('http://', 'https://');
             return '';
@@ -729,12 +733,14 @@
             const step = parseInt(img.dataset.fStep || '0');
             if (step === 0) {
                 img.dataset.fStep = '1';
+                // 予備ルート：従来のダウンロード用
                 img.src = `https://drive.google.com/uc?export=view&id=${driveId}`;
             } else {
                 img.onerror = null; 
                 img.src = 'https://placehold.co/600x800/e2e8f0/94a3b8?text=Image+Blocked';
             }
         };
+        // ==========================================
 
         window.switchView = function(mode) {
             currentViewMode = mode;
@@ -770,11 +776,11 @@
         function escapeHtml(str) {
             if (!str) return '';
             return str.toString()
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
+                .replace(/&/g, '&')
+                .replace(/</g, '<')
+                .replace(/>/g, '>')
+                .replace(/"/g, '"')
+                .replace(/'/g, ''');
         }
 
         function updateMapMarkers() {
@@ -792,8 +798,7 @@
                     const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                     const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                     
-                    // 記号でプログラムが壊れないようにする処理
-                    const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                    const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, """).replace(/\n/g, " ");
                     const displayTitle = escapeHtml(getLocalizedSpotField(spot, 'title'));
                     
                     const popupContent = `
@@ -813,7 +818,7 @@
         }
 
         window.openModalFromMap = function(targetTitle) {
-            const safeTarget = targetTitle.replace(/&quot;/g, '"');
+            const safeTarget = targetTitle.replace(/"/g, '"');
             const target = spotsData.find(s => s.title === safeTarget);
             if (target) openModal(target);
         };
@@ -980,7 +985,7 @@
                         hasMarkers = true;
                         const popupImgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                         
-                        const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
+                        const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, """).replace(/\n/g, " ");
                         
                         const popupContent = `
                             <div style="cursor:pointer;" onclick="scrollToLocalCard('${safeTitleForJS}')">
@@ -1016,7 +1021,7 @@
         }
 
         window.scrollToLocalCard = function(targetTitle) {
-            const safeTarget = targetTitle.replace(/&quot;/g, '"');
+            const safeTarget = targetTitle.replace(/"/g, '"');
             const container = document.getElementById('local-scroll-container');
             if (!container) return;
             
