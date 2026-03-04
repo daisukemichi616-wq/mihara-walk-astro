@@ -1132,7 +1132,29 @@
 
         function updateModalText(spot) {
             document.getElementById('modal-title').textContent = getLocalizedSpotField(spot, 'title');
-            document.getElementById('modal-desc').innerHTML = getLocalizedSpotField(spot, 'desc').replace(/\n/g, '<br>');
+            
+            // ▼ HTMLタグを反映しつつ、ただのURLテキストも自動でリンク化する処理 ▼
+            let rawDesc = getLocalizedSpotField(spot, 'desc').replace(/\n/g, '<br>');
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = rawDesc;
+            function autoLinkTextNodes(node) {
+                if (node.nodeType === 3) { // テキストノード
+                    const urlRegex = /(https?:\/\/[^\s<]+)/g;
+                    if (urlRegex.test(node.nodeValue)) {
+                        const span = document.createElement('span');
+                        span.innerHTML = node.nodeValue.replace(urlRegex, function(url) {
+                            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+                        });
+                        node.parentNode.replaceChild(span, node);
+                    }
+                } else if (node.nodeType === 1 && node.nodeName !== 'A' && node.nodeName !== 'BUTTON') { // Aタグ以外の要素
+                    Array.from(node.childNodes).forEach(autoLinkTextNodes);
+                }
+            }
+            Array.from(tempDiv.childNodes).forEach(autoLinkTextNodes);
+            
+            document.getElementById('modal-desc').innerHTML = tempDiv.innerHTML;
             
             const areaKey = spot.area || 'all';
             document.getElementById('modal-area').textContent = areaLabels[areaKey] ? areaLabels[areaKey][currentLang] : (currentLang === 'en' ? 'MIHARA' : '三原');
