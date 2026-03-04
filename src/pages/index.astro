@@ -1,6 +1,3 @@
----
-// Astroの干渉を防ぐ完全版コード
----
 <!DOCTYPE html>
 <html lang="ja" prefix="og: http://ogp.me/ns#">
 <head>
@@ -230,6 +227,10 @@
         .share-btn.x-twitter:hover { background: #000; color: #fff !important; }
         #copy-success-msg { font-size: 10px; font-weight: bold; color: var(--palette-blue); opacity: 0; transition: opacity 0.3s ease; height: 14px; }
         #copy-success-msg.show { opacity: 1; }
+        
+        /* モーダル内のHTMLコンテンツ用スタイル */
+        #modal-desc img { max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px; margin-bottom: 10px; }
+        #modal-desc a { color: var(--palette-blue); text-decoration: underline; }
     </style>
 </head>
 <body id="top">
@@ -281,42 +282,30 @@
             <h3 class="serif-custom text-blue-900 text-2xl mb-4" id="title-map" data-i18n="title-map">PHOTO MAP</h3>
             <p id="sub-map" class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6" data-i18n="sub-map">Find Your Favorite Spot</p>
             
-            <div id="weather-widget" class="bg-white rounded-[12px] p-4 mx-auto mb-8 max-w-[90%] sm:max-w-md shadow-[0_4px_20px_rgba(0,64,152,0.06)] border border-blue-50" style="margin-top: -10px;">
-                <div class="flex items-center justify-between mb-4 px-1">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-blue-50 text-blue-500 rounded-full w-10 h-10 flex items-center justify-center text-lg shadow-inner border border-blue-100" id="weather-icon-bg">
-                            <i id="weather-main-icon" class="fa-solid fa-spinner fa-spin"></i>
-                        </div>
-                        <div class="text-left leading-tight">
-                            <span class="block text-[9px] font-bold text-gray-400 uppercase tracking-widest" data-i18n="weather-mihara">MIHARA WEATHER</span>
-                            <span class="block text-xl font-bold text-blue-900" id="weather-temp-text">--°C</span>
-                        </div>
-                    </div>
-                    <div class="text-[11px] font-bold text-gray-600 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 shadow-sm" id="weather-desc">取得中...</div>
+            <!-- ▼ コンパクトになったスリムお天気ウィジェット ▼ -->
+            <div id="weather-widget" class="bg-white rounded-full px-5 py-2.5 mx-auto mb-6 max-w-fit shadow-[0_4px_15px_rgba(0,64,152,0.05)] border border-blue-50 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 transition-all">
+                <div class="flex items-center gap-2">
+                    <i id="weather-main-icon" class="fa-solid fa-spinner fa-spin text-blue-500 text-lg"></i>
+                    <span class="text-[10px] font-bold text-gray-400 tracking-widest hidden sm:inline" data-i18n="weather-mihara">MIHARA</span>
+                    <span class="font-bold text-blue-900 text-base" id="weather-temp-text">--°C</span>
                 </div>
-                <div class="weather-magic-box bg-gradient-to-r from-orange-50/80 to-blue-50/80 rounded-[8px] p-3 flex items-center gap-3 border border-orange-100/50">
-                    <div class="w-8 h-8 flex items-center justify-center text-orange-400">
-                        <i class="fa-solid fa-camera-retro text-lg"></i>
-                    </div>
-                    <div class="flex-1 text-left leading-tight">
-                        <span class="block text-[8px] font-bold text-orange-500 uppercase tracking-widest mb-0.5" data-i18n="weather-magic-hour">MAGIC HOUR</span>
-                        <span class="block text-[13px] font-bold text-slate-800" id="magic-hour-text">夕焼けチャンス: --:--</span>
-                    </div>
-                    <div class="text-right border-l border-slate-200 pl-3">
-                        <span class="block text-[8px] font-bold text-blue-400 uppercase tracking-widest mb-0.5" data-i18n="weather-sunrise">SUNRISE</span>
-                        <span class="block text-[13px] font-bold text-slate-600" id="sunrise-text">--:--</span>
-                    </div>
+                <div class="w-px h-4 bg-gray-200 hidden sm:block"></div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-camera-retro text-orange-400"></i>
+                    <span class="text-[11px] font-bold text-slate-700" id="magic-hour-text">夕焼け: --:--</span>
                 </div>
-                <div class="mt-3 pt-2 border-t border-dashed border-blue-100" id="weekly-toggle-wrap">
-                    <button onclick="toggleWeeklyWeather()" class="w-full text-[10px] font-bold text-gray-500 hover:text-blue-600 transition-colors flex items-center justify-center gap-1.5" id="weekly-toggle-btn">
-                        <span data-i18n="weather-weekly-toggle">週間天気を見る</span>
-                        <i class="fa-solid fa-chevron-down text-[8px] transition-transform duration-300" id="weekly-toggle-icon"></i>
-                    </button>
-                    <div id="weekly-weather-container" class="overflow-hidden transition-all duration-300" style="max-height: 0px; opacity: 0;">
-                        <div class="pt-4 pb-1 flex justify-between gap-1 overflow-x-auto" id="weekly-forecast-list"></div>
-                    </div>
-                </div>
+                <div class="w-px h-4 bg-gray-200 hidden sm:block"></div>
+                <button onclick="toggleWeeklyWeather()" class="text-[10px] font-bold text-blue-500 hover:text-blue-700 flex items-center gap-1 transition-colors">
+                    <span data-i18n="weather-weekly-toggle">週間天気</span>
+                    <i class="fa-solid fa-chevron-down transition-transform duration-300" id="weekly-toggle-icon"></i>
+                </button>
             </div>
+            
+            <!-- 分離された週間天気コンテナ -->
+            <div id="weekly-weather-container" class="overflow-hidden transition-all duration-300 max-w-md mx-auto mb-8" style="max-height: 0px; opacity: 0;">
+                <div class="bg-white rounded-[12px] p-3 shadow-[0_4px_20px_rgba(0,64,152,0.06)] border border-blue-50 flex justify-between gap-1 overflow-x-auto" id="weekly-forecast-list"></div>
+            </div>
+            <!-- ▲ お天気ウィジェットここまで ▲ -->
 
             <div class="view-switch">
                 <div id="btn-view-grid" class="view-btn active" onclick="switchView('grid')">
@@ -352,9 +341,9 @@
 
     <section id="local-insights" class="section-wrap bg-slate-50 border-t border-slate-200">
         <div class="inner-limit max-w-5xl px-0 sm:px-6">
-            <span class="section-tag-label" id="label-local" data-i18n="label-local">PARENT & CHILD LOG</span>
-            <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-local" data-i18n="title-local">みはら親子さんぽログ</h2>
-            <p class="text-sm font-bold text-gray-500 mb-6 px-6" id="desc-local" data-i18n="desc-local">公式ガイドには載らない、<br class="block sm:hidden">パパママ目線のリアルな遊び場マップ。</p>
+            <span class="section-tag-label" id="label-local" data-i18n="label-local">MIHARA WALK LOG</span>
+            <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-local" data-i18n="title-local">みはらさんぽログ</h2>
+            <p class="text-sm font-bold text-gray-500 mb-6 px-6 leading-relaxed" id="desc-local" data-i18n="desc-local">ガイドブックには載らない、三原の何気ない日常と新しい発見。<br class="hidden sm:block">歩いて見つける三原の魅力ログ。</p>
             <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-2">
                 <div class="w-full text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
@@ -444,16 +433,28 @@
             <div class="px-8 py-12 text-left">
                 <span id="modal-area" class="text-[9px] font-bold tracking-widest text-blue-600 border border-blue-600 px-3 py-1 mb-6 inline-block uppercase">AREA</span>
                 <h2 id="modal-title" class="serif-custom text-2xl mb-4 leading-normal text-slate-800">タイトル</h2>
-                <p id="modal-desc" class="text-sm font-medium leading-loose mb-8 text-slate-600">紹介文</p>
-                <a id="modal-map-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-10 flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition">
+                
+                <!-- ▼ アフィリエイトタグも表示される説明文エリア ▼ -->
+                <div id="modal-desc" class="text-sm font-medium leading-loose mb-8 text-slate-600 overflow-hidden">紹介文</div>
+                
+                <a id="modal-map-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-6 flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition">
                     <i class="fa-solid fa-location-dot"></i>
                     <span data-i18n="modal-map-btn-text">この場所をGoogleマップで見る</span>
                 </a>
+
+                <!-- ▼ リッチになったInstagram誘導ボタン（さんぽログ専用） ▼ -->
+                <a id="modal-insta-rich-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-10 hidden items-center justify-center gap-2 w-full text-white font-bold text-sm py-4 rounded-full transition-transform hover:-translate-y-1 shadow-[0_10px_20px_rgba(220,39,67,0.2)]" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
+                    <i class="fa-brands fa-instagram text-xl"></i>
+                    <span data-i18n="modal-insta-btn">Instagramでこの投稿を見る</span>
+                </a>
+
                 <div class="flex items-center justify-between border-t border-slate-200 pt-8 mb-8">
                     <span id="modal-author" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">PHOTO BY 管理者</span>
-                    <a id="modal-sns" href="#" target="_blank" rel="noopener noreferrer" class="text-gray-900 font-bold text-[10px] border-b border-gray-900 pb-1 uppercase hover:opacity-70 transition">Instagram Link</a>
+                    <!-- ▼ 今まで通りの小さなテキストリンク（PHOTO MAP専用） ▼ -->
+                    <a id="modal-sns-text-link" href="#" target="_blank" rel="noopener noreferrer" class="text-gray-900 font-bold text-[10px] border-b border-gray-900 pb-1 uppercase hover:opacity-70 transition hidden">Instagram Link</a>
                 </div>
-                <div class="pt-6 border-t border-slate-200 text-center">
+                
+                <div class="pt-4 text-center">
                     <p id="share-label" class="share-label text-[9px] font-bold text-slate-400 mb-4 tracking-widest uppercase" data-i18n="share-label">SHARE THIS SPOT</p>
                     <div class="share-btn-group">
                         <a id="share-x" href="#" target="_blank" rel="noopener noreferrer" class="share-btn x-twitter" title="X (Twitter)でシェア"><i class="fa-brands fa-x-twitter"></i></a>
@@ -470,7 +471,6 @@
     <!-- プログラム部分 -->
     <script is:inline>
         let currentLang = 'jp';
-        let isRPGMode = false;
 
         const areaLabels = {
             'all': { jp: 'ぜんぶ', en: 'ALL' }, 'mihara': { jp: '三原市街', en: 'MIHARA' },
@@ -495,9 +495,11 @@
             'btn-view-map-text': { normal: { jp: 'MAP', en: 'MAP' } },
             'loading-text': { normal: { jp: 'Collecting memories...', en: 'Collecting memories...' } },
             'load-more-btn': { normal: { jp: 'MORE PHOTOS', en: 'MORE PHOTOS' } },
-            'label-local': { normal: { jp: 'PARENT & CHILD LOG', en: 'PARENT & CHILD LOG' } },
-            'title-local': { normal: { jp: 'みはら親子さんぽログ', en: 'Mihara Family Walk Log' } },
-            'desc-local': { normal: { jp: '公式ガイドには載らない、<br class="block sm:hidden">パパママ目線のリアルな遊び場マップ。', en: 'Real playground maps from a parent\'s perspective,<br class="block sm:hidden">not found in official guides.' } },
+            
+            'label-local': { normal: { jp: 'MIHARA WALK LOG', en: 'MIHARA WALK LOG' } },
+            'title-local': { normal: { jp: 'みはらさんぽログ', en: 'Mihara Walk Log' } },
+            'desc-local': { normal: { jp: 'ガイドブックには載らない、三原の何気ない日常と新しい発見。<br class="hidden sm:block">歩いて見つける三原の魅力ログ。', en: 'Everyday moments and new discoveries not found in guidebooks.<br class="hidden sm:block">A log of Mihara\'s charm found by walking.' } },
+
             'local-empty': { normal: { jp: '現在、お散歩コースを準備中です...', en: 'Walking routes are currently being prepared...' } },
             'label-contact': { normal: { jp: 'Photo Submission', en: 'Photo Submission' } },
             'title-contact': { normal: { jp: '三原の魅力を教えてください', en: 'Share the Charm of Mihara' } },
@@ -519,12 +521,13 @@
             'guide-3-desc': { normal: { jp: 'ご提供いただいた写真は、当サイトや関連SNSにおいて三原を盛り上げる広報活動に大切に使用させていただきます。投稿者さんの意思を尊重し、丁寧に扱わせていただきます。', en: 'The provided photos will be carefully used on this site and related SNS to promote Mihara. We respect the photographer\'s intentions and handle them with care.' } },
             'footer-copy': { normal: { jp: '© 2026 Mihara Walk Photo Map', en: '© 2026 Mihara Walk Photo Map' } },
             'modal-map-btn-text': { normal: { jp: 'この場所をGoogleマップで見る', en: 'View on Google Maps' } },
+            'modal-insta-btn': { normal: { jp: 'Instagramでこの投稿を見る', en: 'View this post on Instagram' } },
             'share-label': { normal: { jp: 'SHARE THIS SPOT', en: 'SHARE THIS SPOT' } },
             'copy-success-msg': { normal: { jp: 'リンクをコピーしました！', en: 'Link copied to clipboard!' } },
-            'weather-mihara': { normal: { jp: '三原市の今の天気', en: 'CURRENT WEATHER' } },
+            'weather-mihara': { normal: { jp: 'MIHARA', en: 'MIHARA' } },
             'weather-magic-hour': { normal: { jp: 'MAGIC HOUR', en: 'MAGIC HOUR' } },
             'weather-sunrise': { normal: { jp: 'SUNRISE', en: 'SUNRISE' } },
-            'weather-weekly-toggle': { normal: { jp: '週間天気を見る', en: 'Weekly Forecast' } }
+            'weather-weekly-toggle': { normal: { jp: '週間天気', en: 'Weekly' } }
         };
 
         let weatherDataCache = null;
@@ -540,8 +543,6 @@
                 console.error('Weather API Error:', e);
                 const tempEl = document.getElementById('weather-temp-text');
                 if (tempEl) tempEl.textContent = '--°C';
-                const descEl = document.getElementById('weather-desc');
-                if (descEl) descEl.textContent = currentLang === 'en' ? 'Unavailable' : '取得失敗';
             }
         }
 
@@ -556,25 +557,18 @@
                 const currentInfo = getWeatherInfo(current.weathercode, currentLang);
 
                 const mainIcon = document.getElementById('weather-main-icon');
-                if(mainIcon) mainIcon.className = `fa-solid ${currentInfo.iconClass}`;
+                if(mainIcon) mainIcon.className = `fa-solid ${currentInfo.iconClass} text-lg`;
                 
                 const tempText = document.getElementById('weather-temp-text');
                 if(tempText) tempText.textContent = `${current.temperature}°C`;
-                
-                const descText = document.getElementById('weather-desc');
-                if(descText) descText.textContent = currentInfo.text;
 
                 const formatTime = (date) => `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
-                const sunriseStr = formatTime(new Date(daily.sunrise[0]));
                 const sunsetStr = formatTime(new Date(daily.sunset[0]));
 
-                let magicHourPreText = currentLang === 'en' ? 'Sunset Time: ' : '夕焼けチャンス: ';
+                let magicHourPreText = currentLang === 'en' ? 'Sunset: ' : '夕焼け: ';
                 
                 const magicText = document.getElementById('magic-hour-text');
                 if(magicText) magicText.textContent = magicHourPreText + sunsetStr;
-                
-                const sunriseText = document.getElementById('sunrise-text');
-                if(sunriseText) sunriseText.textContent = sunriseStr;
 
                 const weeklyList = document.getElementById('weekly-forecast-list');
                 if(weeklyList) {
@@ -607,16 +601,15 @@
 
         function getWeatherInfo(code, lang) {
             let iconClass = 'fa-cloud text-gray-400';
-            let weatherTextJp = '曇り'; let weatherTextEn = 'Cloudy';
-            if (code === 0) { iconClass = 'fa-sun text-orange-500'; weatherTextJp = '晴れ'; weatherTextEn = 'Clear'; }
-            else if (code === 1 || code === 2) { iconClass = 'fa-cloud-sun text-orange-400'; weatherTextJp = '晴れ時々曇り'; weatherTextEn = 'Partly Cloudy'; }
-            else if (code === 3) { iconClass = 'fa-cloud text-gray-400'; weatherTextJp = '曇り'; weatherTextEn = 'Cloudy'; }
-            else if (code === 45 || code === 48) { iconClass = 'fa-smog text-gray-400'; weatherTextJp = '霧'; weatherTextEn = 'Fog'; }
-            else if (code >= 51 && code <= 67) { iconClass = 'fa-umbrella text-blue-500'; weatherTextJp = '雨'; weatherTextEn = 'Rain'; }
-            else if (code >= 71 && code <= 77) { iconClass = 'fa-snowflake text-blue-300'; weatherTextJp = '雪'; weatherTextEn = 'Snow'; }
-            else if (code >= 80 && code <= 82) { iconClass = 'fa-cloud-showers-heavy text-blue-600'; weatherTextJp = 'にわか雨'; weatherTextEn = 'Showers'; }
-            else if (code >= 95) { iconClass = 'fa-bolt text-yellow-500'; weatherTextJp = '雷雨'; weatherTextEn = 'Thunderstorm'; }
-            return { iconClass, text: lang === 'en' ? weatherTextEn : weatherTextJp };
+            if (code === 0) { iconClass = 'fa-sun text-orange-500'; }
+            else if (code === 1 || code === 2) { iconClass = 'fa-cloud-sun text-orange-400'; }
+            else if (code === 3) { iconClass = 'fa-cloud text-gray-400'; }
+            else if (code === 45 || code === 48) { iconClass = 'fa-smog text-gray-400'; }
+            else if (code >= 51 && code <= 67) { iconClass = 'fa-umbrella text-blue-500'; }
+            else if (code >= 71 && code <= 77) { iconClass = 'fa-snowflake text-blue-300'; }
+            else if (code >= 80 && code <= 82) { iconClass = 'fa-cloud-showers-heavy text-blue-600'; }
+            else if (code >= 95) { iconClass = 'fa-bolt text-yellow-500'; }
+            return { iconClass };
         }
 
         window.toggleWeeklyWeather = function() {
@@ -652,6 +645,7 @@
             
             const modal = document.getElementById('photo-modal');
             if (modal && modal.classList.contains('active') && modal._currentSpot) {
+                // UIアップデート時にモーダルの内容も更新する（typeの再判定は難しいので再度開き直す想定か文字だけ更新）
                 updateModalText(modal._currentSpot);
             }
         }
@@ -711,9 +705,6 @@
         let markersClusterGroup = null; 
         let currentViewMode = 'grid'; 
 
-        // ==========================================
-        // ▼ 新しい強力な画像読み込みルート ▼
-        // ==========================================
         function getDriveId(urlOrId) {
             if (!urlOrId) return '';
             const match = urlOrId.toString().match(/[-\w]{25,}/);
@@ -721,7 +712,6 @@
         }
 
         function getPrimaryImgUrl(driveId, urlOrId, size = 'w1000') {
-            // 第1ルート：Google公式の最強画像配信サーバー
             if (driveId) return `https://lh3.googleusercontent.com/d/${driveId}=${size}`;
             if (urlOrId && urlOrId.toString().startsWith('http')) return urlOrId.toString().replace('http://', 'https://');
             return '';
@@ -735,22 +725,18 @@
             const step = parseInt(img.dataset.fStep || '0');
             if (step === 0) {
                 img.dataset.fStep = '1';
-                // 第2ルート：従来のダウンロード用
                 img.src = `https://drive.google.com/uc?export=view&id=${driveId}`;
             } else if (step === 1) {
                 img.dataset.fStep = '2';
-                // 第3ルート：サムネイル用
                 img.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1000`;
             } else if (step === 2) {
                 img.dataset.fStep = '3';
-                // 第4ルート：Instagramのブロック回避用の外部画像中継サーバー
                 img.src = `https://wsrv.nl/?url=https://drive.google.com/uc?export=view%26id=${driveId}`;
             } else {
                 img.onerror = null; 
                 img.src = 'https://placehold.co/600x800/e2e8f0/94a3b8?text=Image+Blocked';
             }
         };
-        // ==========================================
 
         window.switchView = function(mode) {
             currentViewMode = mode;
@@ -782,7 +768,6 @@
             mapInstance.addLayer(markersClusterGroup);
         }
 
-        // ▼ 【修正済】文字化けやエラーを防ぐための安全な変換機能
         function escapeHtml(str) {
             if (!str) return '';
             return String(str)
@@ -791,6 +776,12 @@
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
+        }
+        
+        function stripHtml(html) {
+            let tmp = document.createElement("DIV");
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || "";
         }
 
         function updateMapMarkers() {
@@ -811,8 +802,9 @@
                     const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
                     const displayTitle = escapeHtml(getLocalizedSpotField(spot, 'title'));
                     
+                    // ▼ PHOTO MAPからのクリックであることを明示 ▼
                     const popupContent = `
-                        <div onclick="openModalFromMap('${safeTitleForJS}')" style="cursor:pointer;">
+                        <div onclick="openModalFromMap('${safeTitleForJS}', 'photomap')" style="cursor:pointer;">
                             <div class="popup-img-wrap"><img src="${imgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
                             <div class="popup-info">
                                 <span class="popup-area">${areaLabel}</span>
@@ -827,10 +819,10 @@
             else { const set = AREA_POSITIONS[currentActiveArea] || AREA_POSITIONS['all']; mapInstance.setView([set.lat, set.lng], set.zoom); }
         }
 
-        window.openModalFromMap = function(targetTitle) {
+        window.openModalFromMap = function(targetTitle, type = 'photomap') {
             const safeTarget = targetTitle.replace(/&quot;/g, '"');
             const target = spotsData.find(s => s.title === safeTarget);
-            if (target) openModal(target);
+            if (target) openModal(target, type);
         };
 
         function render(filter) {
@@ -870,7 +862,8 @@
                 const areaName = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                 const item = document.createElement('div');
                 item.className = 'photo-item';
-                item.onclick = () => openModal(spot);
+                // ▼ PHOTO MAPからのクリックであることを明示 ▼
+                item.onclick = () => openModal(spot, 'photomap');
                 
                 const safeAlt = escapeHtml(getLocalizedSpotField(spot, 'title'));
                 
@@ -953,8 +946,8 @@
                 const title = (lang === 'en' && spot.title_en) ? spot.title_en : spot.title;
                 const desc = (lang === 'en' && spot.desc_en) ? spot.desc_en : spot.desc;
                 
-                const defaultTagJp = "🎒 親子でお散歩";
-                const defaultTagEn = "🎒 Family Walk";
+                const defaultTagJp = "👟 みはらさんぽ";
+                const defaultTagEn = "👟 Mihara Walk";
                 const tag = lang === 'en' ? (spot.tag_en || spot.tag || defaultTagEn) : (spot.tag || defaultTagJp);
                 
                 const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][lang] : (lang==='en'?'MIHARA':'三原');
@@ -963,14 +956,15 @@
                 card.className = 'local-card-horizontal';
                 card.dataset.title = spot.title; 
                 
+                // ▼ さんぽログからのクリックであることを明示 ▼
                 card.onclick = (e) => {
                     if (window.isDragged) { e.preventDefault(); return; }
                     const modalSpotData = { ...spot, title: spot.title, desc: spot.desc, title_en: spot.title_en, desc_en: spot.desc_en };
-                    window.openModal(modalSpotData);
+                    window.openModal(modalSpotData, 'locallog');
                 }; 
 
                 const safeAlt = escapeHtml(title);
-                const safeDesc = escapeHtml(desc);
+                const safeDesc = stripHtml(desc);
 
                 card.innerHTML = `
                     <div class="local-card-img-wrap">
@@ -997,6 +991,7 @@
                         
                         const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
                         
+                        // マップのポップアップクリックはスクロール連動なのでそのまま
                         const popupContent = `
                             <div style="cursor:pointer;" onclick="scrollToLocalCard('${safeTitleForJS}')">
                                 <div class="popup-img-wrap"><img src="${popupImgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
@@ -1099,7 +1094,7 @@
                 document.title = `${getLocalizedSpotField(spot, 'title')} | MIHARA REDISCOVER`;
                 const descMeta = document.querySelector('meta[name="description"]');
                 if(descMeta) {
-                    let descText = getLocalizedSpotField(spot, 'desc').replace(/\n/g, '');
+                    let descText = stripHtml(getLocalizedSpotField(spot, 'desc')).replace(/\n/g, '');
                     if(descText.length > 100) descText = descText.substring(0, 100) + '...';
                     descMeta.setAttribute('content', descText);
                 }
@@ -1124,14 +1119,21 @@
             const targetSpotTitle = urlParams.get('spot');
             if (targetSpotTitle) {
                 let target = spotsData.find(s => s.title === targetSpotTitle);
-                if (!target) target = localInsightsData.find(s => s.title === targetSpotTitle);
-                if (target) window.openModal(target);
+                if (target) {
+                    window.openModal(target, 'photomap');
+                    return;
+                }
+                target = localInsightsData.find(s => s.title === targetSpotTitle);
+                if (target) {
+                    window.openModal(target, 'locallog');
+                }
             }
         }
 
         function updateModalText(spot) {
             document.getElementById('modal-title').textContent = getLocalizedSpotField(spot, 'title');
-            document.getElementById('modal-desc').innerHTML = escapeHtml(getLocalizedSpotField(spot, 'desc')).replace(/\n/g, '<br>');
+            document.getElementById('modal-desc').innerHTML = getLocalizedSpotField(spot, 'desc').replace(/\n/g, '<br>');
+            
             const areaKey = spot.area || 'all';
             document.getElementById('modal-area').textContent = areaLabels[areaKey] ? areaLabels[areaKey][currentLang] : (currentLang === 'en' ? 'MIHARA' : '三原');
             
@@ -1141,7 +1143,8 @@
             }
         }
 
-        window.openModal = function(spot) {
+        // ▼ 引数 type を追加して、どこから開かれたかを判別 ▼
+        window.openModal = function(spot, type = 'photomap') {
             const driveId = getDriveId(spot.image);
             const modalImg = document.getElementById('modal-img');
             if (modalImg) {
@@ -1157,22 +1160,54 @@
             updateModalText(spot);
 
             const snsLink = spot.sns || spot.snsurl || spot.url || spot.link;
-            const snsEl = document.getElementById('modal-sns');
-            if (snsEl) {
-                if (snsLink && snsLink.startsWith('http')) {
-                    snsEl.style.display = 'block'; 
-                    snsEl.href = snsLink; 
-                    snsEl.textContent = 'INSTAGRAM LINK';
-                    snsEl.style.color = '#1a1a1a'; 
-                    snsEl.style.borderColor = '#1a1a1a'; 
-                    snsEl.style.pointerEvents = 'auto';
+            
+            // 2種類のSNSボタン要素を取得
+            const richBtn = document.getElementById('modal-insta-rich-btn');
+            const textLink = document.getElementById('modal-sns-text-link');
+
+            // 一旦両方とも非表示にする
+            if (richBtn) {
+                richBtn.classList.add('hidden');
+                richBtn.classList.remove('flex');
+            }
+            if (textLink) {
+                textLink.classList.add('hidden');
+                textLink.classList.remove('block');
+            }
+
+            if (snsLink && snsLink.startsWith('http')) {
+                // SNSリンクがある場合、タイプによって出し分ける
+                if (type === 'locallog') {
+                    // さんぽログならリッチボタン
+                    if (richBtn) {
+                        richBtn.classList.remove('hidden');
+                        richBtn.classList.add('flex');
+                        richBtn.href = snsLink;
+                    }
                 } else {
-                    snsEl.style.display = 'block'; 
-                    snsEl.removeAttribute('href'); 
-                    snsEl.textContent = 'NO SNS ACCOUNT';
-                    snsEl.style.color = '#ccc'; 
-                    snsEl.style.borderColor = 'transparent'; 
-                    snsEl.style.pointerEvents = 'none';
+                    // PHOTO MAPなら小さなテキストリンク
+                    if (textLink) {
+                        textLink.classList.remove('hidden');
+                        textLink.classList.add('block');
+                        textLink.href = snsLink; 
+                        textLink.textContent = 'INSTAGRAM LINK';
+                        textLink.style.color = '#1a1a1a'; 
+                        textLink.style.borderColor = '#1a1a1a'; 
+                        textLink.style.pointerEvents = 'auto';
+                    }
+                }
+            } else {
+                // SNSリンクがない場合、PHOTO MAPの時だけ「NO SNS ACCOUNT」を表示
+                if (type === 'photomap') {
+                    if (textLink) {
+                        textLink.classList.remove('hidden');
+                        textLink.classList.add('block');
+                        textLink.removeAttribute('href'); 
+                        textLink.textContent = 'NO SNS ACCOUNT';
+                        textLink.style.color = '#ccc'; 
+                        textLink.style.borderColor = 'transparent'; 
+                        textLink.style.pointerEvents = 'none';
+                    }
                 }
             }
 
