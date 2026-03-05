@@ -230,7 +230,15 @@
         
         /* モーダル内のHTMLコンテンツ用スタイル */
         #modal-desc img { max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px; margin-bottom: 10px; }
-        #modal-desc a { color: var(--palette-blue); text-decoration: underline; }
+        #modal-desc a { color: var(--palette-blue); text-decoration: underline; word-break: break-all; }
+
+        /* モーダルギャラリー用スタイル */
+        .modal-gallery { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; }
+        .modal-gallery::-webkit-scrollbar { display: none; }
+        .modal-gallery-item { flex: 0 0 100%; scroll-snap-align: start; position: relative; }
+        .modal-gallery-indicator { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+        .gallery-dot { width: 6px; height: 6px; border-radius: 50%; background: #e2e8f0; transition: background 0.3s; }
+        .gallery-dot.active { background: var(--palette-blue); }
     </style>
 </head>
 <body id="top">
@@ -282,7 +290,6 @@
             <h3 class="serif-custom text-blue-900 text-2xl mb-4" id="title-map" data-i18n="title-map">PHOTO MAP</h3>
             <p id="sub-map" class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6" data-i18n="sub-map">Find Your Favorite Spot</p>
             
-            <!-- ▼ コンパクトになったスリムお天気ウィジェット ▼ -->
             <div id="weather-widget" class="bg-white rounded-full px-5 py-2.5 mx-auto mb-6 max-w-fit shadow-[0_4px_15px_rgba(0,64,152,0.05)] border border-blue-50 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 transition-all">
                 <div class="flex items-center gap-2">
                     <i id="weather-main-icon" class="fa-solid fa-spinner fa-spin text-blue-500 text-lg"></i>
@@ -301,11 +308,9 @@
                 </button>
             </div>
             
-            <!-- 分離された週間天気コンテナ -->
             <div id="weekly-weather-container" class="overflow-hidden transition-all duration-300 max-w-md mx-auto mb-8" style="max-height: 0px; opacity: 0;">
                 <div class="bg-white rounded-[12px] p-3 shadow-[0_4px_20px_rgba(0,64,152,0.06)] border border-blue-50 flex justify-between gap-1 overflow-x-auto" id="weekly-forecast-list"></div>
             </div>
-            <!-- ▲ お天気ウィジェットここまで ▲ -->
 
             <div class="view-switch">
                 <div id="btn-view-grid" class="view-btn active" onclick="switchView('grid')">
@@ -343,7 +348,7 @@
         <div class="inner-limit max-w-5xl px-0 sm:px-6">
             <span class="section-tag-label" id="label-local" data-i18n="label-local">MIHARA WALK LOG</span>
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-local" data-i18n="title-local">みはらさんぽログ</h2>
-            <p class="text-sm font-bold text-gray-500 mb-6 px-6 leading-relaxed" id="desc-local" data-i18n="desc-local">ガイドブックには載らない、三原の何気ない日常と新しい発見。<br class="hidden sm:block">歩いて見つける三原の魅力ログ。</p>
+            <p class="text-xs sm:text-sm font-bold text-gray-500 mb-6 px-4 sm:px-6 leading-relaxed" id="desc-local" data-i18n="desc-local">ガイドブックには載らない、三原の何気ない日常と<br>新しい発見。歩いて見つける三原の魅力ログ。</p>
             <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-2">
                 <div class="w-full text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
@@ -429,12 +434,16 @@
     <div id="photo-modal" class="modal-wrap">
         <button id="modal-close-btn" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
         <div id="modal-content-area" class="max-w-[600px] mx-auto pb-24 bg-white min-h-screen sm:min-h-0">
-            <img id="modal-img" src="" class="w-full aspect-[4/5] sm:aspect-square object-cover" alt="Photo" onerror="this.onerror=null; this.style.display='none'">
-            <div class="px-8 py-12 text-left">
+            
+            <!-- スワイプ可能なギャラリーコンテナ -->
+            <div id="modal-gallery" class="modal-gallery w-full aspect-[4/5] sm:aspect-square bg-gray-100"></div>
+            <div id="modal-gallery-indicator" class="modal-gallery-indicator hidden pb-4"></div>
+
+            <div class="px-8 py-10 text-left">
                 <span id="modal-area" class="text-[9px] font-bold tracking-widest text-blue-600 border border-blue-600 px-3 py-1 mb-6 inline-block uppercase">AREA</span>
                 <h2 id="modal-title" class="serif-custom text-2xl mb-4 leading-normal text-slate-800">タイトル</h2>
                 
-                <!-- ▼ アフィリエイトタグも表示される説明文エリア ▼ -->
+                <!-- アフィリエイトタグ等も表示される説明文エリア -->
                 <div id="modal-desc" class="text-sm font-medium leading-loose mb-8 text-slate-600 overflow-hidden">紹介文</div>
                 
                 <a id="modal-map-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-6 flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition">
@@ -442,7 +451,13 @@
                     <span data-i18n="modal-map-btn-text">この場所をGoogleマップで見る</span>
                 </a>
 
-                <!-- ▼ リッチになったInstagram誘導ボタン（さんぽログ専用） ▼ -->
+                <!-- ホテル予約ボタン（PHOTO MAP専用） -->
+                <a id="modal-hotel-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-6 hidden items-center justify-center gap-2 w-full text-white font-bold text-xs py-4 rounded hover:opacity-90 transition shadow-md" style="background: linear-gradient(to right, #1a2a6c, #11998e);">
+                    <i class="fa-solid fa-bed text-lg"></i>
+                    <span>周辺のホテル・宿を探す</span>
+                </a>
+
+                <!-- Instagram誘導リッチボタン（さんぽログ専用） -->
                 <a id="modal-insta-rich-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-10 hidden items-center justify-center gap-2 w-full text-white font-bold text-sm py-4 rounded-full transition-transform hover:-translate-y-1 shadow-[0_10px_20px_rgba(220,39,67,0.2)]" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
                     <i class="fa-brands fa-instagram text-xl"></i>
                     <span data-i18n="modal-insta-btn">Instagramでこの投稿を見る</span>
@@ -450,7 +465,7 @@
 
                 <div class="flex items-center justify-between border-t border-slate-200 pt-8 mb-8">
                     <span id="modal-author" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">PHOTO BY 管理者</span>
-                    <!-- ▼ 今まで通りの小さなテキストリンク（PHOTO MAP専用） ▼ -->
+                    <!-- 今まで通りの小さなテキストリンク（PHOTO MAP専用） -->
                     <a id="modal-sns-text-link" href="#" target="_blank" rel="noopener noreferrer" class="text-gray-900 font-bold text-[10px] border-b border-gray-900 pb-1 uppercase hover:opacity-70 transition hidden">Instagram Link</a>
                 </div>
                 
@@ -498,7 +513,7 @@
             
             'label-local': { normal: { jp: 'MIHARA WALK LOG', en: 'MIHARA WALK LOG' } },
             'title-local': { normal: { jp: 'みはらさんぽログ', en: 'Mihara Walk Log' } },
-            'desc-local': { normal: { jp: 'ガイドブックには載らない、三原の何気ない日常と新しい発見。<br class="hidden sm:block">歩いて見つける三原の魅力ログ。', en: 'Everyday moments and new discoveries not found in guidebooks.<br class="hidden sm:block">A log of Mihara\'s charm found by walking.' } },
+            'desc-local': { normal: { jp: 'ガイドブックには載らない、三原の何気ない日常と<br>新しい発見。歩いて見つける三原の魅力ログ。', en: 'Everyday moments and new discoveries not found in guidebooks.<br>A log of Mihara\'s charm found by walking.' } },
 
             'local-empty': { normal: { jp: '現在、お散歩コースを準備中です...', en: 'Walking routes are currently being prepared...' } },
             'label-contact': { normal: { jp: 'Photo Submission', en: 'Photo Submission' } },
@@ -645,7 +660,6 @@
             
             const modal = document.getElementById('photo-modal');
             if (modal && modal.classList.contains('active') && modal._currentSpot) {
-                // UIアップデート時にモーダルの内容も更新する（typeの再判定は難しいので再度開き直す想定か文字だけ更新）
                 updateModalText(modal._currentSpot);
             }
         }
@@ -705,6 +719,7 @@
         let markersClusterGroup = null; 
         let currentViewMode = 'grid'; 
 
+        // ▼ 【修正1】画像IDを抜き出す魔法のプログラムを、一番安定していた形に戻しました ▼
         function getDriveId(urlOrId) {
             if (!urlOrId) return '';
             const match = urlOrId.toString().match(/[-\w]{25,}/);
@@ -802,7 +817,6 @@
                     const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
                     const displayTitle = escapeHtml(getLocalizedSpotField(spot, 'title'));
                     
-                    // ▼ PHOTO MAPからのクリックであることを明示 ▼
                     const popupContent = `
                         <div onclick="openModalFromMap('${safeTitleForJS}', 'photomap')" style="cursor:pointer;">
                             <div class="popup-img-wrap"><img src="${imgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
@@ -862,7 +876,6 @@
                 const areaName = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                 const item = document.createElement('div');
                 item.className = 'photo-item';
-                // ▼ PHOTO MAPからのクリックであることを明示 ▼
                 item.onclick = () => openModal(spot, 'photomap');
                 
                 const safeAlt = escapeHtml(getLocalizedSpotField(spot, 'title'));
@@ -956,7 +969,6 @@
                 card.className = 'local-card-horizontal';
                 card.dataset.title = spot.title; 
                 
-                // ▼ さんぽログからのクリックであることを明示 ▼
                 card.onclick = (e) => {
                     if (window.isDragged) { e.preventDefault(); return; }
                     const modalSpotData = { ...spot, title: spot.title, desc: spot.desc, title_en: spot.title_en, desc_en: spot.desc_en };
@@ -991,7 +1003,6 @@
                         
                         const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
                         
-                        // マップのポップアップクリックはスクロール連動なのでそのまま
                         const popupContent = `
                             <div style="cursor:pointer;" onclick="scrollToLocalCard('${safeTitleForJS}')">
                                 <div class="popup-img-wrap"><img src="${popupImgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
@@ -1133,13 +1144,12 @@
         function updateModalText(spot) {
             document.getElementById('modal-title').textContent = getLocalizedSpotField(spot, 'title');
             
-            // ▼ HTMLタグを反映しつつ、ただのURLテキストも自動でリンク化する処理 ▼
             let rawDesc = getLocalizedSpotField(spot, 'desc').replace(/\n/g, '<br>');
             
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = rawDesc;
             function autoLinkTextNodes(node) {
-                if (node.nodeType === 3) { // テキストノード
+                if (node.nodeType === 3) { 
                     const urlRegex = /(https?:\/\/[^\s<]+)/g;
                     if (urlRegex.test(node.nodeValue)) {
                         const span = document.createElement('span');
@@ -1148,7 +1158,7 @@
                         });
                         node.parentNode.replaceChild(span, node);
                     }
-                } else if (node.nodeType === 1 && node.nodeName !== 'A' && node.nodeName !== 'BUTTON') { // Aタグ以外の要素
+                } else if (node.nodeType === 1 && node.nodeName !== 'A' && node.nodeName !== 'BUTTON') { 
                     Array.from(node.childNodes).forEach(autoLinkTextNodes);
                 }
             }
@@ -1165,16 +1175,59 @@
             }
         }
 
-        // ▼ 引数 type を追加して、どこから開かれたかを判別 ▼
         window.openModal = function(spot, type = 'photomap') {
-            const driveId = getDriveId(spot.image);
-            const modalImg = document.getElementById('modal-img');
-            if (modalImg) {
-                modalImg.style.display = 'block'; 
-                modalImg.src = getPrimaryImgUrl(driveId, spot.image, 'w1600');
-                modalImg.dataset.fStep = '0';
-                modalImg.onerror = function() { handleImgErr(this, driveId); };
-                modalImg.alt = escapeHtml(getLocalizedSpotField(spot, 'title'));
+            const gallery = document.getElementById('modal-gallery');
+            const indicator = document.getElementById('modal-gallery-indicator');
+            if (gallery) gallery.innerHTML = '';
+            if (indicator) { indicator.innerHTML = ''; indicator.classList.add('hidden'); }
+
+            const images = [];
+            // 写真が複数URLで入っていた場合の保険処理
+            let mainImg = spot.image || '';
+            if (mainImg && mainImg.includes(',')) mainImg = mainImg.split(',')[0].trim();
+            if (mainImg) images.push(mainImg);
+            
+            if (spot.image2) images.push(spot.image2);
+            if (spot.image3) images.push(spot.image3);
+            if (spot.image4) images.push(spot.image4);
+
+            const safeTitle = escapeHtml(getLocalizedSpotField(spot, 'title'));
+
+            images.forEach((imgRaw, index) => {
+                const driveId = getDriveId(imgRaw);
+                const imgUrl = getPrimaryImgUrl(driveId, imgRaw, 'w1600');
+                
+                const item = document.createElement('div');
+                // ▼ 影やぼかしをなくし、スッキリとした上品なグレー背景に統一 ▼
+                item.className = 'modal-gallery-item flex items-center justify-center bg-[#f8f9fa]';
+                
+                const imgEl = document.createElement('img');
+                // ▼ シンプルに写真全体を表示するだけにする ▼
+                imgEl.className = 'w-full h-full object-contain';
+                imgEl.src = imgUrl;
+                imgEl.dataset.fStep = '0';
+                imgEl.alt = safeTitle + (images.length > 1 ? ` (${index + 1})` : '');
+                imgEl.onerror = function() { handleImgErr(this, driveId); };
+                
+                item.appendChild(imgEl);
+                gallery.appendChild(item);
+
+                if (images.length > 1 && indicator) {
+                    const dot = document.createElement('div');
+                    dot.className = `gallery-dot ${index === 0 ? 'active' : ''}`;
+                    indicator.appendChild(dot);
+                }
+            });
+
+            if (images.length > 1 && indicator && gallery) {
+                indicator.classList.remove('hidden');
+                gallery.onscroll = () => {
+                    const index = Math.round(gallery.scrollLeft / gallery.clientWidth);
+                    const dots = indicator.querySelectorAll('.gallery-dot');
+                    dots.forEach((d, i) => {
+                        d.className = `gallery-dot ${i === index ? 'active' : ''}`;
+                    });
+                };
             }
             
             const modal = document.getElementById('photo-modal');
@@ -1183,31 +1236,29 @@
 
             const snsLink = spot.sns || spot.snsurl || spot.url || spot.link;
             
-            // 2種類のSNSボタン要素を取得
             const richBtn = document.getElementById('modal-insta-rich-btn');
             const textLink = document.getElementById('modal-sns-text-link');
+            const hotelBtn = document.getElementById('modal-hotel-btn');
 
-            // 一旦両方とも非表示にする
-            if (richBtn) {
-                richBtn.classList.add('hidden');
-                richBtn.classList.remove('flex');
-            }
-            if (textLink) {
-                textLink.classList.add('hidden');
-                textLink.classList.remove('block');
+            if (richBtn) { richBtn.classList.add('hidden'); richBtn.classList.remove('flex'); }
+            if (textLink) { textLink.classList.add('hidden'); textLink.classList.remove('block'); }
+            if (hotelBtn) { hotelBtn.classList.add('hidden'); hotelBtn.classList.remove('flex'); }
+
+            if (type === 'photomap' && hotelBtn) {
+                hotelBtn.classList.remove('hidden');
+                hotelBtn.classList.add('flex');
+                const defaultHotelUrl = "https://a.r10.to/hRIwm0";
+                hotelBtn.href = (spot.hotel_url && spot.hotel_url.trim() !== "") ? spot.hotel_url.trim() : defaultHotelUrl;
             }
 
             if (snsLink && snsLink.startsWith('http')) {
-                // SNSリンクがある場合、タイプによって出し分ける
                 if (type === 'locallog') {
-                    // さんぽログならリッチボタン
                     if (richBtn) {
                         richBtn.classList.remove('hidden');
                         richBtn.classList.add('flex');
                         richBtn.href = snsLink;
                     }
                 } else {
-                    // PHOTO MAPなら小さなテキストリンク
                     if (textLink) {
                         textLink.classList.remove('hidden');
                         textLink.classList.add('block');
@@ -1219,7 +1270,6 @@
                     }
                 }
             } else {
-                // SNSリンクがない場合、PHOTO MAPの時だけ「NO SNS ACCOUNT」を表示
                 if (type === 'photomap') {
                     if (textLink) {
                         textLink.classList.remove('hidden');
@@ -1334,6 +1384,12 @@
                                     clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
                                 });
 
+                                // ▼ 【修正2】日本語の列名（スポット名など）でも読み込める「保険」を追加！ ▼
+                                if (!clean.title) clean.title = clean['スポット名'] || clean['タイトル'] || '';
+                                if (!clean.desc) clean.desc = clean['紹介文'] || clean['説明'] || '';
+                                if (!clean.image) clean.image = clean['写真'] || clean['画像'] || '';
+                                if (!clean.area) clean.area = clean['エリア'] || '';
+
                                 if (clean.lat_lng_raw) {
                                     const parts = String(clean.lat_lng_raw).split(',');
                                     if (parts.length >= 2) {
@@ -1367,6 +1423,13 @@
                                         let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
                                         clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
                                     });
+
+                                    // ▼ 【修正3】さんぽログ側にも、日本語列名でも読み込める「保険」を追加！ ▼
+                                    if (!clean.title) clean.title = clean['スポット名'] || clean['タイトル'] || '';
+                                    if (!clean.desc) clean.desc = clean['紹介文（パパママ目線）'] || clean['紹介文'] || clean['説明'] || '';
+                                    if (!clean.image) clean.image = clean['写真'] || clean['画像'] || '';
+                                    if (!clean.area) clean.area = clean['エリア'] || '';
+                                    if (!clean.tag) clean.tag = clean['タグ'] || '';
 
                                     if (clean.lat_lng_raw) {
                                         const parts = String(clean.lat_lng_raw).split(',');
