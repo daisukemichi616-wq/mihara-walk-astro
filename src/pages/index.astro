@@ -239,6 +239,14 @@
         .modal-gallery-indicator { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
         .gallery-dot { width: 6px; height: 6px; border-radius: 50%; background: #e2e8f0; transition: background 0.3s; }
         .gallery-dot.active { background: var(--palette-blue); }
+
+        /* イベントカード用スタイル */
+        .event-card { display: flex; flex-direction: column; background: white; border: 1px solid var(--border-soft); border-radius: 12px; padding: 20px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,64,152,0.02); text-decoration: none; color: inherit; gap: 15px; }
+        @media (min-width: 640px) { .event-card { flex-direction: row; align-items: center; } }
+        .event-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,64,152,0.08); border-color: var(--palette-blue-light); }
+        .event-date-box { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--palette-sky); border: 1px solid var(--palette-blue-light); border-radius: 8px; padding: 12px 10px; width: 100%; text-align: center; color: var(--palette-blue); }
+        @media (min-width: 640px) { .event-date-box { width: 120px; } }
+        .event-content-box { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
     </style>
 </head>
 <body id="top">
@@ -248,8 +256,8 @@
         <div class="nav-links-wrap">
             <div class="nav-simple-link" onclick="scrollToId('gallery')" data-i18n="nav-map">マップ</div>
             <div class="nav-simple-link" onclick="scrollToId('local-insights')" data-i18n="nav-local">さんぽログ</div>
+            <div class="nav-simple-link" onclick="scrollToId('events')" data-i18n="nav-event">イベント</div>
             <div class="nav-simple-link" onclick="scrollToId('contact')" data-i18n="nav-submit">掲載募集</div>
-            <div class="nav-simple-link hidden sm:block" onclick="scrollToId('guideline')" data-i18n="nav-guide">掲載案内</div>
             <button id="lang-toggle-btn" class="header-btn" onclick="toggleLanguage()">
                 <i class="fa-solid fa-globe"></i> <span id="lang-text">EN</span>
             </button>
@@ -356,6 +364,18 @@
         </div>
     </section>
 
+    <section id="events" class="section-wrap bg-white border-t border-slate-200">
+        <div class="inner-limit max-w-5xl px-0 sm:px-6">
+            <span class="section-tag-label" id="label-event" data-i18n="label-event">UPCOMING EVENTS</span>
+            <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-event" data-i18n="title-event">三原のイベント情報</h2>
+            <p class="text-xs sm:text-sm font-bold text-gray-500 mb-8 px-4 sm:px-6 leading-relaxed" id="desc-event" data-i18n="desc-event">週末のお出かけにぴったりな、<br>三原市内のイベントや催し物をお届けします。</p>
+            
+            <div id="events-container" class="px-6 sm:px-0 grid gap-4 md:grid-cols-1 max-w-3xl mx-auto text-left">
+                <div class="w-full py-10 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
+            </div>
+        </div>
+    </section>
+
     <section id="contact" class="section-wrap" style="background-color: var(--palette-sky); border-top: 1px solid var(--border-soft);">
         <div class="inner-limit">
             <span class="section-tag-label" id="label-contact" data-i18n="label-contact">Photo Submission</span>
@@ -435,15 +455,13 @@
         <button id="modal-close-btn" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
         <div id="modal-content-area" class="max-w-[600px] mx-auto pb-24 bg-white min-h-screen sm:min-h-0">
             
-            <!-- スワイプ可能なギャラリーコンテナ -->
-            <div id="modal-gallery" class="modal-gallery w-full aspect-[4/5] sm:aspect-square bg-gray-100"></div>
+            <div id="modal-gallery" class="modal-gallery w-full aspect-[4/5] sm:aspect-square bg-[#f8f9fa]"></div>
             <div id="modal-gallery-indicator" class="modal-gallery-indicator hidden pb-4"></div>
 
             <div class="px-8 py-10 text-left">
                 <span id="modal-area" class="text-[9px] font-bold tracking-widest text-blue-600 border border-blue-600 px-3 py-1 mb-6 inline-block uppercase">AREA</span>
                 <h2 id="modal-title" class="serif-custom text-2xl mb-4 leading-normal text-slate-800">タイトル</h2>
                 
-                <!-- アフィリエイトタグ等も表示される説明文エリア -->
                 <div id="modal-desc" class="text-sm font-medium leading-loose mb-8 text-slate-600 overflow-hidden">紹介文</div>
                 
                 <a id="modal-map-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-6 flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition">
@@ -451,13 +469,11 @@
                     <span data-i18n="modal-map-btn-text">この場所をGoogleマップで見る</span>
                 </a>
 
-                <!-- ホテル予約ボタン（PHOTO MAP専用） -->
                 <a id="modal-hotel-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-6 hidden items-center justify-center gap-2 w-full text-white font-bold text-xs py-4 rounded hover:opacity-90 transition shadow-md" style="background: linear-gradient(to right, #1a2a6c, #11998e);">
                     <i class="fa-solid fa-bed text-lg"></i>
                     <span>周辺のホテル・宿を探す</span>
                 </a>
 
-                <!-- Instagram誘導リッチボタン（さんぽログ専用） -->
                 <a id="modal-insta-rich-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-10 hidden items-center justify-center gap-2 w-full text-white font-bold text-sm py-4 rounded-full transition-transform hover:-translate-y-1 shadow-[0_10px_20px_rgba(220,39,67,0.2)]" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
                     <i class="fa-brands fa-instagram text-xl"></i>
                     <span data-i18n="modal-insta-btn">Instagramでこの投稿を見る</span>
@@ -465,7 +481,6 @@
 
                 <div class="flex items-center justify-between border-t border-slate-200 pt-8 mb-8">
                     <span id="modal-author" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">PHOTO BY 管理者</span>
-                    <!-- 今まで通りの小さなテキストリンク（PHOTO MAP専用） -->
                     <a id="modal-sns-text-link" href="#" target="_blank" rel="noopener noreferrer" class="text-gray-900 font-bold text-[10px] border-b border-gray-900 pb-1 uppercase hover:opacity-70 transition hidden">Instagram Link</a>
                 </div>
                 
@@ -497,6 +512,7 @@
             'header-logo': { normal: { jp: 'MIHARA REDISCOVER', en: 'MIHARA REDISCOVER' } },
             'nav-map': { normal: { jp: 'マップ', en: 'MAP' } },
             'nav-local': { normal: { jp: 'さんぽログ', en: 'WALK LOG' } },
+            'nav-event': { normal: { jp: 'イベント', en: 'EVENTS' } },
             'nav-submit': { normal: { jp: '掲載募集', en: 'SUBMIT' } },
             'nav-guide': { normal: { jp: '掲載案内', en: 'GUIDES' } },
             'hero-label': { normal: { jp: 'MIHARA REDISCOVER PROJECT', en: 'MIHARA REDISCOVER PROJECT' } },
@@ -514,8 +530,14 @@
             'label-local': { normal: { jp: 'MIHARA WALK LOG', en: 'MIHARA WALK LOG' } },
             'title-local': { normal: { jp: 'みはらさんぽログ', en: 'Mihara Walk Log' } },
             'desc-local': { normal: { jp: 'ガイドブックには載らない、三原の何気ない日常と<br>新しい発見。歩いて見つける三原の魅力ログ。', en: 'Everyday moments and new discoveries not found in guidebooks.<br>A log of Mihara\'s charm found by walking.' } },
-
             'local-empty': { normal: { jp: '現在、お散歩コースを準備中です...', en: 'Walking routes are currently being prepared...' } },
+
+            'label-event': { normal: { jp: 'UPCOMING EVENTS', en: 'UPCOMING EVENTS' } },
+            'title-event': { normal: { jp: '三原のイベント情報', en: 'Mihara Events' } },
+            'desc-event': { normal: { jp: '週末のお出かけにぴったりな、<br>三原市内のイベントや催し物をお届けします。', en: 'Upcoming events and activities<br>perfect for your weekend outing in Mihara.' } },
+            'event-empty': { normal: { jp: '現在、予定されているイベントはありません。', en: 'No upcoming events currently scheduled.' } },
+            'event-detail-btn': { normal: { jp: '詳細を見る', en: 'Details' } },
+
             'label-contact': { normal: { jp: 'Photo Submission', en: 'Photo Submission' } },
             'title-contact': { normal: { jp: '三原の魅力を教えてください', en: 'Share the Charm of Mihara' } },
             'desc-contact': { normal: { jp: '隠れた名所、美味しいグルメ、四季折々の風景、まちのイベント、あるいは何気ない日常のひとコマなど、三原の魅力が伝わる写真を幅広く募集しています。', en: 'We are looking for a wide range of photos that convey the charm of Mihara, such as hidden spots, delicious food, seasonal scenery, local events, or just casual everyday moments.' } },
@@ -657,6 +679,7 @@
             updateWeatherUI();
             if(spotsData.length > 0) render(currentActiveArea);
             renderLocalInsights(); 
+            renderEvents(); 
             
             const modal = document.getElementById('photo-modal');
             if (modal && modal.classList.contains('active') && modal._currentSpot) {
@@ -703,9 +726,13 @@
 
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33pmO60BCd0hIr_v5xh34cJ_IWAHkF0pTaj855pzicmNoVx6W8CPK3MEhlp-irodPSE/pub?gid=1232979489&single=true&output=csv";
         const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
+        
+        // ▼ みちむさんのイベント用スプレッドシートURL ▼
+        const EVENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqAv0S9Shfo2bXUlTuP4jtkZ75D-wt4qCl-P_GOFYMu53peSOEwy7EhbUSUEeBi_T0jehNRIbgp91M/pub?output=csv";
 
         let spotsData = [];
         let localInsightsData = [];
+        let eventsData = [];
         let localMapInstance = null;
         let localMarkersGroup = null;
         let localMarkersMap = {};
@@ -719,7 +746,6 @@
         let markersClusterGroup = null; 
         let currentViewMode = 'grid'; 
 
-        // ▼ 【修正1】画像IDを抜き出す魔法のプログラムを、一番安定していた形に戻しました ▼
         function getDriveId(urlOrId) {
             if (!urlOrId) return '';
             const match = urlOrId.toString().match(/[-\w]{25,}/);
@@ -1036,6 +1062,78 @@
             }
         }
 
+        // ▼ カレンダー風イベント描画（画像なし・改行対応・リンク対応） ▼
+        function renderEvents() {
+            const container = document.getElementById('events-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (eventsData.length === 0) {
+                container.innerHTML = `
+                    <div class="w-full py-16 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                        <i class="fa-regular fa-calendar-xmark text-3xl text-gray-300 mb-3"></i>
+                        <div class="text-xs font-bold text-gray-400" data-i18n="event-empty">現在、予定されているイベントはありません。</div>
+                    </div>
+                `;
+                const el = container.querySelector('[data-i18n="event-empty"]');
+                if (el && i18nData['event-empty']['normal'][currentLang]) {
+                    el.innerHTML = i18nData['event-empty']['normal'][currentLang];
+                }
+                return;
+            }
+
+            eventsData.forEach(event => {
+                const lang = currentLang;
+                const title = (lang === 'en' && event.title_en) ? event.title_en : event.title;
+                const desc = (lang === 'en' && event.desc_en) ? event.desc_en : event.desc;
+                const dateStr = (lang === 'en' && event.date_str_en) ? event.date_str_en : event.date_str;
+                const btnText = i18nData['event-detail-btn']['normal'][lang];
+
+                const safeTitle = escapeHtml(title);
+                
+                // 【重要】改行を<br>に変換し、URLを自動リンク化する処理
+                let safeDesc = escapeHtml(desc).replace(/\n/g, '<br>');
+                const urlRegex = /(https?:\/\/[^\s<]+)/g;
+                safeDesc = safeDesc.replace(urlRegex, function(url) {
+                    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline" onclick="event.stopPropagation()">${url}</a>`;
+                });
+
+                const safeDate = escapeHtml(dateStr || '開催日未定');
+                const linkUrl = event.url ? escapeHtml(event.url) : '#';
+                
+                // URLがある場合はリンクとして機能させ、ない場合はただのカードにする
+                const isLink = event.url && event.url.trim() !== '';
+                const cardTag = isLink ? 'a' : 'div';
+                const card = document.createElement(cardTag);
+                
+                if (isLink) {
+                    card.href = linkUrl;
+                    card.target = "_blank";
+                    card.rel = "noopener noreferrer";
+                }
+                
+                // リンクがない場合は hover エフェクトを少し弱める
+                card.className = `event-card ${!isLink ? 'cursor-default hover:transform-none hover:shadow-[0_4px_15px_rgba(0,64,152,0.02)] hover:border-[var(--border-soft)]' : ''}`;
+
+                card.innerHTML = `
+                    <div class="event-date-box">
+                        <i class="fa-regular fa-calendar text-xl mb-1.5 opacity-70"></i>
+                        <span class="text-[12px] sm:text-[13px] font-bold leading-tight whitespace-pre-line">${safeDate.replace(/ /g, '<br>')}</span>
+                    </div>
+                    <div class="event-content-box">
+                        <h4 class="font-bold text-blue-900 text-[15px] sm:text-[17px] mb-2 leading-snug">${safeTitle}</h4>
+                        <p class="text-xs text-gray-500 leading-relaxed mb-3">${safeDesc}</p>
+                        ${isLink ? `
+                        <div class="mt-auto flex justify-end">
+                            <span class="text-[10px] font-bold text-blue-500 flex items-center gap-1 hover:text-blue-700 transition">${btnText} <i class="fa-solid fa-chevron-right text-[8px]"></i></span>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
         window.scrollToLocalCard = function(targetTitle) {
             const safeTarget = targetTitle.replace(/&quot;/g, '"');
             const container = document.getElementById('local-scroll-container');
@@ -1182,7 +1280,6 @@
             if (indicator) { indicator.innerHTML = ''; indicator.classList.add('hidden'); }
 
             const images = [];
-            // 写真が複数URLで入っていた場合の保険処理
             let mainImg = spot.image || '';
             if (mainImg && mainImg.includes(',')) mainImg = mainImg.split(',')[0].trim();
             if (mainImg) images.push(mainImg);
@@ -1198,11 +1295,9 @@
                 const imgUrl = getPrimaryImgUrl(driveId, imgRaw, 'w1600');
                 
                 const item = document.createElement('div');
-                // ▼ 影やぼかしをなくし、スッキリとした上品なグレー背景に統一 ▼
                 item.className = 'modal-gallery-item flex items-center justify-center bg-[#f8f9fa]';
                 
                 const imgEl = document.createElement('img');
-                // ▼ シンプルに写真全体を表示するだけにする ▼
                 imgEl.className = 'w-full h-full object-contain';
                 imgEl.src = imgUrl;
                 imgEl.dataset.fStep = '0';
@@ -1384,7 +1479,6 @@
                                     clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
                                 });
 
-                                // ▼ 【修正2】日本語の列名（スポット名など）でも読み込める「保険」を追加！ ▼
                                 if (!clean.title) clean.title = clean['スポット名'] || clean['タイトル'] || '';
                                 if (!clean.desc) clean.desc = clean['紹介文'] || clean['説明'] || '';
                                 if (!clean.image) clean.image = clean['写真'] || clean['画像'] || '';
@@ -1424,7 +1518,6 @@
                                         clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
                                     });
 
-                                    // ▼ 【修正3】さんぽログ側にも、日本語列名でも読み込める「保険」を追加！ ▼
                                     if (!clean.title) clean.title = clean['スポット名'] || clean['タイトル'] || '';
                                     if (!clean.desc) clean.desc = clean['紹介文（パパママ目線）'] || clean['紹介文'] || clean['説明'] || '';
                                     if (!clean.image) clean.image = clean['写真'] || clean['画像'] || '';
@@ -1454,6 +1547,50 @@
                 } else {
                     localInsightsData = [];
                     renderLocalInsights();
+                }
+
+                if (EVENT_CSV_URL && EVENT_CSV_URL.startsWith("http")) {
+                    Papa.parse(EVENT_CSV_URL, {
+                        download: true, header: true, skipEmptyLines: true,
+                        complete: function(results) {
+                            try {
+                                const today = new Date();
+                                today.setHours(0, 0, 0, 0); 
+
+                                eventsData = results.data.map(row => {
+                                    const clean = {};
+                                    Object.keys(row).forEach(k => {
+                                        let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
+                                        clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
+                                    });
+
+                                    if (!clean.title) clean.title = clean['イベント名'] || clean['タイトル'] || '';
+                                    if (!clean.desc) clean.desc = clean['説明'] || clean['紹介文'] || '';
+                                    if (!clean.date_str) clean.date_str = clean['表示用日付'] || clean['日付'] || '';
+                                    if (!clean.end_date) clean.end_date = clean['終了日'] || '';
+                                    if (!clean.url) clean.url = clean['リンク'] || clean['公式サイト'] || clean['url'] || '';
+
+                                    return clean;
+                                }).filter(e => e.title);
+
+                                eventsData = eventsData.filter(e => {
+                                    if (!e.end_date) return true; 
+                                    const endDate = new Date(e.end_date.replace(/-/g, '/')); 
+                                    if (isNaN(endDate.getTime())) return true; 
+                                    return endDate >= today; 
+                                });
+                                
+                                renderEvents();
+                            } catch (e) { console.warn('Event Data parse warning:', e); }
+                        },
+                        error: function(err) {
+                            eventsData = [];
+                            renderEvents(); 
+                        }
+                    });
+                } else {
+                    eventsData = [];
+                    renderEvents();
                 }
             }
 
