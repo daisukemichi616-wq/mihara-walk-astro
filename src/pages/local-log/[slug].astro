@@ -46,7 +46,6 @@ export async function getStaticPaths() {
       rawSpot[h] = values[index] ? values[index].trim() : '';
     });
 
-    // 💡【重要修正】日本語の列名を、プログラムが読める英語名に正確に翻訳（ひも付け）する
     const spot = {};
     spot.title = rawSpot['スポット名'] || rawSpot['タイトル'] || rawSpot['title'] || '';
     spot.desc = rawSpot['紹介文（パパママ目線）'] || rawSpot['紹介文'] || rawSpot['説明'] || rawSpot['desc'] || '';
@@ -65,12 +64,10 @@ export async function getStaticPaths() {
 
   // 記事の数だけページ（URL）を生成
   return spots.map(spot => {
-    // タイトルをURLのスラッグとして使用（記号はハイフンに置換）
     let slug = spot.title.replace(/[\/\\]/g, '-');
-    
     return {
       params: { slug: slug },
-      props: { spot }, // 各コンポーネントにデータを渡す
+      props: { spot }, 
     };
   });
 }
@@ -78,11 +75,9 @@ export async function getStaticPaths() {
 // 2. 各ページに渡されたデータを受け取る
 const { spot } = Astro.props;
 
-// 💡 画像URLの整形（複数画像への対応と、安定した高画質URLへの変換）
+// 画像URLの整形
 let rawImage = spot.image || '';
-// カンマ区切りで複数の写真が入っている場合は、最初の1枚目だけを取り出す
 let firstImage = rawImage.includes(',') ? rawImage.split(',')[0].trim() : rawImage.trim();
-
 let imageUrl = "https://placehold.co/600x800/e2e8f0/94a3b8?text=No+Image";
 let driveId = "";
 
@@ -90,7 +85,6 @@ if (firstImage) {
   const idMatch = firstImage.match(/[-\w]{25,}/);
   if (idMatch) {
     driveId = idMatch[0];
-    // 最も安定して表示されるGoogleの画像サーバーURLを使用
     imageUrl = `https://lh3.googleusercontent.com/d/${driveId}=w1200`;
   } else if (firstImage.startsWith('http')) {
     imageUrl = firstImage;
@@ -100,7 +94,6 @@ if (firstImage) {
 // Googleマップ用URLの準備
 let mapUrl = spot.map_url || '';
 if(!mapUrl && spot.lat_lng_raw) {
-   // 緯度経度がある場合のフォールバック
    mapUrl = `https://www.google.com/maps/search/?api=1&query=${spot.lat_lng_raw}`;
 }
 ---
@@ -111,11 +104,11 @@ if(!mapUrl && spot.lat_lng_raw) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
-  <title>{spot.title} | みはら親子さんぽログ</title>
+  <title>{spot.title} | みはらさんぽログ</title>
   <meta name="description" content={spot.desc}>
   
   <meta property="og:type" content="article">
-  <meta property="og:title" content={`${spot.title} | みはら親子さんぽログ`}>
+  <meta property="og:title" content={`${spot.title} | みはらさんぽログ`}>
   <meta property="og:description" content={spot.desc}>
   <meta property="og:image" content={imageUrl}>
   <meta name="twitter:card" content="summary_large_image">
@@ -134,7 +127,6 @@ if(!mapUrl && spot.lat_lng_raw) {
     .serif-custom { font-family: 'Noto Serif JP', serif; }
   </style>
 
-  <!-- 💡 画像がブロックされた時用の最強の予備プログラム（トップページと同じもの） -->
   <script is:inline>
     function handleFallbackErr(img, driveId) {
       if (!img || !driveId) return;
@@ -158,7 +150,7 @@ if(!mapUrl && spot.lat_lng_raw) {
 <body>
   
   <nav class="bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 py-3 sticky top-0 z-50 flex items-center justify-between shadow-sm">
-      <!-- 💡 戻るボタンのリンク先を /#local-insights に変更し、テキストを修正 -->
+      <!-- 💡 戻るボタンのリンク先をトップページの「みはらさんぽログ」セクションに指定 -->
       <a href="/#local-insights" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
         <i class="fa-solid fa-arrow-left"></i> さんぽログへ戻る
       </a>
@@ -167,7 +159,6 @@ if(!mapUrl && spot.lat_lng_raw) {
 
   <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-md pb-24">
     
-    <!-- 💡 画像の枠の縦幅を長くし(h-[60vh])、画像が切れない設定(object-contain)に変更 -->
     <div class="w-full h-[60vh] sm:h-[80vh] bg-[#f8f9fa] flex items-center justify-center relative">
         <img 
             src={imageUrl} 
@@ -184,14 +175,16 @@ if(!mapUrl && spot.lat_lng_raw) {
     <div class="px-6 sm:px-10 py-8 sm:py-12">
         
        <div class="flex items-center gap-2 mb-4">
-         <span class="text-[#004098] bg-blue-50 border border-blue-100 text-[10px] font-bold px-2 py-1 rounded">🎒 親子でお散歩</span>
+         <!-- 💡 タグのデザインをトップページと同じ青色にし、文字を「👟 みはらさんぽ」に変更 -->
+         <span class="text-white bg-[#004098]/90 text-[10px] font-bold px-3 py-1.5 rounded shadow-sm">
+           {spot.tag || '👟 みはらさんぽ'}
+         </span>
        </div>
        
        <h1 class="text-2xl sm:text-3xl font-bold text-[#004098] serif-custom mb-8 leading-relaxed border-b-2 border-blue-50 pb-6">
            {spot.title}
        </h1>
        
-       <!-- 💡 紹介文のURLを自動でリンクにするスクリプト -->
        <div id="desc-container" class="text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12">
          {spot.desc}
        </div>
