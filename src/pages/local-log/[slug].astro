@@ -39,10 +39,25 @@ export async function getStaticPaths() {
   for(let i=1; i<rows.length; i++) {
     const values = rows[i];
     if(!values || values.length <= 1) continue;
-    const spot = {};
+    
+    // 一旦生のデータを取得
+    const rawSpot = {};
     header.forEach((h, index) => {
-      spot[h] = values[index] ? values[index].trim() : '';
+      rawSpot[h] = values[index] ? values[index].trim() : '';
     });
+
+    // 💡【重要修正】日本語の列名を、プログラムが読める英語名に正確に翻訳（ひも付け）する
+    const spot = {};
+    spot.title = rawSpot['スポット名'] || rawSpot['タイトル'] || rawSpot['title'] || '';
+    spot.desc = rawSpot['紹介文（パパママ目線）'] || rawSpot['紹介文'] || rawSpot['説明'] || rawSpot['desc'] || '';
+    spot.image = rawSpot['写真'] || rawSpot['画像'] || rawSpot['image'] || '';
+    spot.area = rawSpot['エリア'] || rawSpot['area'] || '';
+    spot.tag = rawSpot['タグ'] || rawSpot['tag'] || '';
+    spot.lat_lng_raw = rawSpot['lat_lng_raw'] || rawSpot['緯度経度'] || '';
+    spot.map_url = rawSpot['googleマップのurl'] || rawSpot['googleマップのurl(共有リンク)'] || rawSpot['地図url'] || rawSpot['map_url'] || '';
+    spot.author = rawSpot['ニックネーム'] || rawSpot['撮影者'] || rawSpot['author'] || rawSpot['nickname'] || '';
+    spot.sns = rawSpot['sns'] || rawSpot['snsurl'] || rawSpot['url'] || rawSpot['link'] || '';
+
     if(spot.title) {
       spots.push(spot);
     }
@@ -63,12 +78,12 @@ export async function getStaticPaths() {
 // 2. 各ページに渡されたデータを受け取る
 const { spot } = Astro.props;
 
-// 💡 【修正ポイント】画像URLの整形（複数画像への対応と、安定した高画質URLへの変換）
+// 💡 画像URLの整形（複数画像への対応と、安定した高画質URLへの変換）
 let rawImage = spot.image || '';
 // カンマ区切りで複数の写真が入っている場合は、最初の1枚目だけを取り出す
 let firstImage = rawImage.includes(',') ? rawImage.split(',')[0].trim() : rawImage.trim();
 
-let imageUrl = "https://placehold.co/600x400/e2e8f0/94a3b8?text=No+Image";
+let imageUrl = "https://placehold.co/600x800/e2e8f0/94a3b8?text=No+Image";
 let driveId = "";
 
 if (firstImage) {
@@ -83,7 +98,7 @@ if (firstImage) {
 }
 
 // Googleマップ用URLの準備
-let mapUrl = spot.map_url || spot['googleマップのurl'] || spot['地図url'] || '';
+let mapUrl = spot.map_url || '';
 if(!mapUrl && spot.lat_lng_raw) {
    // 緯度経度がある場合のフォールバック
    mapUrl = `https://www.google.com/maps/search/?api=1&query=${spot.lat_lng_raw}`;
@@ -119,7 +134,7 @@ if(!mapUrl && spot.lat_lng_raw) {
     .serif-custom { font-family: 'Noto Serif JP', serif; }
   </style>
 
-  <!-- 画像がブロックされた時用の予備プログラム -->
+  <!-- 💡 画像がブロックされた時用の最強の予備プログラム（トップページと同じもの） -->
   <script is:inline>
     function handleFallbackErr(img, driveId) {
       if (!img || !driveId) return;
@@ -130,8 +145,12 @@ if(!mapUrl && spot.lat_lng_raw) {
       } else if (step === 1) {
         img.dataset.fStep = '2';
         img.src = 'https://drive.google.com/thumbnail?id=' + driveId + '&sz=w1000';
+      } else if (step === 2) {
+        img.dataset.fStep = '3';
+        img.src = 'https://wsrv.nl/?url=https://drive.google.com/uc?export=view%26id=' + driveId;
       } else {
         img.onerror = null;
+        img.src = 'https://placehold.co/600x800/e2e8f0/94a3b8?text=Image+Blocked';
       }
     }
   </script>
@@ -148,7 +167,7 @@ if(!mapUrl && spot.lat_lng_raw) {
   <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-md pb-24">
     
     <div class="w-full aspect-[4/3] sm:aspect-[16/9] bg-gray-100 overflow-hidden relative">
-        <!-- 💡 読み込み失敗時のバックアップ機能（onerror）を搭載 -->
+        <!-- 💡 onerrorイベントで予備の表示方法を試す -->
         <img 
             src={imageUrl} 
             alt={spot.title} 
@@ -171,18 +190,34 @@ if(!mapUrl && spot.lat_lng_raw) {
            {spot.title}
        </h1>
        
-       <div class="text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12">
+       <!-- 💡 紹介文のURLを自動でリンクにするスクリプト -->
+       <div id="desc-container" class="text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12">
          {spot.desc}
        </div>
+       <script is:inline>
+         const descEl = document.getElementById('desc-container');
+         if (descEl) {
+           const urlRegex = /(https?:\/\/[^\s<]+)/g;
+           descEl.innerHTML = descEl.innerHTML.replace(urlRegex, function(url) {
+             return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #004098; text-decoration: underline;">${url}</a>`;
+           });
+         }
+       </script>
 
        {mapUrl && (
          <a href={mapUrl} target="_blank" rel="noopener noreferrer" class="block w-full text-center bg-blue-50 text-[#004098] border border-[#004098] font-bold py-4 rounded-lg hover:bg-[#004098] hover:text-white transition-all shadow-sm">
            <i class="fa-solid fa-map-location-dot mr-2"></i> この場所をGoogleマップで見る
          </a>
        )}
+
+       {spot.sns && (
+         <a href={spot.sns} target="_blank" rel="noopener noreferrer" class="block w-full mt-4 text-center text-white font-bold py-4 rounded-lg shadow-md transition-transform hover:-translate-y-1" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
+           <i class="fa-brands fa-instagram text-xl mr-2 align-middle"></i> Instagramでこの投稿を見る
+         </a>
+       )}
        
        <div class="mt-16 pt-8 border-t border-dashed border-gray-200 flex justify-between items-center text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">
-         <span>Photo by {spot.author || spot.nickname || 'みはらさんぽ'}</span>
+         <span>Photo by {spot.author || 'みはらさんぽ'}</span>
          <span>Share the Charm</span>
        </div>
        
