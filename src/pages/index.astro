@@ -179,13 +179,12 @@
         .horizontal-scroll-container::-webkit-scrollbar { display: none; }
         .horizontal-scroll-container.active { cursor: grabbing; }
         
-        /* ▼ ここが一番安定していたカードのスタイルです ▼ */
         .local-card-horizontal {
             flex: 0 0 85%; scroll-snap-align: center; display: flex; flex-direction: column; background: #fff;
             border: 2px solid transparent; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.03);
             cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; user-select: none;
         }
-        .local-card-horizontal:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,64,152,0.08); }
+        .local-card-horizontal:hover, .local-card-horizontal:active { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,64,152,0.08); }
         .horizontal-scroll-container.active .local-card-horizontal { transition: none; transform: none; pointer-events: none; }
         .local-card-horizontal.active-card { border-color: var(--palette-blue); box-shadow: 0 12px 30px rgba(0,64,152,0.15); }
         @media (min-width: 640px) {
@@ -887,6 +886,7 @@
             entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in-view'); obs.unobserve(e.target); }});
         }, { threshold: 0.25 });
 
+        // PHOTO MAP（ぜんぶなどのタブ）は、一旦今まで通りモーダルを開く設定のままにしています
         window.loadMoreItems = function() {
             const grid = document.getElementById('gallery-grid');
             const loadMoreArea = document.getElementById('load-more-area');
@@ -989,12 +989,15 @@
                 
                 const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][lang] : (lang==='en'?'MIHARA':'三原');
 
-                const card = document.createElement('div');
+                const card = document.createElement('div'); 
                 card.className = 'local-card-horizontal';
                 card.dataset.title = spot.title; 
                 
                 card.onclick = (e) => {
-                    if (window.isDragged) { e.preventDefault(); return; }
+                    if (window.isDragged) { 
+                        e.preventDefault(); 
+                        return; 
+                    }
                     const modalSpotData = { ...spot, title: spot.title, desc: spot.desc, title_en: spot.title_en, desc_en: spot.desc_en };
                     window.openModal(modalSpotData, 'locallog');
                 }; 
@@ -1145,6 +1148,7 @@
             }
         };
 
+        // ▼ スワイプとクリックの喧嘩を防ぐための、スマホ対応タッチプログラムを追加 ▼
         window.isDown = false;
         window.startX = 0;
         window.scrollLeft = 0;
@@ -1161,21 +1165,16 @@
                     window.startX = e.pageX - scrollContainer.offsetLeft;
                     window.scrollLeft = scrollContainer.scrollLeft;
                 });
-
                 scrollContainer.addEventListener('mouseleave', () => {
                     window.isDown = false;
                     scrollContainer.classList.remove('active');
                     scrollContainer.style.scrollSnapType = 'x mandatory';
                 });
-
                 scrollContainer.addEventListener('mouseup', () => {
                     window.isDown = false;
                     scrollContainer.classList.remove('active');
                     scrollContainer.style.scrollSnapType = 'x mandatory';
-                    // クリックイベントが先に発火するように少し遅らせてフラグを戻す
-                    setTimeout(() => { window.isDragged = false; }, 50);
                 });
-
                 scrollContainer.addEventListener('mousemove', (e) => {
                     if (!window.isDown) return;
                     e.preventDefault();
@@ -1187,25 +1186,11 @@
             }
         });
 
+        // PHOTO MAP用のURL更新
         function updateUrlParams(spotTitle) {
             if (!history.pushState) return;
             const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?spot=' + encodeURIComponent(spotTitle) + '&lang=' + currentLang;
             window.history.pushState({path: newUrl}, '', newUrl);
-            
-            let spot = spotsData.find(s => s.title === spotTitle);
-            if (!spot) spot = localInsightsData.find(s => s.title === spotTitle);
-
-            if(spot) {
-                document.title = `${getLocalizedSpotField(spot, 'title')} | MIHARA REDISCOVER`;
-                const descMeta = document.querySelector('meta[name="description"]');
-                if(descMeta) {
-                    let descText = stripHtml(getLocalizedSpotField(spot, 'desc')).replace(/\n/g, '');
-                    if(descText.length > 100) descText = descText.substring(0, 100) + '...';
-                    descMeta.setAttribute('content', descText);
-                }
-            }
-            const linkCanonical = document.getElementById('canonical-tag');
-            if (linkCanonical) linkCanonical.setAttribute('href', newUrl);
         }
 
         function clearUrlParams() {
@@ -1215,8 +1200,6 @@
             document.title = currentLang === 'en' ? "Mihara Walk PHOTO MAP" : "三原市まち歩き - PHOTO MAP | 三原市の魅力を再発見するプロジェクト";
             const descMeta = document.querySelector('meta[name="description"]');
             if(descMeta) descMeta.setAttribute('content', currentLang === 'en' ? "A photo map project to rediscover the charm of Mihara, Hiroshima." : "広島県三原市の魅力を再発見するフォトマッププロジェクト。");
-            const linkCanonical = document.getElementById('canonical-tag');
-            if (linkCanonical) linkCanonical.setAttribute('href', window.location.protocol + "//" + window.location.host + window.location.pathname);
         }
 
         function checkAndOpenModalFromUrl() {
@@ -1226,11 +1209,6 @@
                 let target = spotsData.find(s => s.title === targetSpotTitle);
                 if (target) {
                     window.openModal(target, 'photomap');
-                    return;
-                }
-                target = localInsightsData.find(s => s.title === targetSpotTitle);
-                if (target) {
-                    window.openModal(target, 'locallog');
                 }
             }
         }
@@ -1343,22 +1321,14 @@
             }
 
             if (snsLink && snsLink.startsWith('http')) {
-                if (type === 'locallog') {
-                    if (richBtn) {
-                        richBtn.classList.remove('hidden');
-                        richBtn.classList.add('flex');
-                        richBtn.href = snsLink;
-                    }
-                } else {
-                    if (textLink) {
-                        textLink.classList.remove('hidden');
-                        textLink.classList.add('block');
-                        textLink.href = snsLink; 
-                        textLink.textContent = 'INSTAGRAM LINK';
-                        textLink.style.color = '#1a1a1a'; 
-                        textLink.style.borderColor = '#1a1a1a'; 
-                        textLink.style.pointerEvents = 'auto';
-                    }
+                if (textLink) {
+                    textLink.classList.remove('hidden');
+                    textLink.classList.add('block');
+                    textLink.href = snsLink; 
+                    textLink.textContent = 'INSTAGRAM LINK';
+                    textLink.style.color = '#1a1a1a'; 
+                    textLink.style.borderColor = '#1a1a1a'; 
+                    textLink.style.pointerEvents = 'auto';
                 }
             } else {
                 if (type === 'photomap') {
