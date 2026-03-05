@@ -1,303 +1,159 @@
 ---
-
-// ここからAstroの裏側（パソコン側）で動くプログラム
-
-
-
+// 1. Astroのビルド時に実行される処理（サーバーサイド）
 export async function getStaticPaths() {
-
-  // 1. スプレッドシート（CSV）のデータを取得
-
+  // スプレッドシート（CSV形式で公開したもの）のURL
   const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
-
+  
   const response = await fetch(LOCAL_CSV_URL);
-
   const csvText = await response.text();
 
-
-
-  // 2. CSVを読み解く機能
-
+  // CSVをパース（解析）する関数
   function parseCSV(text) {
-
     const result = [];
-
     let row = [];
-
     let current = '';
-
     let inQuotes = false;
-
     for (let i = 0; i < text.length; i++) {
-
       const char = text[i];
-
       if (char === '"') {
-
         if (inQuotes && text[i + 1] === '"') { current += '"'; i++; }
-
         else { inQuotes = !inQuotes; }
-
       } else if (char === ',' && !inQuotes) {
-
         row.push(current); current = '';
-
       } else if ((char === '\n' || char === '\r') && !inQuotes) {
-
         if (char === '\r' && text[i + 1] === '\n') { i++; }
-
         row.push(current); result.push(row); row = []; current = '';
-
       } else { current += char; }
-
     }
-
     if (current !== '' || row.length > 0) { row.push(current); result.push(row); }
-
     return result;
-
   }
-
-
 
   const rows = parseCSV(csvText);
-
   if (rows.length < 2) return [];
 
-
-
+  // ヘッダー行を整形（空白削除・小文字化）
   const header = rows[0].map(h => h.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase());
-
- 
-
+  
   const spots = [];
-
   for(let i=1; i<rows.length; i++) {
-
     const values = rows[i];
-
     if(!values || values.length <= 1) continue;
-
     const spot = {};
-
     header.forEach((h, index) => {
-
       spot[h] = values[index] ? values[index].trim() : '';
-
     });
-
     if(spot.title) {
-
       spots.push(spot);
-
     }
-
   }
 
-
-
-  // 3. 記事の数だけページを自動生成する指令を出す
-
+  // 記事の数だけページ（URL）を生成
   return spots.map(spot => {
-
-    // スラッグ（URLの末尾）を決定（今回はタイトルをそのままURLにします）
-
+    // タイトルをURLのスラッグとして使用（記号はハイフンに置換）
     let slug = spot.title.replace(/[\/\\]/g, '-');
-
-   
-
+    
     return {
-
       params: { slug: slug },
-
-      props: { spot }, // 各ページにスプレッドシートのデータを渡す
-
+      props: { spot }, // 各コンポーネントにデータを渡す
     };
-
   });
-
 }
 
-
-
-// 4. ここから下は、各ページで受け取ったデータ（spot）の展開準備
-
+// 2. 各ページに渡されたデータを受け取る
 const { spot } = Astro.props;
 
-
-
-// 画像のURLを綺麗なプレビュー形式に変換
-
+// 画像URLの整形（Googleドライブのリンクをプレビュー用に変換）
 let imageUrl = spot.image || "https://placehold.co/600x400?text=No+Image";
-
 if (imageUrl.includes('drive.google.com')) {
-
   const idMatch = imageUrl.match(/[-\w]{25,}/);
-
   if (idMatch) {
-
     imageUrl = `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w1000`;
-
   }
-
 }
 
-
-
-// マップのURLを準備
-
+// Googleマップ用URLの準備
 let mapUrl = spot.map_url || spot['googleマップのurl'] || spot['地図url'] || '';
-
 if(!mapUrl && spot.lat_lng_raw) {
-
-   mapUrl = `https://google.com/maps?q=${spot.lat_lng_raw}`;
-
+   // 緯度経度がある場合のフォールバック
+   mapUrl = `https://www.google.com/maps/search/?api=1&query=${spot.lat_lng_raw}`;
 }
-
 ---
 
-
-
 <!DOCTYPE html>
-
 <html lang="ja">
-
 <head>
-
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
- 
-
+  
   <title>{spot.title} | みはら親子さんぽログ</title>
-
   <meta name="description" content={spot.desc}>
-
- 
-
+  
   <meta property="og:type" content="article">
-
   <meta property="og:title" content={`${spot.title} | みはら親子さんぽログ`}>
-
   <meta property="og:description" content={spot.desc}>
-
   <meta property="og:image" content={imageUrl}>
-
   <meta name="twitter:card" content="summary_large_image">
 
-
-
   <script is:inline src="https://cdn.tailwindcss.com"></script>
-
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
- 
-
+  
   <style>
-
-    body { font-family: 'Zen Maru Gothic', sans-serif; color: #1a1a1a; background-color: #f1f5f9; }
-
+    body { 
+      font-family: 'Zen Maru Gothic', sans-serif; 
+      color: #1a1a1a; 
+      background-color: #f1f5f9; 
+      word-break: break-all;
+    }
     .serif-custom { font-family: 'Noto Serif JP', serif; }
-
   </style>
-
 </head>
-
 <body>
-
- 
-
+  
   <nav class="bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 py-3 sticky top-0 z-50 flex items-center justify-between shadow-sm">
-
-     <a href="/" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
-
-       <i class="fa-solid fa-arrow-left"></i> マップへ戻る
-
-     </a>
-
-     <div class="text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest">MIHARA REDISCOVER</div>
-
+      <a href="/" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
+        <i class="fa-solid fa-arrow-left"></i> マップへ戻る
+      </a>
+      <div class="text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">Mihara Rediscover</div>
   </nav>
 
-
-
   <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-md pb-24">
-
-   
-
+    
     <div class="w-full aspect-[4/3] sm:aspect-[16/9] bg-gray-100 overflow-hidden relative">
-
         <img src={imageUrl} alt={spot.title} class="w-full h-full object-cover" />
-
         <div class="absolute top-4 left-4 bg-[#004098]/90 text-white text-[10px] font-bold px-3 py-1.5 rounded flex items-center gap-1.5 shadow-lg">
-
-            <i class="fa-solid fa-location-dot"></i> {spot.area || '三原'}
-
+            <i class="fa-solid fa-location-dot"></i> {spot.area || '三原市'}
         </div>
-
     </div>
-
-   
-
+    
     <div class="px-6 sm:px-10 py-8 sm:py-12">
-
-       
-
+        
        <div class="flex items-center gap-2 mb-4">
-
          <span class="text-[#004098] bg-blue-50 border border-blue-100 text-[10px] font-bold px-2 py-1 rounded">🎒 親子でお散歩</span>
-
        </div>
-
        
-
        <h1 class="text-2xl sm:text-3xl font-bold text-[#004098] serif-custom mb-8 leading-relaxed border-b-2 border-blue-50 pb-6">
-
            {spot.title}
-
        </h1>
-
        
-
        <div class="text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12">
-
          {spot.desc}
-
        </div>
-
-
 
        {mapUrl && (
-
          <a href={mapUrl} target="_blank" rel="noopener noreferrer" class="block w-full text-center bg-blue-50 text-[#004098] border border-[#004098] font-bold py-4 rounded-lg hover:bg-[#004098] hover:text-white transition-all shadow-sm">
-
            <i class="fa-solid fa-map-location-dot mr-2"></i> この場所をGoogleマップで見る
-
          </a>
-
        )}
-
        
-
        <div class="mt-16 pt-8 border-t border-dashed border-gray-200 flex justify-between items-center text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">
-
-         <span>PHOTO BY {spot.author || spot.nickname || 'みはらさんぽ'}</span>
-
-         <span>SHARE THE CHARM</span>
-
+         <span>Photo by {spot.author || spot.nickname || 'みはらさんぽ'}</span>
+         <span>Share the Charm</span>
        </div>
-
        
-
     </div>
-
   </main>
 
-
-
 </body>
-
 </html>
