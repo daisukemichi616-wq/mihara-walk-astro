@@ -158,24 +158,25 @@ if(!mapUrl && spot.lat_lng_raw) {
 <body>
   
   <nav class="bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 py-3 sticky top-0 z-50 flex items-center justify-between shadow-sm">
-      <a href="/" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
-        <i class="fa-solid fa-arrow-left"></i> マップへ戻る
+      <!-- 💡 戻るボタンのリンク先を /#local-insights に変更し、テキストを修正 -->
+      <a href="/#local-insights" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
+        <i class="fa-solid fa-arrow-left"></i> さんぽログへ戻る
       </a>
       <div class="text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">Mihara Rediscover</div>
   </nav>
 
   <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-md pb-24">
     
-    <div class="w-full aspect-[4/3] sm:aspect-[16/9] bg-gray-100 overflow-hidden relative">
-        <!-- 💡 onerrorイベントで予備の表示方法を試す -->
+    <!-- 💡 画像の枠の縦幅を長くし(h-[60vh])、画像が切れない設定(object-contain)に変更 -->
+    <div class="w-full h-[60vh] sm:h-[80vh] bg-[#f8f9fa] flex items-center justify-center relative">
         <img 
             src={imageUrl} 
             alt={spot.title} 
-            class="w-full h-full object-cover" 
+            class="w-full h-full object-contain" 
             data-f-step="0" 
             onerror={`handleFallbackErr(this, '${driveId}')`} 
         />
-        <div class="absolute top-4 left-4 bg-[#004098]/90 text-white text-[10px] font-bold px-3 py-1.5 rounded flex items-center gap-1.5 shadow-lg">
+        <div class="absolute top-4 left-4 bg-[#004098]/90 text-white text-[10px] font-bold px-3 py-1.5 rounded flex items-center gap-1.5 shadow-lg z-10">
             <i class="fa-solid fa-location-dot"></i> {spot.area || '三原市'}
         </div>
     </div>
