@@ -989,18 +989,13 @@
                 
                 const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][lang] : (lang==='en'?'MIHARA':'三原');
 
-                const card = document.createElement('div'); 
-                card.className = 'local-card-horizontal';
+                // ▼ aタグに変更し、みちむさんが作った個別ページへ直接リンクさせます ▼
+                const slug = spot.title.replace(/[\/\\]/g, '-');
+                const card = document.createElement('a'); 
+                card.href = `/local-log/${encodeURIComponent(slug)}`;
+                card.className = 'local-card-horizontal block'; 
                 card.dataset.title = spot.title; 
-                
-                card.onclick = (e) => {
-                    if (window.isDragged) { 
-                        e.preventDefault(); 
-                        return; 
-                    }
-                    const modalSpotData = { ...spot, title: spot.title, desc: spot.desc, title_en: spot.title_en, desc_en: spot.desc_en };
-                    window.openModal(modalSpotData, 'locallog');
-                }; 
+                // ※タップを邪魔していた onclick の処理は削除しました
 
                 const safeAlt = escapeHtml(title);
                 const safeDesc = stripHtml(desc);
@@ -1148,43 +1143,8 @@
             }
         };
 
-        // ▼ スワイプとクリックの喧嘩を防ぐための、スマホ対応タッチプログラムを追加 ▼
-        window.isDown = false;
-        window.startX = 0;
-        window.scrollLeft = 0;
-        window.isDragged = false;
-        
-        window.addEventListener('DOMContentLoaded', () => {
-            const scrollContainer = document.getElementById('local-scroll-container');
-            if (scrollContainer) {
-                scrollContainer.addEventListener('mousedown', (e) => {
-                    window.isDown = true;
-                    window.isDragged = false;
-                    scrollContainer.classList.add('active');
-                    scrollContainer.style.scrollSnapType = 'none'; 
-                    window.startX = e.pageX - scrollContainer.offsetLeft;
-                    window.scrollLeft = scrollContainer.scrollLeft;
-                });
-                scrollContainer.addEventListener('mouseleave', () => {
-                    window.isDown = false;
-                    scrollContainer.classList.remove('active');
-                    scrollContainer.style.scrollSnapType = 'x mandatory';
-                });
-                scrollContainer.addEventListener('mouseup', () => {
-                    window.isDown = false;
-                    scrollContainer.classList.remove('active');
-                    scrollContainer.style.scrollSnapType = 'x mandatory';
-                });
-                scrollContainer.addEventListener('mousemove', (e) => {
-                    if (!window.isDown) return;
-                    e.preventDefault();
-                    const x = e.pageX - scrollContainer.offsetLeft;
-                    const walk = (x - window.startX) * 1.5; 
-                    if (Math.abs(walk) > 5) window.isDragged = true; 
-                    scrollContainer.scrollLeft = window.scrollLeft - walk;
-                });
-            }
-        });
+        // ▼ スマホでのタップを邪魔していたドラッグ操作用のプログラムを完全に削除しました ▼
+        // これにより、スマホ標準のスワイプ機能が働き、タップも確実に反応するようになります。
 
         // PHOTO MAP用のURL更新
         function updateUrlParams(spotTitle) {
