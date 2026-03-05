@@ -1,13 +1,10 @@
 ---
-// ここからAstroの裏側（パソコン側）で動くプログラム
-
 export async function getStaticPaths() {
-  // 1. スプレッドシート（CSV）のデータを取得
+  // 1. 両方のスプレッドシート（CSV）のURLを定義
+  const PHOTO_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33pmO60BCd0hIr_v5xh34cJ_IWAHkF0pTaj855pzicmNoVx6W8CPK3MEhlp-irodPSE/pub?gid=1232979489&single=true&output=csv";
   const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
-  const response = await fetch(LOCAL_CSV_URL);
-  const csvText = await response.text();
 
-  // 2. CSVを読み解く機能
+  // CSVを読み解く関数
   function parseCSV(text) {
     const result = [];
     let row = [];
@@ -29,41 +26,81 @@ export async function getStaticPaths() {
     return result;
   }
 
-  const rows = parseCSV(csvText);
-  if (rows.length < 2) return [];
+  // データを取得して整形する関数
+  async function fetchSpots(url, type) {
+    try {
+      const response = await fetch(url);
+      const csvText = await response.text();
+      const rows = parseCSV(csvText);
+      if (rows.length < 2) return [];
 
-  const header = rows[0].map(h => h.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase());
-  
-  const spots = [];
-  for(let i=1; i<rows.length; i++) {
-    const values = rows[i];
-    if(!values || values.length <= 1) continue;
-    const spot = {};
-    header.forEach((h, index) => {
-      spot[h] = values[index] ? values[index].trim() : '';
-    });
-    if(spot.title) {
-      spots.push(spot);
+      const header = rows[0].map(h => h.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase());
+      const spots = [];
+      
+      for(let i=1; i<rows.length; i++) {
+        const values = rows[i];
+        if(!values || values.length <= 1) continue;
+        const spot = {};
+        header.forEach((h, index) => {
+          spot[h] = values[index] ? values[index].trim() : '';
+        });
+
+        // 異なるスプレッドシート間の項目名（表記揺れ）を統一する
+        spot.title = spot['タイトル'] || spot['スポット名'] || spot.title || '';
+        spot.desc = spot['紹介文'] || spot['紹介文（パパママ目線）'] || spot['説明'] || spot.desc || '';
+        spot.image = spot['画像'] || spot['写真'] || spot.image || '';
+        spot.area = spot['エリア'] || spot.area || '';
+        spot.map_url = spot['googleマップのurl'] || spot['googleマップのurl(共有リンク)'] || spot['地図url'] || spot.map_url || '';
+        spot.lat_lng_raw = spot['lat_lng_raw'] || spot['座標'] || '';
+        spot.author = spot['撮影者名'] || spot['ニックネーム'] || spot.author || '';
+        spot.type = type; // どちらのデータか判別するための目印
+
+        if(spot.title) {
+          spots.push(spot);
+        }
+      }
+      return spots;
+    } catch(err) {
+      console.error(`Error fetching ${type} data:`, err);
+      return [];
     }
   }
 
+  // 2. 両方のデータを取得
+  const photoSpots = await fetchSpots(PHOTO_CSV_URL, 'photomap');
+  const localSpots = await fetchSpots(LOCAL_CSV_URL, 'locallog');
+
+  // データを合体させる
+  const allSpots = [...photoSpots, ...localSpots];
+
+  // もし同じタイトルのスポットが両方にあった場合のエラーを防ぐため、一意にまとめる
+  const uniqueSpotsMap = new Map();
+  allSpots.forEach(spot => {
+    if (!uniqueSpotsMap.has(spot.title)) {
+      uniqueSpotsMap.set(spot.title, spot);
+    }
+  });
+
   // 3. 記事の数だけページを自動生成する指令を出す
-  return spots.map(spot => {
-    // スラッグ（URLの末尾）を決定（今回はタイトルをそのままURLにします）
+  return Array.from(uniqueSpotsMap.values()).map(spot => {
     let slug = spot.title.replace(/[\/\\]/g, '-'); 
-    
     return {
       params: { slug: slug },
-      props: { spot }, // 各ページにスプレッドシートのデータを渡す
+      props: { spot },
     };
   });
 }
 
-// 4. ここから下は、各ページで受け取ったデータ（spot）の展開準備
+// 4. 各ページで受け取ったデータ（spot）の展開準備
 const { spot } = Astro.props;
 
-// 画像のURLを綺麗なプレビュー形式に変換
-let imageUrl = spot.image || "https://placehold.co/600x400?text=No+Image";
+// 画像のURLを綺麗なプレビュー形式に変換（複数画像がある場合はカンマ区切りの1枚目を使用）
+let rawImage = spot.image || "";
+if (rawImage.includes(',')) {
+    rawImage = rawImage.split(',')[0].trim();
+}
+let imageUrl = rawImage || "https://placehold.co/600x400?text=No+Image";
+
 if (imageUrl.includes('drive.google.com')) {
   const idMatch = imageUrl.match(/[-\w]{25,}/);
   if (idMatch) {
@@ -72,10 +109,14 @@ if (imageUrl.includes('drive.google.com')) {
 }
 
 // マップのURLを準備
-let mapUrl = spot.map_url || spot['googleマップのurl'] || spot['地図url'] || '';
+let mapUrl = spot.map_url;
 if(!mapUrl && spot.lat_lng_raw) {
    mapUrl = `https://google.com/maps?q=${spot.lat_lng_raw}`;
 }
+
+// データ元によってタグの表示を変える
+const isLocalLog = spot.type === 'locallog';
+const tagText = isLocalLog ? "🎒 親子でお散歩" : "📸 PHOTO MAP";
 ---
 
 <!DOCTYPE html>
@@ -84,11 +125,11 @@ if(!mapUrl && spot.lat_lng_raw) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
-  <title>{spot.title} | みはら親子さんぽログ</title>
+  <title>{spot.title} | MIHARA REDISCOVER</title>
   <meta name="description" content={spot.desc}>
   
   <meta property="og:type" content="article">
-  <meta property="og:title" content={`${spot.title} | みはら親子さんぽログ`}>
+  <meta property="og:title" content={`${spot.title} | MIHARA REDISCOVER`}>
   <meta property="og:description" content={spot.desc}>
   <meta property="og:image" content={imageUrl}>
   <meta name="twitter:card" content="summary_large_image">
@@ -123,7 +164,7 @@ if(!mapUrl && spot.lat_lng_raw) {
     <div class="px-6 sm:px-10 py-8 sm:py-12">
        
        <div class="flex items-center gap-2 mb-4">
-         <span class="text-[#004098] bg-blue-50 border border-blue-100 text-[10px] font-bold px-2 py-1 rounded">🎒 親子でお散歩</span>
+         <span class="text-[#004098] bg-blue-50 border border-blue-100 text-[10px] font-bold px-2 py-1 rounded">{tagText}</span>
        </div>
        
        <h1 class="text-2xl sm:text-3xl font-bold text-[#004098] serif-custom mb-8 leading-relaxed border-b-2 border-blue-50 pb-6">
@@ -141,7 +182,7 @@ if(!mapUrl && spot.lat_lng_raw) {
        )}
        
        <div class="mt-16 pt-8 border-t border-dashed border-gray-200 flex justify-between items-center text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">
-         <span>PHOTO BY {spot.author || spot.nickname || 'みはらさんぽ'}</span>
+         <span>PHOTO BY {spot.author || 'みはらさんぽ'}</span>
          <span>SHARE THE CHARM</span>
        </div>
        

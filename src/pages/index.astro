@@ -217,29 +217,7 @@
         .footer-main { text-align: center; background-color: #fff; border-top: 1px solid var(--border-soft); padding: 60px 20px 60px 20px; transition: background-color 0.5s ease; }
         .footer-copy { font-size: 9px; font-weight: 700 !important; color: #9ca3af; letter-spacing: 0.3em; margin-bottom: 12px; text-transform: uppercase; }
         .footer-produced { font-size: 8px; font-weight: 500 !important; color: #cbd5e1; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
-        .modal-wrap { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; background: white; overflow-y: auto; transition: background-color 0.5s ease; }
-        .modal-wrap.active { display: block; }
-        .modal-close { position: fixed; top: 15px; right: 15px; background: white; border: 1px solid #eee; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 11000; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s, background-color 0.5s ease; }
-        .modal-close:hover { transform: rotate(90deg); }
-        .share-btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
-        .share-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 16px; transition: all 0.3s; text-decoration: none; border: 1px solid transparent; }
-        .share-btn:hover { transform: translateY(-2px); color: white; }
-        .share-btn.x-twitter:hover { background: #000; color: #fff !important; }
-        #copy-success-msg { font-size: 10px; font-weight: bold; color: var(--palette-blue); opacity: 0; transition: opacity 0.3s ease; height: 14px; }
-        #copy-success-msg.show { opacity: 1; }
         
-        /* モーダル内のHTMLコンテンツ用スタイル */
-        #modal-desc img { max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px; margin-bottom: 10px; }
-        #modal-desc a { color: var(--palette-blue); text-decoration: underline; word-break: break-all; }
-
-        /* モーダルギャラリー用スタイル */
-        .modal-gallery { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; }
-        .modal-gallery::-webkit-scrollbar { display: none; }
-        .modal-gallery-item { flex: 0 0 100%; scroll-snap-align: start; position: relative; }
-        .modal-gallery-indicator { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
-        .gallery-dot { width: 6px; height: 6px; border-radius: 50%; background: #e2e8f0; transition: background 0.3s; }
-        .gallery-dot.active { background: var(--palette-blue); }
-
         /* イベントカード用スタイル */
         .event-card { display: flex; flex-direction: column; background: white; border: 1px solid var(--border-soft); border-radius: 12px; padding: 20px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,64,152,0.02); text-decoration: none; color: inherit; gap: 15px; }
         @media (min-width: 640px) { .event-card { flex-direction: row; align-items: center; } }
@@ -451,53 +429,6 @@
         <p class="footer-produced">PRODUCED BY MICHIM | PHOTOS BY MIHARA LOVERS</p>
     </footer>
 
-    <div id="photo-modal" class="modal-wrap">
-        <button id="modal-close-btn" class="modal-close"><i class="fa-solid fa-xmark"></i></button>
-        <div id="modal-content-area" class="max-w-[600px] mx-auto pb-24 bg-white min-h-screen sm:min-h-0">
-            
-            <div id="modal-gallery" class="modal-gallery w-full aspect-[4/5] sm:aspect-square bg-[#f8f9fa]"></div>
-            <div id="modal-gallery-indicator" class="modal-gallery-indicator hidden pb-4"></div>
-
-            <div class="px-8 py-10 text-left">
-                <span id="modal-area" class="text-[9px] font-bold tracking-widest text-blue-600 border border-blue-600 px-3 py-1 mb-6 inline-block uppercase">AREA</span>
-                <h2 id="modal-title" class="serif-custom text-2xl mb-4 leading-normal text-slate-800">タイトル</h2>
-                
-                <div id="modal-desc" class="text-sm font-medium leading-loose mb-8 text-slate-600 overflow-hidden">紹介文</div>
-                
-                <a id="modal-map-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-6 flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <span data-i18n="modal-map-btn-text">この場所をGoogleマップで見る</span>
-                </a>
-
-                <a id="modal-hotel-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-6 hidden items-center justify-center gap-2 w-full text-white font-bold text-xs py-4 rounded hover:opacity-90 transition shadow-md" style="background: linear-gradient(to right, #1a2a6c, #11998e);">
-                    <i class="fa-solid fa-bed text-lg"></i>
-                    <span>周辺のホテル・宿を探す</span>
-                </a>
-
-                <a id="modal-insta-rich-btn" href="#" target="_blank" rel="noopener noreferrer" class="mb-10 hidden items-center justify-center gap-2 w-full text-white font-bold text-sm py-4 rounded-full transition-transform hover:-translate-y-1 shadow-[0_10px_20px_rgba(220,39,67,0.2)]" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
-                    <i class="fa-brands fa-instagram text-xl"></i>
-                    <span data-i18n="modal-insta-btn">Instagramでこの投稿を見る</span>
-                </a>
-
-                <div class="flex items-center justify-between border-t border-slate-200 pt-8 mb-8">
-                    <span id="modal-author" class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">PHOTO BY 管理者</span>
-                    <a id="modal-sns-text-link" href="#" target="_blank" rel="noopener noreferrer" class="text-gray-900 font-bold text-[10px] border-b border-gray-900 pb-1 uppercase hover:opacity-70 transition hidden">Instagram Link</a>
-                </div>
-                
-                <div class="pt-4 text-center">
-                    <p id="share-label" class="share-label text-[9px] font-bold text-slate-400 mb-4 tracking-widest uppercase" data-i18n="share-label">SHARE THIS SPOT</p>
-                    <div class="share-btn-group">
-                        <a id="share-x" href="#" target="_blank" rel="noopener noreferrer" class="share-btn x-twitter" title="X (Twitter)でシェア"><i class="fa-brands fa-x-twitter"></i></a>
-                        <a id="share-fb" href="#" target="_blank" rel="noopener noreferrer" class="share-btn facebook" title="Facebookでシェア"><i class="fa-brands fa-facebook-f"></i></a>
-                        <a id="share-line" href="#" target="_blank" rel="noopener noreferrer" class="share-btn line" title="LINEで送る"><i class="fa-brands fa-line"></i></a>
-                        <button id="share-copy" class="share-btn copy-link" title="リンクをコピー"><i class="fa-solid fa-link"></i></button>
-                    </div>
-                    <p id="copy-success-msg" data-i18n="copy-success-msg">リンクをコピーしました！</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- プログラム部分 -->
     <script is:inline>
         let currentLang = 'jp';
@@ -557,10 +488,6 @@
             'guide-3-title': { normal: { jp: '写真の取り扱い', en: 'Handling of Photos' } },
             'guide-3-desc': { normal: { jp: 'ご提供いただいた写真は、当サイトや関連SNSにおいて三原を盛り上げる広報活動に大切に使用させていただきます。投稿者さんの意思を尊重し、丁寧に扱わせていただきます。', en: 'The provided photos will be carefully used on this site and related SNS to promote Mihara. We respect the photographer\'s intentions and handle them with care.' } },
             'footer-copy': { normal: { jp: '© 2026 Mihara Walk Photo Map', en: '© 2026 Mihara Walk Photo Map' } },
-            'modal-map-btn-text': { normal: { jp: 'この場所をGoogleマップで見る', en: 'View on Google Maps' } },
-            'modal-insta-btn': { normal: { jp: 'Instagramでこの投稿を見る', en: 'View this post on Instagram' } },
-            'share-label': { normal: { jp: 'SHARE THIS SPOT', en: 'SHARE THIS SPOT' } },
-            'copy-success-msg': { normal: { jp: 'リンクをコピーしました！', en: 'Link copied to clipboard!' } },
             'weather-mihara': { normal: { jp: 'MIHARA', en: 'MIHARA' } },
             'weather-magic-hour': { normal: { jp: 'MAGIC HOUR', en: 'MAGIC HOUR' } },
             'weather-sunrise': { normal: { jp: 'SUNRISE', en: 'SUNRISE' } },
@@ -680,11 +607,6 @@
             if(spotsData.length > 0) render(currentActiveArea);
             renderLocalInsights(); 
             renderEvents(); 
-            
-            const modal = document.getElementById('photo-modal');
-            if (modal && modal.classList.contains('active') && modal._currentSpot) {
-                updateModalText(modal._currentSpot);
-            }
         }
 
         window.toggleLanguage = function() {
@@ -711,6 +633,55 @@
             if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 60, behavior: 'smooth' });
         };
 
+        // --- 個別ページ遷移関連の関数 ---
+        function getSpotPageUrl(spotTitle) {
+            if (!spotTitle) return '#';
+            const slug = spotTitle.replace(/[\/\\]/g, '-');
+            // 日本語をそのままURLパスとして扱います（Astroの生成パスと一致させるため）
+            return `/${slug}`; 
+        }
+
+        window.goToSpotPage = function(spot) {
+            if (!spot || !spot.title) return;
+            const url = getSpotPageUrl(spot.title);
+            if (url && url !== '#') {
+                try {
+                    window.location.href = url;
+                } catch (e) {
+                    console.warn("プレビュー環境のためページ遷移をスキップしました:", url);
+                }
+            }
+        };
+
+        window.goToSpotPageFromMap = function(targetTitle) {
+            if (!targetTitle) return;
+            const safeTarget = targetTitle.replace(/&quot;/g, '"');
+            let target = spotsData.find(s => s.title === safeTarget);
+            if (!target) {
+                target = localInsightsData.find(s => s.title === safeTarget);
+            }
+            if (target) {
+                window.goToSpotPage(target);
+            }
+        };
+
+        // 古いURLパラメータ（?spot=xxx）でアクセスされた場合に個別ページへリダイレクト
+        function checkAndRedirectFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetSpotTitle = urlParams.get('spot');
+            if (targetSpotTitle) {
+                const redirectUrl = getSpotPageUrl(targetSpotTitle);
+                if (redirectUrl && redirectUrl !== '#') {
+                    try {
+                        window.location.replace(redirectUrl);
+                    } catch (e) {
+                        console.warn("プレビュー環境のためリダイレクトをスキップしました:", redirectUrl);
+                    }
+                }
+            }
+        }
+        // -------------------------------
+
         let currentSlide = 0;
         let slideInterval;
         function rotateSlides() {
@@ -726,8 +697,6 @@
 
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33pmO60BCd0hIr_v5xh34cJ_IWAHkF0pTaj855pzicmNoVx6W8CPK3MEhlp-irodPSE/pub?gid=1232979489&single=true&output=csv";
         const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
-        
-        // ▼ みちむさんのイベント用スプレッドシートURL ▼
         const EVENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqAv0S9Shfo2bXUlTuP4jtkZ75D-wt4qCl-P_GOFYMu53peSOEwy7EhbUSUEeBi_T0jehNRIbgp91M/pub?output=csv";
 
         let spotsData = [];
@@ -844,7 +813,7 @@
                     const displayTitle = escapeHtml(getLocalizedSpotField(spot, 'title'));
                     
                     const popupContent = `
-                        <div onclick="openModalFromMap('${safeTitleForJS}', 'photomap')" style="cursor:pointer;">
+                        <div onclick="goToSpotPageFromMap('${safeTitleForJS}')" style="cursor:pointer;">
                             <div class="popup-img-wrap"><img src="${imgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
                             <div class="popup-info">
                                 <span class="popup-area">${areaLabel}</span>
@@ -858,12 +827,6 @@
             if (hasMarkers) mapInstance.fitBounds(markersClusterGroup.getBounds(), { padding: [50, 50], maxZoom: 15 });
             else { const set = AREA_POSITIONS[currentActiveArea] || AREA_POSITIONS['all']; mapInstance.setView([set.lat, set.lng], set.zoom); }
         }
-
-        window.openModalFromMap = function(targetTitle, type = 'photomap') {
-            const safeTarget = targetTitle.replace(/&quot;/g, '"');
-            const target = spotsData.find(s => s.title === safeTarget);
-            if (target) openModal(target, type);
-        };
 
         function render(filter) {
             currentActiveArea = filter; 
@@ -902,7 +865,8 @@
                 const areaName = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                 const item = document.createElement('div');
                 item.className = 'photo-item';
-                item.onclick = () => openModal(spot, 'photomap');
+                // ★ 個別ページへ遷移
+                item.onclick = () => window.goToSpotPage(spot);
                 
                 const safeAlt = escapeHtml(getLocalizedSpotField(spot, 'title'));
                 
@@ -995,10 +959,10 @@
                 card.className = 'local-card-horizontal';
                 card.dataset.title = spot.title; 
                 
+                // ★ 個別ページへ遷移
                 card.onclick = (e) => {
                     if (window.isDragged) { e.preventDefault(); return; }
-                    const modalSpotData = { ...spot, title: spot.title, desc: spot.desc, title_en: spot.title_en, desc_en: spot.desc_en };
-                    window.openModal(modalSpotData, 'locallog');
+                    window.goToSpotPage(spot);
                 }; 
 
                 const safeAlt = escapeHtml(title);
@@ -1030,7 +994,7 @@
                         const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
                         
                         const popupContent = `
-                            <div style="cursor:pointer;" onclick="scrollToLocalCard('${safeTitleForJS}')">
+                            <div style="cursor:pointer;" onclick="goToSpotPageFromMap('${safeTitleForJS}')">
                                 <div class="popup-img-wrap"><img src="${popupImgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
                                 <div class="popup-info">
                                     <span class="popup-area">${areaLabel}</span>
@@ -1062,7 +1026,7 @@
             }
         }
 
-        // ▼ カレンダー風イベント描画（画像なし・改行対応・リンク対応） ▼
+        // ▼ カレンダー風イベント描画 ▼
         function renderEvents() {
             const container = document.getElementById('events-container');
             if (!container) return;
@@ -1090,8 +1054,6 @@
                 const btnText = i18nData['event-detail-btn']['normal'][lang];
 
                 const safeTitle = escapeHtml(title);
-                
-                // 【重要】改行を<br>に変換し、URLを自動リンク化する処理
                 let safeDesc = escapeHtml(desc).replace(/\n/g, '<br>');
                 const urlRegex = /(https?:\/\/[^\s<]+)/g;
                 safeDesc = safeDesc.replace(urlRegex, function(url) {
@@ -1101,7 +1063,6 @@
                 const safeDate = escapeHtml(dateStr || '開催日未定');
                 const linkUrl = event.url ? escapeHtml(event.url) : '#';
                 
-                // URLがある場合はリンクとして機能させ、ない場合はただのカードにする
                 const isLink = event.url && event.url.trim() !== '';
                 const cardTag = isLink ? 'a' : 'div';
                 const card = document.createElement(cardTag);
@@ -1112,7 +1073,6 @@
                     card.rel = "noopener noreferrer";
                 }
                 
-                // リンクがない場合は hover エフェクトを少し弱める
                 card.className = `event-card ${!isLink ? 'cursor-default hover:transform-none hover:shadow-[0_4px_15px_rgba(0,64,152,0.02)] hover:border-[var(--border-soft)]' : ''}`;
 
                 card.innerHTML = `
@@ -1191,265 +1151,6 @@
             }
         });
 
-        function updateUrlParams(spotTitle) {
-            if (!history.pushState) return;
-            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?spot=' + encodeURIComponent(spotTitle) + '&lang=' + currentLang;
-            window.history.pushState({path: newUrl}, '', newUrl);
-            
-            let spot = spotsData.find(s => s.title === spotTitle);
-            if (!spot) spot = localInsightsData.find(s => s.title === spotTitle);
-
-            if(spot) {
-                document.title = `${getLocalizedSpotField(spot, 'title')} | MIHARA REDISCOVER`;
-                const descMeta = document.querySelector('meta[name="description"]');
-                if(descMeta) {
-                    let descText = stripHtml(getLocalizedSpotField(spot, 'desc')).replace(/\n/g, '');
-                    if(descText.length > 100) descText = descText.substring(0, 100) + '...';
-                    descMeta.setAttribute('content', descText);
-                }
-            }
-            const linkCanonical = document.getElementById('canonical-tag');
-            if (linkCanonical) linkCanonical.setAttribute('href', newUrl);
-        }
-
-        function clearUrlParams() {
-            if (!history.pushState) return;
-            const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?lang=' + currentLang;
-            window.history.pushState({path: newUrl}, '', newUrl);
-            document.title = currentLang === 'en' ? "Mihara Walk PHOTO MAP" : "三原市まち歩き - PHOTO MAP | 三原市の魅力を再発見するプロジェクト";
-            const descMeta = document.querySelector('meta[name="description"]');
-            if(descMeta) descMeta.setAttribute('content', currentLang === 'en' ? "A photo map project to rediscover the charm of Mihara, Hiroshima." : "広島県三原市の魅力を再発見するフォトマッププロジェクト。");
-            const linkCanonical = document.getElementById('canonical-tag');
-            if (linkCanonical) linkCanonical.setAttribute('href', window.location.protocol + "//" + window.location.host + window.location.pathname);
-        }
-
-        function checkAndOpenModalFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const targetSpotTitle = urlParams.get('spot');
-            if (targetSpotTitle) {
-                let target = spotsData.find(s => s.title === targetSpotTitle);
-                if (target) {
-                    window.openModal(target, 'photomap');
-                    return;
-                }
-                target = localInsightsData.find(s => s.title === targetSpotTitle);
-                if (target) {
-                    window.openModal(target, 'locallog');
-                }
-            }
-        }
-
-        function updateModalText(spot) {
-            document.getElementById('modal-title').textContent = getLocalizedSpotField(spot, 'title');
-            
-            let rawDesc = getLocalizedSpotField(spot, 'desc').replace(/\n/g, '<br>');
-            
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = rawDesc;
-            function autoLinkTextNodes(node) {
-                if (node.nodeType === 3) { 
-                    const urlRegex = /(https?:\/\/[^\s<]+)/g;
-                    if (urlRegex.test(node.nodeValue)) {
-                        const span = document.createElement('span');
-                        span.innerHTML = node.nodeValue.replace(urlRegex, function(url) {
-                            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-                        });
-                        node.parentNode.replaceChild(span, node);
-                    }
-                } else if (node.nodeType === 1 && node.nodeName !== 'A' && node.nodeName !== 'BUTTON') { 
-                    Array.from(node.childNodes).forEach(autoLinkTextNodes);
-                }
-            }
-            Array.from(tempDiv.childNodes).forEach(autoLinkTextNodes);
-            
-            document.getElementById('modal-desc').innerHTML = tempDiv.innerHTML;
-            
-            const areaKey = spot.area || 'all';
-            document.getElementById('modal-area').textContent = areaLabels[areaKey] ? areaLabels[areaKey][currentLang] : (currentLang === 'en' ? 'MIHARA' : '三原');
-            
-            const authorEl = document.getElementById('modal-author');
-            if (authorEl) {
-                authorEl.textContent = 'PHOTO BY ' + escapeHtml((spot.author || spot.nickname || spot.name || (currentLang === 'en' ? 'Admin' : '管理者')));
-            }
-        }
-
-        window.openModal = function(spot, type = 'photomap') {
-            const gallery = document.getElementById('modal-gallery');
-            const indicator = document.getElementById('modal-gallery-indicator');
-            if (gallery) gallery.innerHTML = '';
-            if (indicator) { indicator.innerHTML = ''; indicator.classList.add('hidden'); }
-
-            const images = [];
-            let mainImg = spot.image || '';
-            if (mainImg && mainImg.includes(',')) mainImg = mainImg.split(',')[0].trim();
-            if (mainImg) images.push(mainImg);
-            
-            if (spot.image2) images.push(spot.image2);
-            if (spot.image3) images.push(spot.image3);
-            if (spot.image4) images.push(spot.image4);
-
-            const safeTitle = escapeHtml(getLocalizedSpotField(spot, 'title'));
-
-            images.forEach((imgRaw, index) => {
-                const driveId = getDriveId(imgRaw);
-                const imgUrl = getPrimaryImgUrl(driveId, imgRaw, 'w1600');
-                
-                const item = document.createElement('div');
-                item.className = 'modal-gallery-item flex items-center justify-center bg-[#f8f9fa]';
-                
-                const imgEl = document.createElement('img');
-                imgEl.className = 'w-full h-full object-contain';
-                imgEl.src = imgUrl;
-                imgEl.dataset.fStep = '0';
-                imgEl.alt = safeTitle + (images.length > 1 ? ` (${index + 1})` : '');
-                imgEl.onerror = function() { handleImgErr(this, driveId); };
-                
-                item.appendChild(imgEl);
-                gallery.appendChild(item);
-
-                if (images.length > 1 && indicator) {
-                    const dot = document.createElement('div');
-                    dot.className = `gallery-dot ${index === 0 ? 'active' : ''}`;
-                    indicator.appendChild(dot);
-                }
-            });
-
-            if (images.length > 1 && indicator && gallery) {
-                indicator.classList.remove('hidden');
-                gallery.onscroll = () => {
-                    const index = Math.round(gallery.scrollLeft / gallery.clientWidth);
-                    const dots = indicator.querySelectorAll('.gallery-dot');
-                    dots.forEach((d, i) => {
-                        d.className = `gallery-dot ${i === index ? 'active' : ''}`;
-                    });
-                };
-            }
-            
-            const modal = document.getElementById('photo-modal');
-            if (modal) modal._currentSpot = spot;
-            updateModalText(spot);
-
-            const snsLink = spot.sns || spot.snsurl || spot.url || spot.link;
-            
-            const richBtn = document.getElementById('modal-insta-rich-btn');
-            const textLink = document.getElementById('modal-sns-text-link');
-            const hotelBtn = document.getElementById('modal-hotel-btn');
-
-            if (richBtn) { richBtn.classList.add('hidden'); richBtn.classList.remove('flex'); }
-            if (textLink) { textLink.classList.add('hidden'); textLink.classList.remove('block'); }
-            if (hotelBtn) { hotelBtn.classList.add('hidden'); hotelBtn.classList.remove('flex'); }
-
-            if (type === 'photomap' && hotelBtn) {
-                hotelBtn.classList.remove('hidden');
-                hotelBtn.classList.add('flex');
-                const defaultHotelUrl = "https://a.r10.to/hRIwm0";
-                hotelBtn.href = (spot.hotel_url && spot.hotel_url.trim() !== "") ? spot.hotel_url.trim() : defaultHotelUrl;
-            }
-
-            if (snsLink && snsLink.startsWith('http')) {
-                if (type === 'locallog') {
-                    if (richBtn) {
-                        richBtn.classList.remove('hidden');
-                        richBtn.classList.add('flex');
-                        richBtn.href = snsLink;
-                    }
-                } else {
-                    if (textLink) {
-                        textLink.classList.remove('hidden');
-                        textLink.classList.add('block');
-                        textLink.href = snsLink; 
-                        textLink.textContent = 'INSTAGRAM LINK';
-                        textLink.style.color = '#1a1a1a'; 
-                        textLink.style.borderColor = '#1a1a1a'; 
-                        textLink.style.pointerEvents = 'auto';
-                    }
-                }
-            } else {
-                if (type === 'photomap') {
-                    if (textLink) {
-                        textLink.classList.remove('hidden');
-                        textLink.classList.add('block');
-                        textLink.removeAttribute('href'); 
-                        textLink.textContent = 'NO SNS ACCOUNT';
-                        textLink.style.color = '#ccc'; 
-                        textLink.style.borderColor = 'transparent'; 
-                        textLink.style.pointerEvents = 'none';
-                    }
-                }
-            }
-
-            const mapBtn = document.getElementById('modal-map-btn');
-            if (mapBtn) {
-                mapBtn.href = spot.map_url && spot.map_url.trim() !== "" ? spot.map_url.trim() : (spot.lat && spot.lng ? `https://maps.google.com/?q=${spot.lat},${spot.lng}` : `https://maps.google.com/?q=${encodeURIComponent("三原市 " + spot.title)}`);
-            }
-
-            const shareUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?spot=' + encodeURIComponent(spot.title) + '&lang=' + currentLang;
-            const shareText = `${currentLang === 'en' ? `Found a hidden gem in Mihara! "${getLocalizedSpotField(spot, 'title')}"` : `三原のいいとこ見つけた！「${getLocalizedSpotField(spot, 'title')}」`}\n#三原市まち歩き #Mihara`;
-
-            const shareX = document.getElementById('share-x');
-            if(shareX) shareX.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
-            
-            const shareFb = document.getElementById('share-fb');
-            if(shareFb) shareFb.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-            
-            const shareLine = document.getElementById('share-line');
-            if(shareLine) shareLine.href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`;
-            
-            const copyBtn = document.getElementById('share-copy');
-            const copyMsg = document.getElementById('copy-success-msg');
-            if (copyMsg) copyMsg.classList.remove('show');
-            if (copyBtn) {
-                copyBtn.onclick = () => {
-                    try {
-                        if (navigator.clipboard && navigator.clipboard.writeText) {
-                            navigator.clipboard.writeText(shareUrl).then(() => {
-                                if (copyMsg) {
-                                    copyMsg.classList.add('show'); 
-                                    setTimeout(() => copyMsg.classList.remove('show'), 2000);
-                                }
-                            }).catch(err => {
-                                fallbackCopyText(shareUrl, copyMsg);
-                            });
-                        } else {
-                            fallbackCopyText(shareUrl, copyMsg);
-                        }
-                    } catch(e) { console.warn(e); }
-                };
-            }
-
-            if (modal) modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            updateUrlParams(spot.title);
-        };
-
-        function fallbackCopyText(text, copyMsg) {
-            try {
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                textArea.style.position = "fixed";
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                if (copyMsg) {
-                    copyMsg.classList.add('show');
-                    setTimeout(() => copyMsg.classList.remove('show'), 2000);
-                }
-            } catch (err) {
-                console.warn('Fallback copy failed', err);
-            }
-        }
-
-        window.closeModal = function() {
-            const modal = document.getElementById('photo-modal');
-            if (modal) modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-            const copyMsg = document.getElementById('copy-success-msg');
-            if (copyMsg) copyMsg.classList.remove('show');
-            clearUrlParams();
-        };
-
         window.addEventListener('load', () => {
             fetchWeather();
             
@@ -1459,13 +1160,9 @@
             }
             updateUI();
             rotateSlides();
-
-            const modal = document.getElementById('photo-modal');
-            const modalContent = document.getElementById('modal-content-area');
-            const closeBtn = document.getElementById('modal-close-btn');
-            if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) window.closeModal(); });
-            if (closeBtn) closeBtn.addEventListener('click', window.closeModal);
-            if (modalContent) modalContent.addEventListener('click', (e) => e.stopPropagation());
+            
+            // ★旧URLパラメータからの互換性・リダイレクト処理
+            checkAndRedirectFromUrl();
 
             if (typeof Papa !== 'undefined') {
                 Papa.parse(CSV_URL, {
@@ -1497,7 +1194,6 @@
                             }).filter(s => s.title);
                             
                             render('all');
-                            checkAndOpenModalFromUrl();
                         } catch(e) { console.warn('Data parse warning:', e); }
                     },
                     error: function(err) {
@@ -1536,7 +1232,6 @@
                                 }).filter(s => s.title); 
                                 
                                 renderLocalInsights();
-                                checkAndOpenModalFromUrl();
                             } catch (e) { console.warn('Local Data parse warning:', e); }
                         },
                         error: function(err) {
