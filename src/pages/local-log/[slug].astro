@@ -63,12 +63,22 @@ export async function getStaticPaths() {
 // 2. 各ページに渡されたデータを受け取る
 const { spot } = Astro.props;
 
-// 画像URLの整形（Googleドライブのリンクをプレビュー用に変換）
-let imageUrl = spot.image || "https://placehold.co/600x400?text=No+Image";
-if (imageUrl.includes('drive.google.com')) {
-  const idMatch = imageUrl.match(/[-\w]{25,}/);
+// 💡 【修正ポイント】画像URLの整形（複数画像への対応と、安定した高画質URLへの変換）
+let rawImage = spot.image || '';
+// カンマ区切りで複数の写真が入っている場合は、最初の1枚目だけを取り出す
+let firstImage = rawImage.includes(',') ? rawImage.split(',')[0].trim() : rawImage.trim();
+
+let imageUrl = "https://placehold.co/600x400/e2e8f0/94a3b8?text=No+Image";
+let driveId = "";
+
+if (firstImage) {
+  const idMatch = firstImage.match(/[-\w]{25,}/);
   if (idMatch) {
-    imageUrl = `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w1000`;
+    driveId = idMatch[0];
+    // 最も安定して表示されるGoogleの画像サーバーURLを使用
+    imageUrl = `https://lh3.googleusercontent.com/d/${driveId}=w1200`;
+  } else if (firstImage.startsWith('http')) {
+    imageUrl = firstImage;
   }
 }
 
@@ -108,6 +118,23 @@ if(!mapUrl && spot.lat_lng_raw) {
     }
     .serif-custom { font-family: 'Noto Serif JP', serif; }
   </style>
+
+  <!-- 画像がブロックされた時用の予備プログラム -->
+  <script is:inline>
+    function handleFallbackErr(img, driveId) {
+      if (!img || !driveId) return;
+      const step = parseInt(img.dataset.fStep || '0');
+      if (step === 0) {
+        img.dataset.fStep = '1';
+        img.src = 'https://drive.google.com/uc?export=view&id=' + driveId;
+      } else if (step === 1) {
+        img.dataset.fStep = '2';
+        img.src = 'https://drive.google.com/thumbnail?id=' + driveId + '&sz=w1000';
+      } else {
+        img.onerror = null;
+      }
+    }
+  </script>
 </head>
 <body>
   
@@ -121,7 +148,14 @@ if(!mapUrl && spot.lat_lng_raw) {
   <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-md pb-24">
     
     <div class="w-full aspect-[4/3] sm:aspect-[16/9] bg-gray-100 overflow-hidden relative">
-        <img src={imageUrl} alt={spot.title} class="w-full h-full object-cover" />
+        <!-- 💡 読み込み失敗時のバックアップ機能（onerror）を搭載 -->
+        <img 
+            src={imageUrl} 
+            alt={spot.title} 
+            class="w-full h-full object-cover" 
+            data-f-step="0" 
+            onerror={`handleFallbackErr(this, '${driveId}')`} 
+        />
         <div class="absolute top-4 left-4 bg-[#004098]/90 text-white text-[10px] font-bold px-3 py-1.5 rounded flex items-center gap-1.5 shadow-lg">
             <i class="fa-solid fa-location-dot"></i> {spot.area || '三原市'}
         </div>
