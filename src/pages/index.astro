@@ -145,7 +145,7 @@
         .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border-soft); }
         @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); } }
         
-        /* ▼ aタグ用のスタイルを追加 ▼ */
+        /* ▼ aタグ用のスタイルに変更 ▼ */
         .photo-item { position: relative; aspect-ratio: 1/1; background: #f3f4f6; overflow: hidden; cursor: pointer; display: block; text-decoration: none; }
         .photo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 80%); opacity: 0; transition: opacity 0.6s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; pointer-events: none; }
@@ -177,18 +177,20 @@
         .horizontal-scroll-container {
             display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px;
             padding: 10px 0 30px 0; margin-left: -24px; margin-right: -24px; padding-left: 24px; padding-right: 24px;
-            scrollbar-width: none;
+            scrollbar-width: none; cursor: grab;
         }
         .horizontal-scroll-container::-webkit-scrollbar { display: none; }
+        .horizontal-scroll-container.active { cursor: grabbing; }
         
         /* ▼ さんぽログカードをaタグとして機能させるスタイル ▼ */
         .local-card-horizontal {
             flex: 0 0 85%; scroll-snap-align: center; display: flex; flex-direction: column; background: #fff;
             border: 2px solid transparent; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.03);
             cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; user-select: none;
-            text-decoration: none; color: inherit;
+            text-decoration: none; color: inherit; -webkit-tap-highlight-color: transparent;
         }
         .local-card-horizontal:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,64,152,0.08); }
+        .horizontal-scroll-container.active .local-card-horizontal { transition: none; transform: none; }
         .local-card-horizontal.active-card { border-color: var(--palette-blue); box-shadow: 0 12px 30px rgba(0,64,152,0.15); }
         @media (min-width: 640px) {
             .local-card-horizontal { flex: 0 0 45%; scroll-snap-align: start; }
@@ -494,6 +496,8 @@
             'guide-3-desc': { normal: { jp: 'ご提供いただいた写真は、当サイトや関連SNSにおいて三原を盛り上げる広報活動に大切に使用させていただきます。投稿者さんの意思を尊重し、丁寧に扱わせていただきます。', en: 'The provided photos will be carefully used on this site and related SNS to promote Mihara. We respect the photographer\'s intentions and handle them with care.' } },
             'footer-copy': { normal: { jp: '© 2026 Mihara Walk Photo Map', en: '© 2026 Mihara Walk Photo Map' } },
             'weather-mihara': { normal: { jp: 'MIHARA', en: 'MIHARA' } },
+            'weather-magic-hour': { normal: { jp: 'MAGIC HOUR', en: 'MAGIC HOUR' } },
+            'weather-sunrise': { normal: { jp: 'SUNRISE', en: 'SUNRISE' } },
             'weather-weekly-toggle': { normal: { jp: '週間天気', en: 'Weekly' } }
         };
 
@@ -763,13 +767,11 @@
                     const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                     const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                     
-                    const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
                     const displayTitle = escapeHtml(getLocalizedSpotField(spot, 'title'));
+                    const slug = encodeURIComponent((spot.title || '').replace(/[\/\\]/g, '-'));
                     
-                    // ▼ マップのポップアップも「PHOTO MAP用」の個別ページへ移動するリンクに変更 ▼
-                    const slug = spot.title.replace(/[\/\\]/g, '-');
                     const popupContent = `
-                        <a href="/spot/${encodeURIComponent(slug)}" style="display:block; text-decoration:none; color:inherit;">
+                        <a href="/spot/${slug}" style="display:block; text-decoration:none; color:inherit;">
                             <div class="popup-img-wrap"><img src="${imgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
                             <div class="popup-info">
                                 <span class="popup-area">${areaLabel}</span>
@@ -820,10 +822,9 @@
                 const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                 const areaName = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                 
-                // ▼ PHOTO MAPも「個別ページへの本物のリンク（aタグ）」に変更！ ▼
-                const slug = spot.title.replace(/[\/\\]/g, '-');
+                const slug = encodeURIComponent((spot.title || '').replace(/[\/\\]/g, '-'));
                 const item = document.createElement('a');
-                item.href = `/spot/${encodeURIComponent(slug)}`;
+                item.href = `/spot/${slug}`;
                 item.className = 'photo-item block';
                 
                 const safeAlt = escapeHtml(getLocalizedSpotField(spot, 'title'));
@@ -895,12 +896,19 @@
                 
                 const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][lang] : (lang==='en'?'MIHARA':'三原');
 
-                // ▼ さんぽログも「個別ページへの本物のリンク（aタグ）」に変更！ ▼
-                const slug = spot.title.replace(/[\/\\]/g, '-');
+                const slug = encodeURIComponent((spot.title || '').replace(/[\/\\]/g, '-'));
                 const card = document.createElement('a');
-                card.href = `/local-log/${encodeURIComponent(slug)}`;
+                card.href = `/local-log/${slug}`;
                 card.className = 'local-card-horizontal block';
                 card.dataset.title = spot.title; 
+                
+                // ドラッグ時のリンク誤タップを防ぐための処理
+                card.ondragstart = () => false;
+                card.onclick = (e) => {
+                    if (window.isDragged) {
+                        e.preventDefault();
+                    }
+                };
 
                 const safeAlt = escapeHtml(title);
                 const safeDesc = stripHtml(desc);
@@ -927,11 +935,8 @@
                         hasMarkers = true;
                         const popupImgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                         
-                        const safeTitleForJS = (spot.title || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
-                        
-                        // ▼ さんぽログのマップポップアップも「個別ページ」へ移動するように変更 ▼
                         const popupContent = `
-                            <a href="/local-log/${encodeURIComponent(slug)}" style="display:block; text-decoration:none; color:inherit;">
+                            <a href="/local-log/${slug}" style="display:block; text-decoration:none; color:inherit;">
                                 <div class="popup-img-wrap"><img src="${popupImgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
                                 <div class="popup-info">
                                     <span class="popup-area">${areaLabel}</span>
@@ -1024,6 +1029,47 @@
                 container.appendChild(card);
             });
         }
+
+        window.isDown = false;
+        window.startX = 0;
+        window.scrollLeft = 0;
+        window.isDragged = false;
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            const scrollContainer = document.getElementById('local-scroll-container');
+            if (scrollContainer) {
+                scrollContainer.addEventListener('mousedown', (e) => {
+                    window.isDown = true;
+                    window.isDragged = false;
+                    scrollContainer.classList.add('active');
+                    scrollContainer.style.scrollSnapType = 'none'; 
+                    window.startX = e.pageX - scrollContainer.offsetLeft;
+                    window.scrollLeft = scrollContainer.scrollLeft;
+                });
+
+                scrollContainer.addEventListener('mouseleave', () => {
+                    window.isDown = false;
+                    scrollContainer.classList.remove('active');
+                    scrollContainer.style.scrollSnapType = 'x mandatory';
+                });
+
+                scrollContainer.addEventListener('mouseup', () => {
+                    window.isDown = false;
+                    scrollContainer.classList.remove('active');
+                    scrollContainer.style.scrollSnapType = 'x mandatory';
+                    setTimeout(() => { window.isDragged = false; }, 50);
+                });
+
+                scrollContainer.addEventListener('mousemove', (e) => {
+                    if (!window.isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - scrollContainer.offsetLeft;
+                    const walk = (x - window.startX) * 1.5; 
+                    if (Math.abs(walk) > 5) window.isDragged = true; 
+                    scrollContainer.scrollLeft = window.scrollLeft - walk;
+                });
+            }
+        });
 
         window.addEventListener('load', () => {
             fetchWeather();

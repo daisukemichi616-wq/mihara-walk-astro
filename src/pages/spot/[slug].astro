@@ -1,12 +1,13 @@
 ---
 // 1. Astroのビルド時に実行される処理（サーバーサイド）
 export async function getStaticPaths() {
-  // PHOTO MAP用のスプレッドシートURL
-  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33pmO60BCd0hIr_v5xh34cJ_IWAHkF0pTaj855pzicmNoVx6W8CPK3MEhlp-irodPSE/pub?gid=1232979489&single=true&output=csv";
+  // スプレッドシート（CSV形式で公開したもの）のURL
+  const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
   
-  const response = await fetch(CSV_URL);
+  const response = await fetch(LOCAL_CSV_URL);
   const csvText = await response.text();
 
+  // CSVをパース（解析）する関数
   function parseCSV(text) {
     const result = [];
     let row = [];
@@ -31,6 +32,7 @@ export async function getStaticPaths() {
   const rows = parseCSV(csvText);
   if (rows.length < 2) return [];
 
+  // ヘッダー行を整形（空白削除・小文字化）
   const header = rows[0].map(h => h.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase());
   
   const spots = [];
@@ -38,6 +40,7 @@ export async function getStaticPaths() {
     const values = rows[i];
     if(!values || values.length <= 1) continue;
     
+    // 一旦生のデータを取得
     const rawSpot = {};
     header.forEach((h, index) => {
       rawSpot[h] = values[index] ? values[index].trim() : '';
@@ -45,22 +48,21 @@ export async function getStaticPaths() {
 
     const spot = {};
     spot.title = rawSpot['スポット名'] || rawSpot['タイトル'] || rawSpot['title'] || '';
-    spot.desc = rawSpot['紹介文'] || rawSpot['説明'] || rawSpot['desc'] || '';
+    spot.desc = rawSpot['紹介文（パパママ目線）'] || rawSpot['紹介文'] || rawSpot['説明'] || rawSpot['desc'] || '';
     spot.image = rawSpot['写真'] || rawSpot['画像'] || rawSpot['image'] || '';
-    spot.image2 = rawSpot['写真2'] || rawSpot['画像2'] || rawSpot['image2'] || '';
-    spot.image3 = rawSpot['写真3'] || rawSpot['画像3'] || rawSpot['image3'] || '';
-    spot.image4 = rawSpot['写真4'] || rawSpot['画像4'] || rawSpot['image4'] || '';
     spot.area = rawSpot['エリア'] || rawSpot['area'] || '';
+    spot.tag = rawSpot['タグ'] || rawSpot['tag'] || '';
     spot.lat_lng_raw = rawSpot['lat_lng_raw'] || rawSpot['緯度経度'] || '';
     spot.map_url = rawSpot['googleマップのurl'] || rawSpot['googleマップのurl(共有リンク)'] || rawSpot['地図url'] || rawSpot['map_url'] || '';
-    spot.hotel_url = rawSpot['hotel_url'] || rawSpot['ホテルurl'] || '';
     spot.author = rawSpot['ニックネーム'] || rawSpot['撮影者'] || rawSpot['author'] || rawSpot['nickname'] || '';
+    spot.sns = rawSpot['sns'] || rawSpot['snsurl'] || rawSpot['url'] || rawSpot['link'] || '';
 
     if(spot.title) {
       spots.push(spot);
     }
   }
 
+  // 記事の数だけページ（URL）を生成
   return spots.map(spot => {
     let slug = spot.title.replace(/[\/\\]/g, '-');
     return {
@@ -73,49 +75,27 @@ export async function getStaticPaths() {
 // 2. 各ページに渡されたデータを受け取る
 const { spot } = Astro.props;
 
-// GoogleドライブIDを抽出する関数
-function getDriveId(urlOrId) {
-  if (!urlOrId) return '';
-  const match = urlOrId.toString().match(/[-\w]{25,}/);
-  return match ? match[0] : '';
-}
-
-// メイン画像の処理
+// 画像URLの整形
 let rawImage = spot.image || '';
 let firstImage = rawImage.includes(',') ? rawImage.split(',')[0].trim() : rawImage.trim();
-let mainImageUrl = "https://placehold.co/600x800/e2e8f0/94a3b8?text=No+Image";
-let mainDriveId = getDriveId(firstImage);
+let imageUrl = "https://placehold.co/600x800/e2e8f0/94a3b8?text=No+Image";
+let driveId = "";
 
-if (mainDriveId) {
-  mainImageUrl = `https://lh3.googleusercontent.com/d/${mainDriveId}=w1200`;
-} else if (firstImage.startsWith('http')) {
-  mainImageUrl = firstImage;
+if (firstImage) {
+  const idMatch = firstImage.match(/[-\w]{25,}/);
+  if (idMatch) {
+    driveId = idMatch[0];
+    imageUrl = `https://lh3.googleusercontent.com/d/${driveId}=w1200`;
+  } else if (firstImage.startsWith('http')) {
+    imageUrl = firstImage;
+  }
 }
 
-// サブ画像（複数画像）のリストを作成
-const subImages = [];
-[spot.image2, spot.image3, spot.image4].forEach(img => {
-  if (img) {
-    const dId = getDriveId(img);
-    if (dId) subImages.push({ id: dId, url: `https://lh3.googleusercontent.com/d/${dId}=w1200` });
-  }
-});
-
-// Googleマップ用URL
+// Googleマップ用URLの準備
 let mapUrl = spot.map_url || '';
 if(!mapUrl && spot.lat_lng_raw) {
    mapUrl = `https://www.google.com/maps/search/?api=1&query=${spot.lat_lng_raw}`;
 }
-
-// ホテル用URL
-const defaultHotelUrl = "https://a.r10.to/hRIwm0";
-const hotelUrl = (spot.hotel_url && spot.hotel_url.trim() !== "") ? spot.hotel_url.trim() : defaultHotelUrl;
-
-// エリアの表示名
-const areaLabels = {
-  'all': 'ぜんぶ', 'mihara': '三原市街', 'daiwa': '大和', 'kui': '久井', 'hongo': '本郷', 'sagi': '佐木島'
-};
-const displayArea = areaLabels[spot.area] || spot.area || '三原市';
 ---
 
 <!DOCTYPE html>
@@ -124,13 +104,13 @@ const displayArea = areaLabels[spot.area] || spot.area || '三原市';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
-  <title>{spot.title} | 三原市まち歩き - PHOTO MAP</title>
+  <title>{spot.title} | みはらさんぽログ</title>
   <meta name="description" content={spot.desc}>
   
   <meta property="og:type" content="article">
-  <meta property="og:title" content={`${spot.title} | PHOTO MAP`}>
+  <meta property="og:title" content={`${spot.title} | みはらさんぽログ`}>
   <meta property="og:description" content={spot.desc}>
-  <meta property="og:image" content={mainImageUrl}>
+  <meta property="og:image" content={imageUrl}>
   <meta name="twitter:card" content="summary_large_image">
 
   <script is:inline src="https://cdn.tailwindcss.com"></script>
@@ -145,20 +125,17 @@ const displayArea = areaLabels[spot.area] || spot.area || '三原市';
       word-break: break-all;
     }
     .serif-custom { font-family: 'Noto Serif JP', serif; }
-    /* 横スクロールギャラリー用 */
-    .gallery-container {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none; /* Firefox */
-    }
-    .gallery-container::-webkit-scrollbar {
-      display: none; /* Chrome/Safari */
-    }
-    .gallery-item {
-      flex: 0 0 100%;
-      scroll-snap-align: start;
-    }
+    
+    /* シェアボタン用のスタイル */
+    .share-btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
+    .share-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 16px; transition: all 0.3s; text-decoration: none; border: 1px solid transparent; cursor: pointer; }
+    .share-btn:hover { transform: translateY(-2px); color: white; }
+    .share-btn.x-twitter:hover { background: #000; color: #fff !important; }
+    .share-btn.facebook:hover { background: #1877f2; color: #fff !important; }
+    .share-btn.line:hover { background: #06c755; color: #fff !important; }
+    .share-btn.copy-link:hover { background: #004098; color: #fff !important; }
+    #copy-success-msg { font-size: 10px; font-weight: bold; color: #004098; opacity: 0; transition: opacity 0.3s ease; height: 14px; text-align: center; }
+    #copy-success-msg.show { opacity: 1; }
   </style>
 
   <script is:inline>
@@ -171,6 +148,9 @@ const displayArea = areaLabels[spot.area] || spot.area || '三原市';
       } else if (step === 1) {
         img.dataset.fStep = '2';
         img.src = 'https://drive.google.com/thumbnail?id=' + driveId + '&sz=w1000';
+      } else if (step === 2) {
+        img.dataset.fStep = '3';
+        img.src = 'https://wsrv.nl/?url=https://drive.google.com/uc?export=view%26id=' + driveId;
       } else {
         img.onerror = null;
         img.src = 'https://placehold.co/600x800/e2e8f0/94a3b8?text=Image+Blocked';
@@ -181,56 +161,36 @@ const displayArea = areaLabels[spot.area] || spot.area || '三原市';
 <body>
   
   <nav class="bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 py-3 sticky top-0 z-50 flex items-center justify-between shadow-sm">
-      <a href="/#gallery" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
-        <i class="fa-solid fa-arrow-left"></i> マップへ戻る
+      <a href="/#local-insights" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
+        <i class="fa-solid fa-arrow-left"></i> さんぽログへ戻る
       </a>
       <div class="text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">Mihara Rediscover</div>
   </nav>
 
   <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-md pb-24">
     
-    <!-- ギャラリー部分（複数画像対応） -->
-    <div class="relative w-full bg-[#f8f9fa]">
-        <div class="gallery-container w-full h-[60vh] sm:h-[80vh]">
-            <!-- メイン画像 -->
-            <div class="gallery-item h-full flex items-center justify-center relative">
-                <img 
-                    src={mainImageUrl} 
-                    alt={spot.title} 
-                    class="w-full h-full object-contain" 
-                    data-f-step="0" 
-                    onerror={`handleFallbackErr(this, '${mainDriveId}')`} 
-                />
-            </div>
-            <!-- サブ画像 -->
-            {subImages.map((img, index) => (
-                <div class="gallery-item h-full flex items-center justify-center relative bg-[#f1f5f9]">
-                    <img 
-                        src={img.url} 
-                        alt={`${spot.title} - 写真${index + 2}`} 
-                        class="w-full h-full object-contain" 
-                        data-f-step="0" 
-                        onerror={`handleFallbackErr(this, '${img.id}')`} 
-                    />
-                </div>
-            ))}
-        </div>
-        
-        <!-- 画像が複数ある場合はスワイプ案内を表示 -->
-        {subImages.length > 0 && (
-            <div class="absolute bottom-4 right-4 bg-black/50 text-white text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-sm">
-                <i class="fa-solid fa-arrows-left-right"></i> スワイプして写真を見る
-            </div>
-        )}
-        
+    <div class="w-full h-[60vh] sm:h-[80vh] bg-[#f8f9fa] flex items-center justify-center relative">
+        <img 
+            src={imageUrl} 
+            alt={spot.title} 
+            class="w-full h-full object-contain" 
+            data-f-step="0" 
+            onerror={`handleFallbackErr(this, '${driveId}')`} 
+        />
         <div class="absolute top-4 left-4 bg-[#004098]/90 text-white text-[10px] font-bold px-3 py-1.5 rounded flex items-center gap-1.5 shadow-lg z-10">
-            <i class="fa-solid fa-location-dot"></i> {displayArea}
+            <i class="fa-solid fa-location-dot"></i> {spot.area || '三原市'}
         </div>
     </div>
     
     <div class="px-6 sm:px-10 py-8 sm:py-12">
+        
+       <div class="flex items-center gap-2 mb-4">
+         <span class="text-white bg-[#004098]/90 text-[10px] font-bold px-3 py-1.5 rounded shadow-sm">
+           {spot.tag || '👟 みはらさんぽ'}
+         </span>
+       </div>
        
-       <h1 class="text-2xl sm:text-3xl font-bold text-[#004098] serif-custom mb-8 leading-relaxed border-b-2 border-blue-50 pb-6 mt-4">
+       <h1 class="text-2xl sm:text-3xl font-bold text-[#004098] serif-custom mb-8 leading-relaxed border-b-2 border-blue-50 pb-6">
            {spot.title}
        </h1>
        
@@ -247,23 +207,66 @@ const displayArea = areaLabels[spot.area] || spot.area || '三原市';
          }
        </script>
 
-       <!-- アクションボタン群 -->
-       <div class="space-y-4">
-           {mapUrl && (
-             <a href={mapUrl} target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition">
-               <i class="fa-solid fa-map-location-dot text-lg"></i> この場所をGoogleマップで見る
-             </a>
-           )}
+       {mapUrl && (
+         <a href={mapUrl} target="_blank" rel="noopener noreferrer" class="block w-full text-center bg-blue-50 text-[#004098] border border-[#004098] font-bold py-4 rounded-lg hover:bg-[#004098] hover:text-white transition-all shadow-sm">
+           <i class="fa-solid fa-map-location-dot mr-2"></i> この場所をGoogleマップで見る
+         </a>
+       )}
 
-           <a href={hotelUrl} target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full text-white font-bold text-xs py-4 rounded hover:opacity-90 transition shadow-md" style="background: linear-gradient(to right, #1a2a6c, #11998e);">
-             <i class="fa-solid fa-bed text-lg"></i> 周辺のホテル・宿を探す
-           </a>
+       {spot.sns && (
+         <a href={spot.sns} target="_blank" rel="noopener noreferrer" class="block w-full mt-4 text-center text-white font-bold py-4 rounded-lg shadow-md transition-transform hover:-translate-y-1" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
+           <i class="fa-brands fa-instagram text-xl mr-2 align-middle"></i> Instagramでこの投稿を見る
+         </a>
+       )}
+       
+       <div class="mt-16 pt-8 border-t border-dashed border-gray-200 flex justify-between items-center mb-8">
+         <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Photo by {spot.author || 'みはらさんぽ'}</span>
        </div>
        
-       <div class="mt-16 pt-8 border-t border-dashed border-gray-200 flex justify-between items-center text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">
-         <span>Photo by {spot.author || '管理者'}</span>
-         <span>Share the Charm</span>
+       <div class="pt-4 text-center">
+           <p class="text-[9px] font-bold text-slate-400 mb-4 tracking-widest uppercase">SHARE THIS SPOT</p>
+           <div class="share-btn-group" id="share-buttons">
+               <a id="share-x" href="#" target="_blank" rel="noopener noreferrer" class="share-btn x-twitter" title="X (Twitter)でシェア"><i class="fa-brands fa-x-twitter"></i></a>
+               <a id="share-fb" href="#" target="_blank" rel="noopener noreferrer" class="share-btn facebook" title="Facebookでシェア"><i class="fa-brands fa-facebook-f"></i></a>
+               <a id="share-line" href="#" target="_blank" rel="noopener noreferrer" class="share-btn line" title="LINEで送る"><i class="fa-brands fa-line"></i></a>
+               <button id="share-copy" class="share-btn copy-link" title="リンクをコピー"><i class="fa-solid fa-link"></i></button>
+           </div>
+           <p id="copy-success-msg">リンクをコピーしました！</p>
        </div>
+       
+       <!-- シェアボタンを動かすプログラム -->
+       <script is:inline>
+         document.addEventListener('DOMContentLoaded', () => {
+           const shareUrl = window.location.href;
+           const spotTitle = document.title.split(' | ')[0];
+           const shareText = `三原のいいとこ見つけた！「${spotTitle}」\n#三原市まち歩き #Mihara`;
+           
+           document.getElementById('share-x').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+           document.getElementById('share-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+           document.getElementById('share-line').href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`;
+           
+           const copyBtn = document.getElementById('share-copy');
+           const copyMsg = document.getElementById('copy-success-msg');
+           
+           copyBtn.addEventListener('click', () => {
+             if (navigator.clipboard && navigator.clipboard.writeText) {
+               navigator.clipboard.writeText(shareUrl).then(() => {
+                 copyMsg.classList.add('show');
+                 setTimeout(() => copyMsg.classList.remove('show'), 2000);
+               });
+             } else {
+               const textArea = document.createElement("textarea");
+               textArea.value = shareUrl;
+               document.body.appendChild(textArea);
+               textArea.select();
+               document.execCommand('copy');
+               document.body.removeChild(textArea);
+               copyMsg.classList.add('show');
+               setTimeout(() => copyMsg.classList.remove('show'), 2000);
+             }
+           });
+         });
+       </script>
        
     </div>
   </main>

@@ -125,6 +125,17 @@ if(!mapUrl && spot.lat_lng_raw) {
       word-break: break-all;
     }
     .serif-custom { font-family: 'Noto Serif JP', serif; }
+    
+    /* シェアボタン用のスタイル */
+    .share-btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
+    .share-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 16px; transition: all 0.3s; text-decoration: none; border: 1px solid transparent; cursor: pointer; }
+    .share-btn:hover { transform: translateY(-2px); color: white; }
+    .share-btn.x-twitter:hover { background: #000; color: #fff !important; }
+    .share-btn.facebook:hover { background: #1877f2; color: #fff !important; }
+    .share-btn.line:hover { background: #06c755; color: #fff !important; }
+    .share-btn.copy-link:hover { background: #004098; color: #fff !important; }
+    #copy-success-msg { font-size: 10px; font-weight: bold; color: #004098; opacity: 0; transition: opacity 0.3s ease; height: 14px; text-align: center; }
+    #copy-success-msg.show { opacity: 1; }
   </style>
 
   <script is:inline>
@@ -150,7 +161,6 @@ if(!mapUrl && spot.lat_lng_raw) {
 <body>
   
   <nav class="bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 py-3 sticky top-0 z-50 flex items-center justify-between shadow-sm">
-      <!-- 💡 戻るボタンのリンク先をトップページの「みはらさんぽログ」セクションに指定 -->
       <a href="/#local-insights" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
         <i class="fa-solid fa-arrow-left"></i> さんぽログへ戻る
       </a>
@@ -175,7 +185,6 @@ if(!mapUrl && spot.lat_lng_raw) {
     <div class="px-6 sm:px-10 py-8 sm:py-12">
         
        <div class="flex items-center gap-2 mb-4">
-         <!-- 💡 タグのデザインをトップページと同じ青色にし、文字を「👟 みはらさんぽ」に変更 -->
          <span class="text-white bg-[#004098]/90 text-[10px] font-bold px-3 py-1.5 rounded shadow-sm">
            {spot.tag || '👟 みはらさんぽ'}
          </span>
@@ -210,10 +219,54 @@ if(!mapUrl && spot.lat_lng_raw) {
          </a>
        )}
        
-       <div class="mt-16 pt-8 border-t border-dashed border-gray-200 flex justify-between items-center text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">
-         <span>Photo by {spot.author || 'みはらさんぽ'}</span>
-         <span>Share the Charm</span>
+       <div class="mt-16 pt-8 border-t border-dashed border-gray-200 flex justify-between items-center mb-8">
+         <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Photo by {spot.author || 'みはらさんぽ'}</span>
        </div>
+       
+       <div class="pt-4 text-center">
+           <p class="text-[9px] font-bold text-slate-400 mb-4 tracking-widest uppercase">SHARE THIS SPOT</p>
+           <div class="share-btn-group" id="share-buttons">
+               <a id="share-x" href="#" target="_blank" rel="noopener noreferrer" class="share-btn x-twitter" title="X (Twitter)でシェア"><i class="fa-brands fa-x-twitter"></i></a>
+               <a id="share-fb" href="#" target="_blank" rel="noopener noreferrer" class="share-btn facebook" title="Facebookでシェア"><i class="fa-brands fa-facebook-f"></i></a>
+               <a id="share-line" href="#" target="_blank" rel="noopener noreferrer" class="share-btn line" title="LINEで送る"><i class="fa-brands fa-line"></i></a>
+               <button id="share-copy" class="share-btn copy-link" title="リンクをコピー"><i class="fa-solid fa-link"></i></button>
+           </div>
+           <p id="copy-success-msg">リンクをコピーしました！</p>
+       </div>
+       
+       <!-- シェアボタンを動かすプログラム -->
+       <script is:inline>
+         document.addEventListener('DOMContentLoaded', () => {
+           const shareUrl = window.location.href;
+           const spotTitle = document.title.split(' | ')[0];
+           const shareText = `三原のいいとこ見つけた！「${spotTitle}」\n#三原市まち歩き #Mihara`;
+           
+           document.getElementById('share-x').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+           document.getElementById('share-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+           document.getElementById('share-line').href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`;
+           
+           const copyBtn = document.getElementById('share-copy');
+           const copyMsg = document.getElementById('copy-success-msg');
+           
+           copyBtn.addEventListener('click', () => {
+             if (navigator.clipboard && navigator.clipboard.writeText) {
+               navigator.clipboard.writeText(shareUrl).then(() => {
+                 copyMsg.classList.add('show');
+                 setTimeout(() => copyMsg.classList.remove('show'), 2000);
+               });
+             } else {
+               const textArea = document.createElement("textarea");
+               textArea.value = shareUrl;
+               document.body.appendChild(textArea);
+               textArea.select();
+               document.execCommand('copy');
+               document.body.removeChild(textArea);
+               copyMsg.classList.add('show');
+               setTimeout(() => copyMsg.classList.remove('show'), 2000);
+             }
+           });
+         });
+       </script>
        
     </div>
   </main>
