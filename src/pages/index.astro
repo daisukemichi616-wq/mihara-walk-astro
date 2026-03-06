@@ -145,7 +145,6 @@
         .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border-soft); }
         @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); } }
         
-        /* ▼ aタグ用のスタイルに変更 ▼ */
         .photo-item { position: relative; aspect-ratio: 1/1; background: #f3f4f6; overflow: hidden; cursor: pointer; display: block; text-decoration: none; }
         .photo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
         .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 80%); opacity: 0; transition: opacity 0.6s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; pointer-events: none; }
@@ -182,7 +181,6 @@
         .horizontal-scroll-container::-webkit-scrollbar { display: none; }
         .horizontal-scroll-container.active { cursor: grabbing; }
         
-        /* ▼ さんぽログカードをaタグとして機能させるスタイル ▼ */
         .local-card-horizontal {
             flex: 0 0 85%; scroll-snap-align: center; display: flex; flex-direction: column; background: #fff;
             border: 2px solid transparent; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.03);
@@ -208,6 +206,7 @@
         .local-area { font-size: 10px; font-weight: 700; color: #9ca3af; letter-spacing: 0.1em; text-transform: uppercase; }
         .local-btn { font-size: 10px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 4px; }
         
+        /* ▼ 修正：地図が右に寄らないように、幅と余白の設定を最適化しました ▼ */
         #local-map-container { height: 50vh; min-height: 400px; width: 100%; border-radius: 12px; border: 1px solid var(--border-soft); margin-top: 10px; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
         @media (min-width: 1024px) { #local-map-container { height: 65vh; min-height: 550px; } }
         
@@ -345,7 +344,10 @@
             <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-2">
                 <div class="w-full text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
-            <div id="local-map-container" class="mx-6 sm:mx-0"></div>
+            <!-- ▼ 地図がド真ん中に配置されるように親要素（div）にパディングを追加し、地図の幅を100%に調整しました ▼ -->
+            <div class="px-6 sm:px-0">
+                <div id="local-map-container"></div>
+            </div>
         </div>
     </section>
 
@@ -771,7 +773,7 @@
                     const slug = encodeURIComponent((spot.title || '').replace(/[\/\\]/g, '-'));
                     
                     const popupContent = `
-                        <a href="/spot/${slug}" style="display:block; text-decoration:none; color:inherit;">
+                        <a href="/spot/${slug}" onclick="event.preventDefault(); window.location.href='/spot/${slug}'" style="display:block; text-decoration:none; color:inherit;">
                             <div class="popup-img-wrap"><img src="${imgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
                             <div class="popup-info">
                                 <span class="popup-area">${areaLabel}</span>
@@ -826,6 +828,13 @@
                 const item = document.createElement('a');
                 item.href = `/spot/${slug}`;
                 item.className = 'photo-item block';
+                
+                item.onclick = (e) => {
+                    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                        e.preventDefault();
+                        window.location.href = item.href;
+                    }
+                };
                 
                 const safeAlt = escapeHtml(getLocalizedSpotField(spot, 'title'));
                 
@@ -902,11 +911,13 @@
                 card.className = 'local-card-horizontal block';
                 card.dataset.title = spot.title; 
                 
-                // ドラッグ時のリンク誤タップを防ぐための処理
                 card.ondragstart = () => false;
                 card.onclick = (e) => {
                     if (window.isDragged) {
                         e.preventDefault();
+                    } else if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                        e.preventDefault();
+                        window.location.href = card.href;
                     }
                 };
 
@@ -936,7 +947,7 @@
                         const popupImgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                         
                         const popupContent = `
-                            <a href="/local-log/${slug}" style="display:block; text-decoration:none; color:inherit;">
+                            <a href="/local-log/${slug}" onclick="event.preventDefault(); window.location.href='/local-log/${slug}'" style="display:block; text-decoration:none; color:inherit;">
                                 <div class="popup-img-wrap"><img src="${popupImgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
                                 <div class="popup-info">
                                     <span class="popup-area">${areaLabel}</span>
