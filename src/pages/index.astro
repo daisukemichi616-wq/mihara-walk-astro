@@ -206,8 +206,9 @@
         .local-area { font-size: 10px; font-weight: 700; color: #9ca3af; letter-spacing: 0.1em; text-transform: uppercase; }
         .local-btn { font-size: 10px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 4px; }
         
-        /* ▼ 修正：地図が右に寄らないように、幅と余白の設定を最適化しました ▼ */
-        #local-map-container { height: 50vh; min-height: 400px; width: 100%; border-radius: 12px; border: 1px solid var(--border-soft); margin-top: 10px; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
+        /* ▼ 修正：地図の横幅を100%にしつつ、親要素のパディングを相殺して画面いっぱいに広げる ▼ */
+        #local-map-container { height: 50vh; min-height: 400px; width: calc(100% + 48px); margin-left: -24px; border-radius: 0; border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); border-left: none; border-right: none; margin-top: 10px; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
+        @media (min-width: 640px) { #local-map-container { width: 100%; margin-left: 0; border-radius: 12px; border: 1px solid var(--border-soft); } }
         @media (min-width: 1024px) { #local-map-container { height: 65vh; min-height: 550px; } }
         
         .h2-one-line { font-size: 1.6rem; font-weight: 700 !important; margin-bottom: 50px; line-height: 1.2; text-align: center; white-space: nowrap; letter-spacing: -0.07em; color: var(--palette-blue); }
@@ -344,10 +345,8 @@
             <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-2">
                 <div class="w-full text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
-            <!-- ▼ 地図がド真ん中に配置されるように親要素（div）にパディングを追加し、地図の幅を100%に調整しました ▼ -->
-            <div class="px-6 sm:px-0">
-                <div id="local-map-container"></div>
-            </div>
+            <!-- ▼ 地図のコンテナ。上記のCSS調整で画面いっぱいに広がります ▼ -->
+            <div id="local-map-container"></div>
         </div>
     </section>
 
@@ -892,6 +891,25 @@
             localMarkersMap = {};
             let hasMarkers = false;
 
+            // ▼ 追加：スクロール連動のためのObserverを復活 ▼
+            const observerOptions = { root: container, rootMargin: '0px', threshold: 0.8 };
+            const cardObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const title = entry.target.dataset.title;
+                        const marker = localMarkersMap[title];
+                        
+                        document.querySelectorAll('.local-card-horizontal').forEach(c => c.classList.remove('active-card'));
+                        entry.target.classList.add('active-card');
+
+                        if (marker) {
+                            localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
+                            marker.openPopup();
+                        }
+                    }
+                });
+            }, observerOptions);
+
             localInsightsData.forEach(spot => {
                 const driveId = getDriveId(spot.image);
                 const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w800');
@@ -939,6 +957,8 @@
                     </div>
                 `;
                 container.appendChild(card);
+                // ▼ 追加：カードをObserverの監視対象にする ▼
+                cardObserver.observe(card);
 
                 if (spot.lat && spot.lng) {
                     const lat = parseFloat(spot.lat); const lng = parseFloat(spot.lng);
@@ -969,6 +989,9 @@
                 setTimeout(() => {
                     localMapInstance.invalidateSize();
                     localMapInstance.fitBounds(localMarkersGroup.getBounds(), { padding: [30, 30], maxZoom: 14 });
+                    // ▼ 追加：最初のカードをアクティブにする ▼
+                    const firstCard = container.querySelector('.local-card-horizontal');
+                    if (firstCard) firstCard.classList.add('active-card');
                 }, 300);
             }
         }
