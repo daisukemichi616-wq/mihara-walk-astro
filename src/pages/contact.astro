@@ -1,0 +1,88 @@
+---
+// お問い合わせページ
+---
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <title>お問い合わせ | 三原市まち歩き - PHOTO MAP</title>
+  <meta name="description" content="三原市まち歩き - PHOTO MAPへのお問い合わせはこちらからお願いいたします。">
+
+  <script is:inline src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <style>
+    body { 
+      font-family: 'Zen Maru Gothic', sans-serif; 
+      color: #1a1a1a; 
+      background-color: #f8f9fa; 
+      line-height: 1.8;
+    }
+    .serif-custom { font-family: 'Noto Serif JP', serif; }
+    
+    h2 {
+      color: #004098;
+      font-weight: bold;
+      font-size: 1.25rem;
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #e1f5fe;
+    }
+    p {
+      color: #4b5563;
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      line-height: 2;
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- 上部ナビゲーション -->
+  <nav class="bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 py-3 sticky top-0 z-50 flex items-center justify-between shadow-sm">
+      <a href="/" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
+        <i class="fa-solid fa-arrow-left"></i> トップページへ戻る
+      </a>
+      <div class="text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">Mihara Rediscover</div>
+  </nav>
+
+  <!-- メインコンテンツ -->
+  <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-sm mt-6 mb-12 rounded-lg overflow-hidden">
+    
+    <div class="px-6 sm:px-12 py-10 sm:py-16 text-center">
+       
+       <h1 class="text-2xl sm:text-3xl font-bold text-[#004098] serif-custom mb-8 tracking-wide">
+           お問い合わせ
+       </h1>
+
+       <p class="text-left mb-10">
+         当サイトに関するご質問、写真掲載の取り下げ依頼、その他のお問い合わせにつきましては、以下の専用フォームよりご連絡ください。<br>
+         内容を確認次第、運営者よりご連絡させていただきます。
+       </p>
+
+       <a href="https://docs.google.com/forms/d/e/1FAIpQLSdQps3FxrrZlenFlyMxRZG1URw0yOb4QJYJCsiNbPTnRFonUA/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center gap-3 bg-[#004098] text-white font-bold py-4 px-8 rounded-full hover:bg-blue-800 transition-colors shadow-md">
+           <i class="fa-solid fa-envelope"></i> お問い合わせフォームを開く
+       </a>
+       
+       <div class="mt-16 text-left bg-gray-50 p-6 rounded-lg border border-gray-100">
+           <h3 class="font-bold text-sm text-gray-700 mb-2"><i class="fa-solid fa-circle-info text-blue-500 mr-2"></i>写真の掲載に関するお問い合わせ</h3>
+           <p class="text-xs text-gray-500 mb-0 leading-relaxed">
+             もし、ご自身が権利を持つ被写体（人物・私有地など）が意図せず掲載されており、削除をご希望の場合は、該当ページのURLを添えてフォームよりご連絡ください。速やかに対応いたします。
+           </p>
+       </div>
+
+    </div>
+  </main>
+
+  <!-- フッター -->
+  <footer class="text-center bg-white border-t border-gray-200 padding py-10 mt-auto">
+    <p class="text-[9px] font-bold text-gray-400 tracking-widest uppercase">© 2026 Mihara Walk Photo Map</p>
+  </footer>
+
+</body>
+</html>
