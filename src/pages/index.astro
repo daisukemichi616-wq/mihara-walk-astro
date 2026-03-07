@@ -600,6 +600,16 @@
             const langTextEl = document.getElementById('lang-text');
             if (langTextEl) langTextEl.textContent = currentLang === 'jp' ? 'EN' : 'JP';
 
+            // ▼ ここを追加：bodyタグに現在の言語の目印（class）をつける！
+            if (currentLang === 'en') {
+                document.body.classList.add('lang-en');
+                document.body.classList.remove('lang-jp');
+            } else {
+                document.body.classList.add('lang-jp');
+                document.body.classList.remove('lang-en');
+            }
+            // ▲ ここまで ▲
+
             updateWeatherUI();
             if(spotsData.length > 0) render(currentActiveArea);
             renderLocalInsights(); 
@@ -1047,10 +1057,11 @@
                 
                 card.className = `event-card ${!isLink ? 'cursor-default hover:transform-none hover:shadow-[0_4px_15px_rgba(0,64,152,0.02)] hover:border-[var(--border-soft)]' : ''}`;
 
+                // ▼ ここから書き換え：「.replace(/ /g, '<br>')」という余計な改行処理を削除しました ▼
                 card.innerHTML = `
                     <div class="event-date-box">
                         <i class="fa-regular fa-calendar text-xl mb-1.5 opacity-70"></i>
-                        <span class="text-[12px] sm:text-[13px] font-bold leading-tight whitespace-pre-line">${safeDate.replace(/ /g, '<br>')}</span>
+                        <span class="text-[12px] sm:text-[13px] font-bold leading-tight" style="word-break: keep-all;">${safeDate}</span>
                     </div>
                     <div class="event-content-box">
                         <h4 class="font-bold text-blue-900 text-[15px] sm:text-[17px] mb-2 leading-snug">${safeTitle}</h4>
