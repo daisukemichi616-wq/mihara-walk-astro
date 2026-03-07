@@ -9,7 +9,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
   <title>写真掲載についてのご案内 | 三原市まち歩き - PHOTO MAP</title>
-  <meta name="description" content="三原市まち歩き - PHOTO MAPの写真掲載に関するルールやマナーについてのご案内です。">
+  <meta name="description" content="三原市まち歩き - PHOTO MAPへの写真掲載に関するルールやガイドラインをご案内します。">
 
   <script is:inline src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
@@ -24,40 +24,139 @@
     }
     .serif-custom { font-family: 'Noto Serif JP', serif; }
     
-    .card-frame { background: white; border-radius: 12px; padding: 40px 25px; margin-bottom: 30px; text-align: left; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,64,152,0.03); }
-    .card-frame h4 { font-weight: 700 !important; color: #004098; margin-bottom: 12px; font-size: 1rem; border-left: 5px solid #004098; padding-left: 15px; }
-    .card-frame p { font-size: 0.85rem; font-weight: 500 !important; line-height: 2.3; color: #4b5563; }
+    .card-frame { 
+      background: white; 
+      border-radius: 12px; 
+      padding: 30px; 
+      border: 1px solid #e2e8f0; 
+      box-shadow: 0 4px 15px rgba(0,64,152,0.03); 
+    }
+    .card-frame h4 { 
+      font-weight: 700; 
+      color: #004098; 
+      margin-bottom: 12px; 
+      font-size: 1.1rem; 
+      border-left: 5px solid #004098; 
+      padding-left: 15px; 
+    }
+    .card-frame p { 
+      font-size: 0.9rem; 
+      color: #4b5563; 
+    }
+
+    /* ▼ 完全切り替え用のCSS ▼ */
+    .lang-jp, .lang-en { display: none; }
+    body.is-jp .lang-jp { display: block; }
+    body.is-jp span.lang-jp, body.is-jp a.lang-jp { display: inline; }
+    body.is-en .lang-en { display: block; }
+    body.is-en span.lang-en, body.is-en a.lang-en { display: inline; }
   </style>
+
+  <!-- ▼ 言語判定プログラム ▼ -->
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        let lang = urlParams.get('lang');
+        
+        if (!lang) {
+             lang = localStorage.getItem('siteLang') || 'jp';
+        }
+        
+        if (lang === 'en') {
+            document.body.classList.add('is-en');
+            document.title = "Submission Guidelines | Mihara Walk - PHOTO MAP";
+            const backLink = document.getElementById('back-link');
+            if(backLink) backLink.href = '/?lang=en';
+        } else {
+            document.body.classList.add('is-jp');
+            const backLink = document.getElementById('back-link');
+            if(backLink) backLink.href = '/?lang=jp';
+        }
+    });
+  </script>
 </head>
 <body>
   
   <nav class="bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 py-3 sticky top-0 z-50 flex items-center justify-between shadow-sm">
-      <a href="/" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
-        <i class="fa-solid fa-arrow-left"></i> トップページへ戻る
+      <a href="/" id="back-link" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
+        <i class="fa-solid fa-arrow-left"></i> 
+        <span class="lang-jp">トップページへ戻る</span>
+        <span class="lang-en">Back to Top</span>
       </a>
       <div class="text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">Mihara Rediscover</div>
   </nav>
 
-  <main class="max-w-3xl mx-auto mt-6 mb-12">
-    <div class="px-6 sm:px-12 py-10 sm:py-12 text-center">
-       <h1 class="text-2xl sm:text-3xl font-bold text-[#004098] serif-custom mb-10 tracking-wide">
-           写真掲載についてのご案内
+  <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-sm mt-6 mb-12 rounded-lg overflow-hidden">
+    
+    <div class="px-6 sm:px-12 py-10 sm:py-16">
+       
+       <h1 class="text-2xl sm:text-3xl font-bold text-[#004098] serif-custom mb-10 text-center tracking-wide">
+           <span class="lang-jp">写真掲載についてのご案内</span>
+           <span class="lang-en font-sans">Submission Guidelines</span>
        </h1>
 
-        <div class="space-y-6">
+       <div class="lang-jp text-center text-sm text-gray-600 mb-12 leading-loose">
+         <p>いつも素敵な写真をご提供いただき、ありがとうございます。<br>
+         皆さまに安心してプロジェクトにご参加いただけるよう、いくつかのルールを設けさせていただいております。</p>
+       </div>
+       <div class="lang-en text-center text-sm text-gray-600 mb-12 leading-loose">
+         <p>Thank you for always providing wonderful photos.<br>We have established some rules so that everyone can participate in the project with peace of mind.</p>
+       </div>
+
+        <div class="space-y-8">
             <div class="card-frame">
-                <h4>写真掲載のルール</h4>
-                <p>地域の魅力を伝えることを目的に、風景やお店、日常のひとコマを掲載しています。どなたでも自由に掲載できる仕組みではなく、ご連絡をいただいた内容を確認した上で掲載を行っています。</p>
+                <div class="lang-jp">
+                    <h4>1. 写真掲載のルール</h4>
+                    <p>当サイトは、三原の魅力を伝えることを目的に、風景やお店、日常のひとコマを掲載しています。<br>
+                    どなたでも自由に直接投稿できるシステムではなく、InstagramのDM等でご連絡いただいた内容を運営者が確認した上で、手動で掲載を行っています。</p>
+                </div>
+                <div class="lang-en">
+                    <h4>1. Rules for Publication</h4>
+                    <p>This site posts landscapes, shops, and everyday moments to convey the charm of Mihara.<br>
+                    It is not a system where anyone can post directly; the administrator manually reviews and posts the content received via Instagram DM.</p>
+                </div>
             </div>
+            
             <div class="card-frame">
-                <h4>権利とマナー</h4>
-                <p>著作権は撮影者本人にあります。人物や私有地が写る場合は、必ず権利者の許可を得てからご投稿ください。不適切な写真は掲載を見送る場合がございます。</p>
+                <div class="lang-jp">
+                    <h4>2. 権利とマナー</h4>
+                    <p>写真の著作権は、撮影者ご本人に帰属します。<br>
+                    ただし、人物の顔がはっきりと写っている場合や、私有地（撮影許可の無い店舗内など）が写っている場合は、必ず権利者の許可を得てからご提供ください。<br>
+                    サイトの趣旨にそぐわない写真や、不適切と判断される写真につきましては、掲載を見送る場合がございます。</p>
+                </div>
+                <div class="lang-en">
+                    <h4>2. Rights and Manners</h4>
+                    <p>The copyright of the photo belongs to the photographer.<br>
+                    However, if a person's face is clearly visible, or if private property is included, please be sure to obtain permission from the rights holder before submitting.<br>
+                    We may decline to post photos that are deemed inappropriate or do not match the purpose of the site.</p>
+                </div>
             </div>
+            
             <div class="card-frame">
-                <h4>写真の取り扱い</h4>
-                <p>ご提供いただいた写真は、当サイトや関連SNSにおいて三原を盛り上げる広報活動に大切に使用させていただきます。投稿者さんの意思を尊重し、丁寧に扱わせていただきます。</p>
+                <div class="lang-jp">
+                    <h4>3. 写真の取り扱いと活用</h4>
+                    <p>ご提供いただいた写真は、当サイト内での掲載のほか、関連SNS（Instagram等）において三原を盛り上げるための広報活動に大切に使用させていただきます。<br>
+                    掲載時には、可能な限り撮影者様のアカウント名やリンクをご紹介いたします。撮影者様の意思を尊重し、丁寧に扱わせていただきます。</p>
+                </div>
+                <div class="lang-en">
+                    <h4>3. Handling of Photos</h4>
+                    <p>The provided photos will be carefully used for publication on this site, as well as for public relations activities to promote Mihara on related SNS.<br>
+                    When publishing, we will introduce the photographer's account name and link as much as possible. We respect the photographer's intentions and handle them with care.</p>
+                </div>
+            </div>
+            
+            <div class="card-frame">
+                <div class="lang-jp">
+                    <h4>4. 掲載の取り下げについて</h4>
+                    <p>ご自身の写真の掲載取り下げをご希望の場合、または意図せずご自身や権利を持つものが写り込んでおり削除をご希望の場合は、お問い合わせフォームより該当のURLを添えてご連絡ください。速やかに削除対応をいたします。</p>
+                </div>
+                <div class="lang-en">
+                    <h4>4. Requesting Removal</h4>
+                    <p>If you wish to have your photo removed, or if you or something you hold the rights to is unintentionally included and you wish to have it deleted, please contact us via the inquiry form with the relevant URL. We will promptly remove it.</p>
+                </div>
             </div>
         </div>
+
     </div>
   </main>
 

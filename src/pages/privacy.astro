@@ -11,7 +11,7 @@
   <title>プライバシーポリシーおよび免責事項 | 三原市まち歩き - PHOTO MAP</title>
   <meta name="description" content="三原市まち歩き - PHOTO MAPのプライバシーポリシーおよび免責事項について記載しています。">
   
-  <meta name="robots" content="noindex"> <!-- ポリシーページは検索にヒットしなくても良いためnoindexを推奨 -->
+  <meta name="robots" content="noindex">
 
   <script is:inline src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Noto+Serif+JP:wght@700;900&display=swap" rel="stylesheet">
@@ -40,78 +40,133 @@
       font-size: 0.9rem;
       margin-bottom: 1rem;
     }
-    ul {
-      list-style-type: disc;
-      padding-left: 1.5rem;
-      color: #4b5563;
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
-    }
+
+    /* ▼ 完全切り替えの要：表示/非表示のルール ▼ */
+    .lang-jp, .lang-en { display: none; } /* 最初は両方隠す（チラつき防止） */
+    
+    /* bodyに .is-jp がついたら日本語を表示 */
+    body.is-jp .lang-jp { display: block; }
+    body.is-jp span.lang-jp, body.is-jp a.lang-jp { display: inline; }
+    
+    /* bodyに .is-en がついたら英語を表示 */
+    body.is-en .lang-en { display: block; }
+    body.is-en span.lang-en, body.is-en a.lang-en { display: inline; }
+    /* ▲ ここまで ▲ */
   </style>
+
+  <!-- ▼ URLまたは記憶から言語を判定するプログラム ▼ -->
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        let lang = urlParams.get('lang');
+        
+        // URLに言語指定がない場合は、ブラウザの記憶または日本語をデフォルトにする
+        if (!lang) {
+             lang = localStorage.getItem('siteLang') || 'jp';
+        }
+        
+        // 言語に応じたクラスをbodyに付与
+        if (lang === 'en') {
+            document.body.classList.add('is-en');
+            document.title = "Privacy Policy & Disclaimer | Mihara Walk - PHOTO MAP"; // タイトルも英語に
+            const backLink = document.getElementById('back-link');
+            if(backLink) backLink.href = '/?lang=en';
+        } else {
+            document.body.classList.add('is-jp');
+            const backLink = document.getElementById('back-link');
+            if(backLink) backLink.href = '/?lang=jp';
+        }
+    });
+  </script>
+  <!-- ▲ ここまで ▲ -->
 </head>
 <body>
   
-  <!-- 上部ナビゲーション -->
   <nav class="bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 py-3 sticky top-0 z-50 flex items-center justify-between shadow-sm">
-      <a href="/" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
-        <i class="fa-solid fa-arrow-left"></i> トップページへ戻る
+      <!-- 言語によって戻るボタンの文字を切り替え -->
+      <a href="/" id="back-link" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
+        <i class="fa-solid fa-arrow-left"></i> 
+        <span class="lang-jp">トップページへ戻る</span>
+        <span class="lang-en">Back to Top</span>
       </a>
       <div class="text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">Mihara Rediscover</div>
   </nav>
 
-  <!-- メインコンテンツ -->
   <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-sm mt-6 mb-12 rounded-lg overflow-hidden">
     
     <div class="px-6 sm:px-12 py-10 sm:py-16">
        
        <h1 class="text-2xl sm:text-3xl font-bold text-[#004098] serif-custom mb-10 text-center tracking-wide">
-           プライバシーポリシー<br class="sm:hidden"><span class="text-lg sm:text-2xl">および免責事項</span>
+           <span class="lang-jp">プライバシーポリシー<br class="sm:hidden"><span class="text-lg sm:text-2xl">および免責事項</span></span>
+           <span class="lang-en font-sans">Privacy Policy & Disclaimer</span>
        </h1>
 
-       <h2>個人情報の利用目的</h2>
-       <p>
-         当サイトでは、お問い合わせや記事へのコメントの際、名前やメールアドレス等の個人情報を入力いただく場合がございます。<br>
-         取得した個人情報は、お問い合わせに対する回答や必要な情報を電子メールなどをでご連絡する場合に利用させていただくものであり、これらの目的以外では利用いたしません。
-       </p>
+       <!-- 各項目ごとに 日本語の固まり と 英語の固まり を用意 -->
+       <div class="lang-jp">
+           <h2>個人情報の利用目的</h2>
+           <p>当サイトでは、お問い合わせや記事へのコメントの際、名前やメールアドレス等の個人情報を入力いただく場合がございます。<br>
+           取得した個人情報は、お問い合わせに対する回答や必要な情報を電子メールなどをでご連絡する場合に利用させていただくものであり、これらの目的以外では利用いたしません。</p>
+       </div>
+       <div class="lang-en">
+           <h2>Purpose of Use of Personal Information</h2>
+           <p>On this site, you may be asked to enter personal information such as your name and email address when making inquiries.<br>
+           The acquired personal information will be used to respond to inquiries or to contact you by email, and will not be used for other purposes.</p>
+       </div>
 
-       <h2>広告の配信について</h2>
-       <p>
-         当サイトは、第三者配信の広告サービス（Google AdSense、楽天アフィリエイト等）を利用しています、または利用する予定です。<br>
-         このような広告配信事業者は、ユーザーの興味に応じた商品やサービスの広告を表示するため、当サイトや他サイトへのアクセスに関する情報 『Cookie』（氏名、住所、メール アドレス、電話番号は含まれません）を使用することがあります。<br>
-         またGoogleアドセンスに関して、このプロセスの詳細やこのような情報が広告配信事業者に使用されないようにする方法については、<a href="https://policies.google.com/technologies/ads?hl=ja" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Googleポリシーと規約</a>をご覧ください。
-       </p>
+       <div class="lang-jp">
+           <h2>広告の配信について</h2>
+           <p>当サイトは、第三者配信の広告サービス（Google AdSense等）を利用しています、または利用する予定です。<br>
+           このような広告配信事業者は、ユーザーの興味に応じた商品やサービスの広告を表示するため、当サイトや他サイトへのアクセスに関する情報 『Cookie』（氏名、住所、メール アドレス、電話番号は含まれません）を使用することがあります。<br>
+           またGoogleアドセンスに関して、このプロセスの詳細やこのような情報が広告配信事業者に使用されないようにする方法については、<a href="https://policies.google.com/technologies/ads?hl=ja" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Googleポリシーと規約</a>をご覧ください。</p>
+       </div>
+       <div class="lang-en">
+           <h2>About Advertisement Delivery</h2>
+           <p>This site uses, or plans to use, third-party advertising services (such as Google AdSense).<br>
+           These ad providers may use "Cookies" (not including your name, address, email, or telephone number) about your access to this and other sites to display ads for products and services that match your interests.<br>
+           For more details on this process regarding Google AdSense and how to prevent such information from being used, please see the <a href="https://policies.google.com/technologies/ads?hl=en" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Google Policies and Terms</a>.</p>
+       </div>
 
-       <h2>アクセス解析ツールについて</h2>
-       <p>
-         当サイトでは、Googleによるアクセス解析ツール「Googleアナリティクス」を利用しています。<br>
-         このGoogleアナリティクスはトラフィックデータの収集のためにCookieを使用しています。このトラフィックデータは匿名で収集されており、個人を特定するものではありません。この機能はCookieを無効にすることで収集を拒否することが出来ますので、お使いのブラウザの設定をご確認ください。この規約に関して、詳しくは<a href="https://marketingplatform.google.com/about/analytics/terms/jp/" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Google アナリティクス利用規約</a>をクリックしてください。
-       </p>
+       <div class="lang-jp">
+           <h2>アクセス解析ツールについて</h2>
+           <p>当サイトでは、Googleによるアクセス解析ツール「Googleアナリティクス」を利用しています。<br>
+           このGoogleアナリティクスはトラフィックデータの収集のためにCookieを使用しています。このトラフィックデータは匿名で収集されており、個人を特定するものではありません。この機能はCookieを無効にすることで収集を拒否することが出来ますので、お使いのブラウザの設定をご確認ください。</p>
+       </div>
+       <div class="lang-en">
+           <h2>About Access Analysis Tools</h2>
+           <p>This site uses "Google Analytics", an access analysis tool by Google.<br>
+           This tool uses cookies to collect traffic data anonymously, and does not identify individuals. You can refuse this collection by disabling cookies in your browser settings.</p>
+       </div>
 
-       <h2>免責事項</h2>
-       <p>
-         当サイトからのリンクやバナーなどで移動したサイトで提供される情報、サービス等について一切の責任を負いません。<br>
-         また当サイトのコンテンツ・情報について、できる限り正確な情報を提供するように努めておりますが、正確性や安全性を保証するものではありません。情報が古くなっていることもございます。<br>
-         当サイトに掲載された内容によって生じた損害等の一切の責任を負いかねますのでご了承ください。
-       </p>
+       <div class="lang-jp">
+           <h2>免責事項</h2>
+           <p>当サイトからのリンクやバナーなどで移動したサイトで提供される情報、サービス等について一切の責任を負いません。<br>
+           また当サイトのコンテンツ・情報について、できる限り正確な情報を提供するように努めておりますが、正確性や安全性を保証するものではありません。情報が古くなっていることもございます。<br>
+           当サイトに掲載された内容によって生じた損害等の一切の責任を負いかねますのでご了承ください。</p>
+       </div>
+       <div class="lang-en">
+           <h2>Disclaimer</h2>
+           <p>We take no responsibility for the information or services provided on sites accessed via links or banners from this site.<br>
+           While we strive to provide accurate information, we do not guarantee its accuracy or safety. Please note that we are not responsible for any damages caused by the content posted on this site.</p>
+       </div>
 
-       <h2>著作権・肖像権について</h2>
-       <p>
-         当サイトで掲載している文章や画像などにつきましては、無断転載することを禁止します。<br>
-         当サイトは著作権や肖像権の侵害を目的としたものではありません。著作権や肖像権に関して問題がございましたら、お問い合わせフォームよりご連絡ください。迅速に対応いたします。
-       </p>
+       <div class="lang-jp">
+           <h2>著作権・肖像権について</h2>
+           <p>当サイトで掲載している文章や画像などにつきましては、無断転載することを禁止します。<br>
+           当サイトは著作権や肖像権の侵害を目的としたものではありません。著作権や肖像権に関して問題がございましたら、お問い合わせフォームよりご連絡ください。迅速に対応いたします。</p>
+       </div>
+       <div class="lang-en">
+           <h2>Copyrights and Portrait Rights</h2>
+           <p>Unauthorized reproduction of texts and images posted on this site is prohibited.<br>
+           If you have any problems regarding copyrights or portrait rights, please contact us via the inquiry form. We will respond promptly.</p>
+       </div>
 
        <div class="mt-16 text-right text-sm text-gray-500">
-         策定日：2026年3月<br>
-         三原市まち歩き - PHOTO MAP 運営事務局
+         <span class="lang-jp">策定日：2026年3月<br>三原市まち歩き - PHOTO MAP 運営事務局</span>
+         <span class="lang-en">Established: March 2026<br>Mihara Walk - PHOTO MAP</span>
        </div>
 
     </div>
   </main>
-
-  <!-- フッター -->
-  <footer class="text-center bg-white border-t border-gray-200 padding py-10 mt-auto">
-    <p class="text-[9px] font-bold text-gray-400 tracking-widest uppercase">© 2026 Mihara Walk Photo Map</p>
-  </footer>
 
 </body>
 </html>

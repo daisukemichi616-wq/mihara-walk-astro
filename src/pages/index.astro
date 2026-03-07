@@ -410,10 +410,10 @@
 
     <footer class="footer-main">
         <div class="flex flex-wrap justify-center gap-x-4 sm:gap-x-8 gap-y-3 mb-8 text-[11px] font-bold text-[#004098]">
-            <a href="/profile" class="hover:opacity-70 transition">運営者情報</a>
-            <a href="/guideline" class="hover:opacity-70 transition">写真掲載についてのご案内</a>
-            <a href="/privacy" class="hover:opacity-70 transition">プライバシーポリシー・免責事項</a>
-            <a href="/contact" class="hover:opacity-70 transition">お問い合わせ</a>
+            <a href="/profile" class="hover:opacity-70 transition" data-i18n="footer-profile">運営者情報</a>
+            <a href="/guideline" class="hover:opacity-70 transition" data-i18n="footer-guideline">写真掲載についてのご案内</a>
+            <a href="/privacy" class="hover:opacity-70 transition" data-i18n="footer-privacy">プライバシーポリシー・免責事項</a>
+            <a href="/contact" class="hover:opacity-70 transition" data-i18n="footer-contact">お問い合わせ</a>
         </div>
 
         <p class="footer-copy" data-i18n="footer-copy">© 2026 Mihara Walk Photo Map</p>
@@ -482,7 +482,13 @@
             'weather-mihara': { normal: { jp: 'MIHARA', en: 'MIHARA' } },
             'weather-magic-hour': { normal: { jp: 'MAGIC HOUR', en: 'MAGIC HOUR' } },
             'weather-sunrise': { normal: { jp: 'SUNRISE', en: 'SUNRISE' } },
-            'weather-weekly-toggle': { normal: { jp: '週間天気', en: 'Weekly' } }
+            'weather-weekly-toggle': { normal: { jp: '週間天気', en: 'Weekly' } },
+            // ▼ ここにフッターリンクの翻訳データを追加 ▼
+            'footer-profile': { normal: { jp: '運営者情報', en: 'About Us' } },
+            'footer-guideline': { normal: { jp: '写真掲載についてのご案内', en: 'Submission Guidelines' } },
+            'footer-privacy': { normal: { jp: 'プライバシーポリシー・免責事項', en: 'Privacy Policy & Disclaimer' } },
+            'footer-contact': { normal: { jp: 'お問い合わせ', en: 'Contact' } }
+            // ▲ ここまで ▲
         };
 
         let weatherDataCache = null;
@@ -602,6 +608,8 @@
 
         window.toggleLanguage = function() {
             currentLang = currentLang === 'jp' ? 'en' : 'jp';
+            // 選んだ言語をブラウザに記憶させる！
+            localStorage.setItem('siteLang', currentLang); 
             updateUI();
         };
 
@@ -1119,10 +1127,18 @@
         window.addEventListener('load', () => {
             fetchWeather();
             
+            // URLだけでなく「記憶」からも言語を読み取るように変更
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('lang') === 'en' || urlParams.get('lang') === 'jp') {
-                currentLang = urlParams.get('lang');
+            const paramLang = urlParams.get('lang');
+            const savedLang = localStorage.getItem('siteLang');
+            
+            if (paramLang === 'en' || paramLang === 'jp') {
+                currentLang = paramLang;
+                localStorage.setItem('siteLang', currentLang); // URLで指定されたらそれを記憶
+            } else if (savedLang === 'en' || savedLang === 'jp') {
+                currentLang = savedLang; // URLになければ記憶から呼び出す
             }
+            
             updateUI();
             rotateSlides();
 
@@ -1134,6 +1150,7 @@
                             spotsData = results.data.map(row => {
                                 const clean = {};
                                 Object.keys(row).forEach(k => {
+                                    if (!k) return; // ←【安全装置1】空の列を無視してエラーを防ぎます
                                     let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
                                     clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
                                 });
@@ -1172,6 +1189,7 @@
                                 localInsightsData = results.data.map(row => {
                                     const clean = {};
                                     Object.keys(row).forEach(k => {
+                                        if (!k) return; // ←【安全装置2】空の列を無視します
                                         let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
                                         clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
                                     });
@@ -1217,7 +1235,6 @@
                                 eventsData = results.data.map(row => {
                                     const clean = {};
                                     Object.keys(row).forEach(k => {
-                                        // ▼修正ポイント：k が undefined や null の場合のエラーを防ぐ
                                         if (!k) return; 
                                         let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
                                         clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
@@ -1226,12 +1243,17 @@
                                     if (!clean.title) clean.title = clean['イベント名'] || clean['タイトル'] || '';
                                     if (!clean.desc) clean.desc = clean['説明'] || clean['紹介文'] || '';
                                     
-                                    // 開始日と終了日を取得
+                                    // 英語用の列も取得
+                                    if (!clean.title_en) clean.title_en = clean['title_en'] || '';
+                                    if (!clean.desc_en) clean.desc_en = clean['desc_en'] || '';
+                                    
                                     if (!clean.start_date) clean.start_date = clean['開始日'] || '';
                                     if (!clean.end_date) clean.end_date = clean['終了日'] || '';
 
-                                    // 表示用日付を自動で美しく作る魔法（年またぎ対応版）
-                                    let autoDateStr = '';
+                                    // ▼ 修正ポイント：日本語用と英語用の両方の日付を自動生成する ▼
+                                    let autoDateStrJp = '';
+                                    let autoDateStrEn = '';
+                                    
                                     if (clean.start_date || clean.end_date) {
                                         const parseD = (str) => {
                                             if(!str) return null;
@@ -1243,40 +1265,57 @@
                                         
                                         const currentYear = new Date().getFullYear();
 
-                                        const fmtFull = (d) => {
+                                        // 日本語フォーマット
+                                        const fmtFullJp = (d) => {
                                             const yobi = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
                                             return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日(${yobi})`;
                                         };
-                                        const fmt = (d) => {
+                                        const fmtJp = (d) => {
                                             const yobi = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
                                             return `${d.getMonth() + 1}月${d.getDate()}日(${yobi})`;
                                         };
-                                        const fmtDay = (d) => {
-                                            const yobi = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
-                                            return `${d.getDate()}日(${yobi})`;
+
+                                        // 英語フォーマット（例: Mar 10 (Fri)）
+                                        const fmtFullEn = (d) => {
+                                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                                            return `${months[d.getMonth()]} ${d.getDate()} ${d.getFullYear()} (${days[d.getDay()]})`;
+                                        };
+                                        const fmtEn = (d) => {
+                                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                                            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                                            return `${months[d.getMonth()]} ${d.getDate()} (${days[d.getDay()]})`;
                                         };
                                         
                                         if (sD && eD) {
                                             if (sD.getTime() === eD.getTime()) {
-                                                autoDateStr = sD.getFullYear() === currentYear ? fmt(sD) : fmtFull(sD);
+                                                // 1日だけの場合
+                                                autoDateStrJp = sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD);
+                                                autoDateStrEn = sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD);
                                             } else if (sD.getFullYear() === eD.getFullYear()) {
-                                                if (sD.getMonth() === eD.getMonth()) {
-                                                    autoDateStr = `${sD.getFullYear() === currentYear ? fmt(sD) : fmtFull(sD)}〜${fmtDay(eD)}`;
-                                                } else {
-                                                    autoDateStr = `${sD.getFullYear() === currentYear ? fmt(sD) : fmtFull(sD)}〜 ${fmt(eD)}`;
-                                                }
+                                                // 同じ年で2日以上の期間がある場合
+                                                autoDateStrJp = `${sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD)}〜${fmtJp(eD)}`;
+                                                autoDateStrEn = `${sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD)} - ${fmtEn(eD)}`;
                                             } else {
-                                                autoDateStr = `${fmtFull(sD)}〜 ${fmtFull(eD)}`;
+                                                // 違う年をまたぐ場合
+                                                autoDateStrJp = `${fmtFullJp(sD)}〜${fmtFullJp(eD)}`;
+                                                autoDateStrEn = `${fmtFullEn(sD)} - ${fmtFullEn(eD)}`;
                                             }
                                         } else if (sD) {
-                                            autoDateStr = sD.getFullYear() === currentYear ? fmt(sD) : fmtFull(sD);
+                                            autoDateStrJp = sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD);
+                                            autoDateStrEn = sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD);
                                         } else if (eD) {
-                                            autoDateStr = `〜${eD.getFullYear() === currentYear ? fmt(eD) : fmtFull(eD)}`;
+                                            autoDateStrJp = `〜${eD.getFullYear() === currentYear ? fmtJp(eD) : fmtFullJp(eD)}`;
+                                            autoDateStrEn = `Until ${eD.getFullYear() === currentYear ? fmtEn(eD) : fmtFullEn(eD)}`;
                                         }
                                     }
 
-                                    // 手入力の「表示用日付」があれば優先し、無ければ自動生成したものを使う
-                                    if (!clean.date_str) clean.date_str = clean['表示用日付'] || clean['日付'] || autoDateStr || '';
+                                    // 日本語の日付を決定（手入力優先）
+                                    if (!clean.date_str) clean.date_str = clean['表示用日付'] || clean['日付'] || autoDateStrJp || '';
+                                    
+                                    // 英語の日付を決定（手入力優先）
+                                    if (!clean.date_str_en) clean.date_str_en = clean['date_str_en'] || autoDateStrEn || '';
+                                    // ▲ ここまで ▲
                                     
                                     if (!clean.url) clean.url = clean['リンク'] || clean['公式サイト'] || clean['url'] || '';
 
