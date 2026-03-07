@@ -358,6 +358,11 @@
             <div id="events-container" class="px-6 sm:px-0 grid gap-4 md:grid-cols-1 max-w-3xl mx-auto text-left">
                 <div class="w-full py-10 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
+
+            <!-- MORE EVENTS ボタン -->
+            <div id="event-load-more-area" class="text-center py-10 hidden mt-4">
+                <button onclick="loadMoreEvents()" class="bg-[#004098] text-white text-xs font-bold py-3 px-10 rounded-full hover:opacity-90 transition shadow-lg tracking-widest">MORE EVENTS</button>
+            </div>
         </div>
     </section>
 
@@ -651,6 +656,10 @@
         let mapInstance = null;
         let markersClusterGroup = null; 
         let currentViewMode = 'grid'; 
+
+        // イベントの表示件数設定（最初は10件表示）
+        const EVENTS_PER_PAGE = 10;
+        let eventsDisplayedCount = 0;
 
         function getDriveId(urlOrId) {
             if (!urlOrId) return '';
@@ -971,10 +980,16 @@
             }
         }
 
-        function renderEvents() {
+        function renderEvents(append = false) {
             const container = document.getElementById('events-container');
+            const loadMoreArea = document.getElementById('event-load-more-area');
             if (!container) return;
-            container.innerHTML = '';
+            
+            // 初回読み込み時は中身を空にしてカウントを0にする
+            if (!append) {
+                container.innerHTML = '';
+                eventsDisplayedCount = 0;
+            }
 
             if (eventsData.length === 0) {
                 container.innerHTML = `
@@ -987,10 +1002,14 @@
                 if (el && i18nData['event-empty']['normal'][currentLang]) {
                     el.innerHTML = i18nData['event-empty']['normal'][currentLang];
                 }
+                if (loadMoreArea) loadMoreArea.classList.add('hidden');
                 return;
             }
 
-            eventsData.forEach(event => {
+            // 次に表示するイベントだけを切り取る
+            const nextEvents = eventsData.slice(eventsDisplayedCount, eventsDisplayedCount + EVENTS_PER_PAGE);
+
+            nextEvents.forEach(event => {
                 const lang = currentLang;
                 const title = (lang === 'en' && event.title_en) ? event.title_en : event.title;
                 const desc = (lang === 'en' && event.desc_en) ? event.desc_en : event.desc;
@@ -1037,7 +1056,24 @@
                 `;
                 container.appendChild(card);
             });
+
+            // 表示した数をカウントアップ
+            eventsDisplayedCount += nextEvents.length;
+
+            // まだ表示していないイベントが残っているかチェックして、ボタンの表示/非表示を切り替える
+            if (loadMoreArea) {
+                if (eventsDisplayedCount < eventsData.length) {
+                    loadMoreArea.classList.remove('hidden');
+                } else {
+                    loadMoreArea.classList.add('hidden');
+                }
+            }
         }
+
+        // ボタンが押された時に実行される関数
+        window.loadMoreEvents = function() {
+            renderEvents(true);
+        };
 
         window.isDown = false;
         window.startX = 0;
@@ -1181,19 +1217,73 @@
                                 eventsData = results.data.map(row => {
                                     const clean = {};
                                     Object.keys(row).forEach(k => {
+                                        // ▼修正ポイント：k が undefined や null の場合のエラーを防ぐ
+                                        if (!k) return; 
                                         let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
                                         clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
                                     });
 
                                     if (!clean.title) clean.title = clean['イベント名'] || clean['タイトル'] || '';
                                     if (!clean.desc) clean.desc = clean['説明'] || clean['紹介文'] || '';
-                                    if (!clean.date_str) clean.date_str = clean['表示用日付'] || clean['日付'] || '';
+                                    
+                                    // 開始日と終了日を取得
+                                    if (!clean.start_date) clean.start_date = clean['開始日'] || '';
                                     if (!clean.end_date) clean.end_date = clean['終了日'] || '';
+
+                                    // 表示用日付を自動で美しく作る魔法（年またぎ対応版）
+                                    let autoDateStr = '';
+                                    if (clean.start_date || clean.end_date) {
+                                        const parseD = (str) => {
+                                            if(!str) return null;
+                                            const d = new Date(str.replace(/-/g, '/'));
+                                            return isNaN(d.getTime()) ? null : d;
+                                        };
+                                        const sD = parseD(clean.start_date);
+                                        const eD = parseD(clean.end_date);
+                                        
+                                        const currentYear = new Date().getFullYear();
+
+                                        const fmtFull = (d) => {
+                                            const yobi = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
+                                            return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日(${yobi})`;
+                                        };
+                                        const fmt = (d) => {
+                                            const yobi = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
+                                            return `${d.getMonth() + 1}月${d.getDate()}日(${yobi})`;
+                                        };
+                                        const fmtDay = (d) => {
+                                            const yobi = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
+                                            return `${d.getDate()}日(${yobi})`;
+                                        };
+                                        
+                                        if (sD && eD) {
+                                            if (sD.getTime() === eD.getTime()) {
+                                                autoDateStr = sD.getFullYear() === currentYear ? fmt(sD) : fmtFull(sD);
+                                            } else if (sD.getFullYear() === eD.getFullYear()) {
+                                                if (sD.getMonth() === eD.getMonth()) {
+                                                    autoDateStr = `${sD.getFullYear() === currentYear ? fmt(sD) : fmtFull(sD)}〜${fmtDay(eD)}`;
+                                                } else {
+                                                    autoDateStr = `${sD.getFullYear() === currentYear ? fmt(sD) : fmtFull(sD)}〜 ${fmt(eD)}`;
+                                                }
+                                            } else {
+                                                autoDateStr = `${fmtFull(sD)}〜 ${fmtFull(eD)}`;
+                                            }
+                                        } else if (sD) {
+                                            autoDateStr = sD.getFullYear() === currentYear ? fmt(sD) : fmtFull(sD);
+                                        } else if (eD) {
+                                            autoDateStr = `〜${eD.getFullYear() === currentYear ? fmt(eD) : fmtFull(eD)}`;
+                                        }
+                                    }
+
+                                    // 手入力の「表示用日付」があれば優先し、無ければ自動生成したものを使う
+                                    if (!clean.date_str) clean.date_str = clean['表示用日付'] || clean['日付'] || autoDateStr || '';
+                                    
                                     if (!clean.url) clean.url = clean['リンク'] || clean['公式サイト'] || clean['url'] || '';
 
                                     return clean;
                                 }).filter(e => e.title);
 
+                                // 終了したイベントを除外
                                 eventsData = eventsData.filter(e => {
                                     if (!e.end_date) return true; 
                                     const endDate = new Date(e.end_date.replace(/-/g, '/')); 
@@ -1201,6 +1291,29 @@
                                     return endDate >= today; 
                                 });
                                 
+                                // 最強の並び替え（ソート）処理
+                                eventsData.sort((a, b) => {
+                                    const todayTime = today.getTime();
+                                    
+                                    let startA = a.start_date ? new Date(a.start_date.replace(/-/g, '/')).getTime() : Infinity;
+                                    let startB = b.start_date ? new Date(b.start_date.replace(/-/g, '/')).getTime() : Infinity;
+                                    if (isNaN(startA)) startA = Infinity;
+                                    if (isNaN(startB)) startB = Infinity;
+
+                                    let sortKeyA = startA < todayTime ? todayTime : startA;
+                                    let sortKeyB = startB < todayTime ? todayTime : startB;
+
+                                    if (sortKeyA === sortKeyB) {
+                                        let endA = a.end_date ? new Date(a.end_date.replace(/-/g, '/')).getTime() : Infinity;
+                                        let endB = b.end_date ? new Date(b.end_date.replace(/-/g, '/')).getTime() : Infinity;
+                                        if (isNaN(endA)) endA = Infinity;
+                                        if (isNaN(endB)) endB = Infinity;
+                                        return endA - endB;
+                                    }
+
+                                    return sortKeyA - sortKeyB;
+                                });
+
                                 renderEvents();
                             } catch (e) { console.warn('Event Data parse warning:', e); }
                         },
