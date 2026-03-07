@@ -46,6 +46,11 @@ export async function getStaticPaths() {
     const spot = {};
     spot.title = rawSpot['スポット名'] || rawSpot['タイトル'] || rawSpot['title'] || '';
     spot.desc = rawSpot['紹介文'] || rawSpot['説明'] || rawSpot['desc'] || '';
+    
+    // ▼ 英語用の列データを取得 ▼
+    spot.title_en = rawSpot['title_en'] || '';
+    spot.desc_en = rawSpot['desc_en'] || '';
+    
     spot.image = rawSpot['写真'] || rawSpot['画像'] || rawSpot['image'] || '';
     spot.image2 = rawSpot['写真2'] || rawSpot['画像2'] || rawSpot['image2'] || '';
     spot.image3 = rawSpot['写真3'] || rawSpot['画像3'] || rawSpot['image3'] || '';
@@ -116,7 +121,15 @@ const hotelUrl = (spot.hotel_url && spot.hotel_url.trim() !== "") ? spot.hotel_u
 const areaLabels = {
   'all': 'ぜんぶ', 'mihara': '三原市街', 'daiwa': '大和', 'kui': '久井', 'hongo': '本郷', 'sagi': '佐木島'
 };
+const areaLabelsEn = {
+  'all': 'ALL', 'mihara': 'MIHARA', 'daiwa': 'DAIWA', 'kui': 'KUI', 'hongo': 'HONGO', 'sagi': 'SAGI'
+};
 const displayArea = areaLabels[spot.area] || spot.area || '三原市';
+const displayAreaEn = areaLabelsEn[spot.area] || spot.area || 'Mihara';
+
+// 英語データがない場合のフォールバック（保険）
+const finalTitleEn = spot.title_en || spot.title;
+const finalDescEn = spot.desc_en || "No description available in English yet.";
 ---
 
 <!DOCTYPE html>
@@ -172,7 +185,40 @@ const displayArea = areaLabels[spot.area] || spot.area || '三原市';
     .share-btn.copy-link:hover { background: #004098; color: #fff !important; }
     #copy-success-msg { font-size: 10px; font-weight: bold; color: #004098; opacity: 0; transition: opacity 0.3s ease; height: 14px; text-align: center; }
     #copy-success-msg.show { opacity: 1; }
+
+    /* ▼ 完全切り替え用のCSS ▼ */
+    .lang-jp, .lang-en { display: none; }
+    body.is-jp .lang-jp { display: block; }
+    body.is-jp span.lang-jp, body.is-jp a.lang-jp, body.is-jp div.lang-jp { display: inline; }
+    body.is-jp div.lang-jp.block-elem { display: block; }
+    body.is-en .lang-en { display: block; }
+    body.is-en span.lang-en, body.is-en a.lang-en, body.is-en div.lang-en { display: inline; }
+    body.is-en div.lang-en.block-elem { display: block; }
   </style>
+
+  <!-- ▼ 言語判定プログラム ▼ -->
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        let lang = urlParams.get('lang');
+        
+        if (!lang) {
+             lang = localStorage.getItem('siteLang') || 'jp';
+        }
+        
+        if (lang === 'en') {
+            document.body.classList.add('is-en');
+            const spotTitleEn = document.getElementById('title-en-data').textContent;
+            document.title = spotTitleEn + " | Mihara Walk - PHOTO MAP";
+            const backLink = document.getElementById('back-link');
+            if(backLink) backLink.href = '/?lang=en#gallery';
+        } else {
+            document.body.classList.add('is-jp');
+            const backLink = document.getElementById('back-link');
+            if(backLink) backLink.href = '/?lang=jp#gallery';
+        }
+    });
+  </script>
 
   <script is:inline>
     function handleFallbackErr(img, driveId) {
@@ -197,14 +243,19 @@ const displayArea = areaLabels[spot.area] || spot.area || '三原市';
 <body>
   
   <nav class="bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 py-3 sticky top-0 z-50 flex items-center justify-between shadow-sm">
-      <a href="/#gallery" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
-        <i class="fa-solid fa-arrow-left"></i> マップへ戻る
+      <a href="/#gallery" id="back-link" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="lang-jp">マップへ戻る</span>
+        <span class="lang-en">Back to Map</span>
       </a>
       <div class="text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">Mihara Rediscover</div>
   </nav>
 
   <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-md pb-24">
     
+    <!-- 隠しデータ（JSでタイトルを書き換える用） -->
+    <span id="title-en-data" style="display:none;">{finalTitleEn}</span>
+
     <!-- ギャラリー部分（複数画像対応） -->
     <div class="relative w-full bg-[#f8f9fa]">
         <div class="gallery-container w-full h-[60vh] sm:h-[80vh]">
@@ -235,50 +286,65 @@ const displayArea = areaLabels[spot.area] || spot.area || '三原市';
         <!-- 画像が複数ある場合はスワイプ案内を表示 -->
         {subImages.length > 0 && (
             <div class="absolute bottom-4 right-4 bg-black/50 text-white text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-sm pointer-events-none">
-                <i class="fa-solid fa-arrows-left-right"></i> スワイプして写真を見る
+                <i class="fa-solid fa-arrows-left-right"></i> 
+                <span class="lang-jp">スワイプして写真を見る</span>
+                <span class="lang-en">Swipe to see more</span>
             </div>
         )}
         
         <div class="absolute top-4 left-4 bg-white/90 text-[#004098] border border-[#004098] text-[9px] font-bold px-3 py-1 mb-6 rounded uppercase tracking-widest shadow-sm z-10">
-            {displayArea}
+            <span class="lang-jp">{displayArea}</span>
+            <span class="lang-en">{displayAreaEn}</span>
         </div>
     </div>
     
     <div class="px-6 sm:px-10 py-8 sm:py-12">
        
        <h1 class="text-2xl sm:text-3xl font-bold text-slate-800 serif-custom mb-8 leading-relaxed border-b-2 border-blue-50 pb-6 mt-4">
-           {spot.title}
+           <span class="lang-jp">{spot.title}</span>
+           <span class="lang-en font-sans">{finalTitleEn}</span>
        </h1>
        
-       <div id="desc-container" class="text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12">
+       <div id="desc-container-jp" class="lang-jp block-elem text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12">
          {spot.desc}
        </div>
+       <div id="desc-container-en" class="lang-en block-elem text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12">
+         {finalDescEn}
+       </div>
+
        <script is:inline>
-         const descEl = document.getElementById('desc-container');
-         if (descEl) {
-           const urlRegex = /(https?:\/\/[^\s<]+)/g;
-           descEl.innerHTML = descEl.innerHTML.replace(urlRegex, function(url) {
-             return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #004098; text-decoration: underline;">${url}</a>`;
-           });
-         }
+         // リンクをクリッカブルにする処理（日・英両方）
+         ['desc-container-jp', 'desc-container-en'].forEach(id => {
+             const descEl = document.getElementById(id);
+             if (descEl) {
+               const urlRegex = /(https?:\/\/[^\s<]+)/g;
+               descEl.innerHTML = descEl.innerHTML.replace(urlRegex, function(url) {
+                 return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #004098; text-decoration: underline;">${url}</a>`;
+               });
+             }
+         });
        </script>
 
        <!-- アクションボタン群 -->
        <div class="space-y-4">
            {mapUrl && (
              <a href={mapUrl} target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition">
-               <i class="fa-solid fa-map-location-dot text-lg"></i> この場所をGoogleマップで見る
+               <i class="fa-solid fa-map-location-dot text-lg"></i> 
+               <span class="lang-jp">この場所をGoogleマップで見る</span>
+               <span class="lang-en">View on Google Maps</span>
              </a>
            )}
 
            <a href={hotelUrl} target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full text-white font-bold text-xs py-4 rounded hover:opacity-90 transition shadow-md" style="background: linear-gradient(to right, #1a2a6c, #11998e);">
-             <i class="fa-solid fa-bed text-lg"></i> 周辺のホテル・宿を探す
+             <i class="fa-solid fa-bed text-lg"></i> 
+             <span class="lang-jp">周辺のホテル・宿を探す</span>
+             <span class="lang-en">Find Hotels Nearby</span>
            </a>
        </div>
        
        <!-- Photo by と SNSリンク -->
        <div class="mt-16 pt-8 border-t border-dashed border-gray-200 flex justify-between items-center mb-8">
-         <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Photo by {spot.author || '管理者'}</span>
+         <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Photo by {spot.author || 'MICHIM'}</span>
          {spot.sns && (
            <a href={spot.sns} target="_blank" rel="noopener noreferrer" class="text-gray-900 font-bold text-[10px] border-b border-gray-900 pb-1 uppercase hover:opacity-70 transition">
              Instagram Link
@@ -290,22 +356,32 @@ const displayArea = areaLabels[spot.area] || spot.area || '三原市';
        <div class="pt-4 text-center">
            <p class="text-[9px] font-bold text-slate-400 mb-4 tracking-widest uppercase">SHARE THIS SPOT</p>
            <div class="share-btn-group" id="share-buttons">
-               <a id="share-x" href="#" target="_blank" rel="noopener noreferrer" class="share-btn x-twitter" title="X (Twitter)でシェア"><i class="fa-brands fa-x-twitter"></i></a>
-               <a id="share-fb" href="#" target="_blank" rel="noopener noreferrer" class="share-btn facebook" title="Facebookでシェア"><i class="fa-brands fa-facebook-f"></i></a>
-               <a id="share-line" href="#" target="_blank" rel="noopener noreferrer" class="share-btn line" title="LINEで送る"><i class="fa-brands fa-line"></i></a>
-               <button id="share-copy" class="share-btn copy-link" title="リンクをコピー"><i class="fa-solid fa-link"></i></button>
+               <a id="share-x" href="#" target="_blank" rel="noopener noreferrer" class="share-btn x-twitter" title="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>
+               <a id="share-fb" href="#" target="_blank" rel="noopener noreferrer" class="share-btn facebook" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+               <a id="share-line" href="#" target="_blank" rel="noopener noreferrer" class="share-btn line" title="LINE"><i class="fa-brands fa-line"></i></a>
+               <button id="share-copy" class="share-btn copy-link" title="Copy Link"><i class="fa-solid fa-link"></i></button>
            </div>
-           <p id="copy-success-msg">リンクをコピーしました！</p>
+           <p id="copy-success-msg">
+               <span class="lang-jp">リンクをコピーしました！</span>
+               <span class="lang-en">Link copied to clipboard!</span>
+           </p>
        </div>
        
        <!-- シェアボタンを動かすプログラム -->
        <script is:inline>
          document.addEventListener('DOMContentLoaded', () => {
            const shareUrl = window.location.href;
-           const spotTitle = document.title.split(' | ')[0];
-           const shareText = `三原のいいとこ見つけた！「${spotTitle}」\n#三原市まち歩き #Mihara`;
+           const isEn = document.body.classList.contains('is-en');
            
-           document.getElementById('share-x').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+           const spotTitleJp = document.title.split(' | ')[0];
+           const spotTitleEn = document.getElementById('title-en-data').textContent;
+           
+           const shareTextJp = `三原のいいとこ見つけた！「${spotTitleJp}」\n#三原市まち歩き #Mihara`;
+           const shareTextEn = `Found a great spot in Mihara! "${spotTitleEn}"\n#Mihara #JapanTravel`;
+           
+           const finalShareText = isEn ? shareTextEn : shareTextJp;
+           
+           document.getElementById('share-x').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(finalShareText)}&url=${encodeURIComponent(shareUrl)}`;
            document.getElementById('share-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
            document.getElementById('share-line').href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`;
            
