@@ -1057,7 +1057,7 @@
                 
                 card.className = `event-card ${!isLink ? 'cursor-default hover:transform-none hover:shadow-[0_4px_15px_rgba(0,64,152,0.02)] hover:border-[var(--border-soft)]' : ''}`;
 
-                // ▼ ここから書き換え：「.replace(/ /g, '<br>')」という余計な改行処理を削除しました ▼
+                // ▼ ここから書き換え：リンクの有無で右下の表示を変化させます ▼
                 card.innerHTML = `
                     <div class="event-date-box">
                         <i class="fa-regular fa-calendar text-xl mb-1.5 opacity-70"></i>
@@ -1066,11 +1066,12 @@
                     <div class="event-content-box">
                         <h4 class="font-bold text-blue-900 text-[15px] sm:text-[17px] mb-2 leading-snug">${safeTitle}</h4>
                         <p class="text-xs text-gray-500 leading-relaxed mb-3">${safeDesc}</p>
-                        ${isLink ? `
                         <div class="mt-auto flex justify-end">
-                            <span class="text-[10px] font-bold text-blue-500 flex items-center gap-1 hover:text-blue-700 transition">${btnText} <i class="fa-solid fa-chevron-right text-[8px]"></i></span>
+                            ${isLink 
+                                ? `<span class="text-[10px] font-bold text-blue-500 flex items-center gap-1 hover:text-blue-700 transition">${lang === 'en' ? 'Details' : '詳細を見る'} <i class="fa-solid fa-arrow-up-right-from-square text-[9px] ml-0.5"></i></span>`
+                                : `<span class="text-[10px] font-bold text-gray-300 flex items-center gap-1"><i class="fa-solid fa-link-slash text-[9px]"></i> ${lang === 'en' ? 'No Link' : 'リンクなし'}</span>`
+                            }
                         </div>
-                        ` : ''}
                     </div>
                 `;
                 container.appendChild(card);
