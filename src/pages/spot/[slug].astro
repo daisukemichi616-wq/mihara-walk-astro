@@ -47,7 +47,6 @@ export async function getStaticPaths() {
     spot.title = rawSpot['スポット名'] || rawSpot['タイトル'] || rawSpot['title'] || '';
     spot.desc = rawSpot['紹介文'] || rawSpot['説明'] || rawSpot['desc'] || '';
     
-    // ▼ 英語用の列データを取得 ▼
     spot.title_en = rawSpot['title_en'] || '';
     spot.desc_en = rawSpot['desc_en'] || '';
     
@@ -113,11 +112,9 @@ if(!mapUrl && spot.lat_lng_raw) {
    mapUrl = `https://www.google.com/maps/search/?api=1&query=${spot.lat_lng_raw}`;
 }
 
-// ホテル用URL
 const defaultHotelUrl = "https://a.r10.to/hRIwm0";
 const hotelUrl = (spot.hotel_url && spot.hotel_url.trim() !== "") ? spot.hotel_url.trim() : defaultHotelUrl;
 
-// エリアの表示名
 const areaLabels = {
   'all': 'ぜんぶ', 'mihara': '三原市街', 'daiwa': '大和', 'kui': '久井', 'hongo': '本郷', 'sagi': '佐木島'
 };
@@ -127,7 +124,6 @@ const areaLabelsEn = {
 const displayArea = areaLabels[spot.area] || spot.area || '三原市';
 const displayAreaEn = areaLabelsEn[spot.area] || spot.area || 'Mihara';
 
-// 英語データがない場合のフォールバック（保険）
 const finalTitleEn = spot.title_en || spot.title;
 const finalDescEn = spot.desc_en || "No description available in English yet.";
 ---
@@ -166,6 +162,7 @@ const finalDescEn = spot.desc_en || "No description available in English yet.";
       overflow-x: auto;
       scroll-snap-type: x mandatory;
       scrollbar-width: none; /* Firefox */
+      -webkit-overflow-scrolling: touch;
     }
     .gallery-container::-webkit-scrollbar {
       display: none; /* Chrome/Safari */
@@ -173,9 +170,14 @@ const finalDescEn = spot.desc_en || "No description available in English yet.";
     .gallery-item {
       flex: 0 0 100%;
       scroll-snap-align: start;
+      /* PCでのドラッグ時に画像だけ引っ張れるのを防ぐ */
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .gallery-item img {
+      pointer-events: none; /* 画像自体のドラッグを禁止 */
     }
 
-    /* シェアボタン用のスタイル */
     .share-btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
     .share-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 16px; transition: all 0.3s; text-decoration: none; border: 1px solid transparent; cursor: pointer; }
     .share-btn:hover { transform: translateY(-2px); color: white; }
@@ -186,7 +188,7 @@ const finalDescEn = spot.desc_en || "No description available in English yet.";
     #copy-success-msg { font-size: 10px; font-weight: bold; color: #004098; opacity: 0; transition: opacity 0.3s ease; height: 14px; text-align: center; }
     #copy-success-msg.show { opacity: 1; }
 
-    /* ▼ 完全切り替え用のCSS ▼ */
+    /* 完全切り替え用のCSS */
     .lang-jp, .lang-en { display: none; }
     body.is-jp .lang-jp { display: block; }
     body.is-jp span.lang-jp, body.is-jp a.lang-jp, body.is-jp div.lang-jp { display: inline; }
@@ -196,15 +198,11 @@ const finalDescEn = spot.desc_en || "No description available in English yet.";
     body.is-en div.lang-en.block-elem { display: block; }
   </style>
 
-  <!-- ▼ 言語判定プログラム ▼ -->
   <script is:inline>
     document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         let lang = urlParams.get('lang');
-        
-        if (!lang) {
-             lang = localStorage.getItem('siteLang') || 'jp';
-        }
+        if (!lang) lang = localStorage.getItem('siteLang') || 'jp';
         
         if (lang === 'en') {
             document.body.classList.add('is-en');
@@ -218,9 +216,7 @@ const finalDescEn = spot.desc_en || "No description available in English yet.";
             if(backLink) backLink.href = '/?lang=jp#gallery';
         }
     });
-  </script>
 
-  <script is:inline>
     function handleFallbackErr(img, driveId) {
       if (!img || !driveId) return;
       const step = parseInt(img.dataset.fStep || '0');
@@ -253,50 +249,85 @@ const finalDescEn = spot.desc_en || "No description available in English yet.";
 
   <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-md pb-24">
     
-    <!-- 隠しデータ（JSでタイトルを書き換える用） -->
     <span id="title-en-data" style="display:none;">{finalTitleEn}</span>
 
-    <!-- ギャラリー部分（複数画像対応） -->
-    <div class="relative w-full bg-[#f8f9fa]">
-        <div class="gallery-container w-full h-[60vh] sm:h-[80vh]">
-            <!-- メイン画像 -->
-            <div class="gallery-item h-full flex items-center justify-center relative">
-                <img 
-                    src={mainImageUrl} 
-                    alt={spot.title} 
-                    class="w-full h-full object-contain" 
-                    data-f-step="0" 
-                    onerror={`handleFallbackErr(this, '${mainDriveId}')`} 
-                />
-            </div>
-            <!-- サブ画像 -->
-            {subImages.map((img, index) => (
-                <div class="gallery-item h-full flex items-center justify-center relative bg-[#f1f5f9]">
-                    <img 
-                        src={img.url} 
-                        alt={`${spot.title} - 写真${index + 2}`} 
-                        class="w-full h-full object-contain" 
-                        data-f-step="0" 
-                        onerror={`handleFallbackErr(this, '${img.id}')`} 
-                    />
+    <!-- ▼ ここからギャラリー部分のデザインを改善 ▼ -->
+    <div class="w-full bg-[#f8f9fa]">
+        
+        <div class="relative">
+            <!-- 写真部分 -->
+            <div id="spot-gallery" class="gallery-container w-full h-[60vh] sm:h-[80vh] cursor-grab">
+                <div class="gallery-item h-full flex items-center justify-center relative">
+                    <img src={mainImageUrl} alt={spot.title} class="w-full h-full object-contain" data-f-step="0" onerror={`handleFallbackErr(this, '${mainDriveId}')`} />
                 </div>
-            ))}
+                {subImages.map((img, index) => (
+                    <div class="gallery-item h-full flex items-center justify-center relative bg-[#f1f5f9]">
+                        <img src={img.url} alt={`${spot.title} - 写真${index + 2}`} class="w-full h-full object-contain" data-f-step="0" onerror={`handleFallbackErr(this, '${img.id}')`} />
+                    </div>
+                ))}
+            </div>
+            
+            <div class="absolute top-4 left-4 bg-white/90 text-[#004098] border border-[#004098] text-[9px] font-bold px-3 py-1 rounded uppercase tracking-widest shadow-sm z-10 pointer-events-none">
+                <span class="lang-jp">{displayArea}</span>
+                <span class="lang-en">{displayAreaEn}</span>
+            </div>
         </div>
         
-        <!-- 画像が複数ある場合はスワイプ案内を表示 -->
+        <!-- 写真枠の下に配置されるスワイプ案内（被らない！） -->
         {subImages.length > 0 && (
-            <div class="absolute bottom-4 right-4 bg-black/50 text-white text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-2 backdrop-blur-sm pointer-events-none">
-                <i class="fa-solid fa-arrows-left-right"></i> 
-                <span class="lang-jp">スワイプして写真を見る</span>
-                <span class="lang-en">Swipe to see more</span>
+            <div class="flex justify-center items-center gap-4 py-3 bg-[#f8f9fa] border-t border-gray-200/50 text-gray-400 pointer-events-none">
+                <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                <div class="text-[10px] font-bold tracking-widest flex items-center gap-1.5 uppercase">
+                    <span class="lang-jp">写真をスワイプ</span>
+                    <span class="lang-en">Swipe Photos</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </div>
         )}
         
-        <div class="absolute top-4 left-4 bg-white/90 text-[#004098] border border-[#004098] text-[9px] font-bold px-3 py-1 mb-6 rounded uppercase tracking-widest shadow-sm z-10">
-            <span class="lang-jp">{displayArea}</span>
-            <span class="lang-en">{displayAreaEn}</span>
-        </div>
     </div>
+    <!-- ▲ ここまでギャラリー部分 ▲ -->
+    
+    <!-- ▼ PCでのドラッグ（スワイプ）を可能にする魔法のプログラム ▼ -->
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', () => {
+          const slider = document.getElementById('spot-gallery');
+          if (!slider) return;
+
+          let isDown = false;
+          let startX;
+          let scrollLeft;
+
+          // マウスをクリックした時
+          slider.addEventListener('mousedown', (e) => {
+              isDown = true;
+              slider.classList.add('cursor-grabbing'); // つかんでいるカーソルに変更
+              slider.classList.remove('cursor-grab');
+              startX = e.pageX - slider.offsetLeft;
+              scrollLeft = slider.scrollLeft;
+          });
+          // マウスが枠外に出た時
+          slider.addEventListener('mouseleave', () => {
+              isDown = false;
+              slider.classList.remove('cursor-grabbing');
+              slider.classList.add('cursor-grab');
+          });
+          // マウスのクリックを離した時
+          slider.addEventListener('mouseup', () => {
+              isDown = false;
+              slider.classList.remove('cursor-grabbing');
+              slider.classList.add('cursor-grab');
+          });
+          // マウスを動かしている（ドラッグしている）時
+          slider.addEventListener('mousemove', (e) => {
+              if (!isDown) return;
+              e.preventDefault(); // デフォルトの動作を止める
+              const x = e.pageX - slider.offsetLeft;
+              const walk = (x - startX) * 1.5; // スクロール速度（1.5倍）
+              slider.scrollLeft = scrollLeft - walk;
+          });
+      });
+    </script>
     
     <div class="px-6 sm:px-10 py-8 sm:py-12">
        
@@ -313,7 +344,6 @@ const finalDescEn = spot.desc_en || "No description available in English yet.";
        </div>
 
        <script is:inline>
-         // リンクをクリッカブルにする処理（日・英両方）
          ['desc-container-jp', 'desc-container-en'].forEach(id => {
              const descEl = document.getElementById(id);
              if (descEl) {
@@ -325,7 +355,6 @@ const finalDescEn = spot.desc_en || "No description available in English yet.";
          });
        </script>
 
-       <!-- アクションボタン群 -->
        <div class="space-y-4">
            {mapUrl && (
              <a href={mapUrl} target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition">
@@ -342,7 +371,6 @@ const finalDescEn = spot.desc_en || "No description available in English yet.";
            </a>
        </div>
        
-       <!-- Photo by と SNSリンク -->
        <div class="mt-16 pt-8 border-t border-dashed border-gray-200 flex justify-between items-center mb-8">
          <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Photo by {spot.author || 'MICHIM'}</span>
          {spot.sns && (
@@ -352,7 +380,6 @@ const finalDescEn = spot.desc_en || "No description available in English yet.";
          )}
        </div>
        
-       <!-- シェアボタン -->
        <div class="pt-4 text-center">
            <p class="text-[9px] font-bold text-slate-400 mb-4 tracking-widest uppercase">SHARE THIS SPOT</p>
            <div class="share-btn-group" id="share-buttons">
@@ -367,7 +394,6 @@ const finalDescEn = spot.desc_en || "No description available in English yet.";
            </p>
        </div>
        
-       <!-- シェアボタンを動かすプログラム -->
        <script is:inline>
          document.addEventListener('DOMContentLoaded', () => {
            const shareUrl = window.location.href;
