@@ -50,12 +50,17 @@ export async function getStaticPaths() {
     spot.title = rawSpot['スポット名'] || rawSpot['タイトル'] || rawSpot['title'] || '';
     spot.desc = rawSpot['紹介文（パパママ目線）'] || rawSpot['紹介文'] || rawSpot['説明'] || rawSpot['desc'] || '';
     
-    // ▼ 英語用の列データを取得 ▼
+    // 英語用の列データを取得
     spot.title_en = rawSpot['title_en'] || '';
     spot.desc_en = rawSpot['desc_en'] || '';
     spot.tag_en = rawSpot['tag_en'] || '';
 
+    // 写真の複数枚対応
     spot.image = rawSpot['写真'] || rawSpot['画像'] || rawSpot['image'] || '';
+    spot.image2 = rawSpot['写真2'] || rawSpot['画像2'] || rawSpot['image2'] || '';
+    spot.image3 = rawSpot['写真3'] || rawSpot['画像3'] || rawSpot['image3'] || '';
+    spot.image4 = rawSpot['写真4'] || rawSpot['画像4'] || rawSpot['image4'] || '';
+
     spot.area = rawSpot['エリア'] || rawSpot['area'] || '';
     spot.tag = rawSpot['タグ'] || rawSpot['tag'] || '';
     spot.lat_lng_raw = rawSpot['lat_lng_raw'] || rawSpot['緯度経度'] || '';
@@ -81,21 +86,33 @@ export async function getStaticPaths() {
 // 2. 各ページに渡されたデータを受け取る
 const { spot } = Astro.props;
 
-// 画像URLの整形
+// GoogleドライブIDを抽出する関数
+function getDriveId(urlOrId) {
+  if (!urlOrId) return '';
+  const match = urlOrId.toString().match(/[-\w]{25,}/);
+  return match ? match[0] : '';
+}
+
+// 画像URLの整形（メイン画像）
 let rawImage = spot.image || '';
 let firstImage = rawImage.includes(',') ? rawImage.split(',')[0].trim() : rawImage.trim();
 let imageUrl = "https://placehold.co/600x800/e2e8f0/94a3b8?text=No+Image";
-let driveId = "";
+let driveId = getDriveId(firstImage);
 
-if (firstImage) {
-  const idMatch = firstImage.match(/[-\w]{25,}/);
-  if (idMatch) {
-    driveId = idMatch[0];
-    imageUrl = `https://lh3.googleusercontent.com/d/${driveId}=w1200`;
-  } else if (firstImage.startsWith('http')) {
-    imageUrl = firstImage;
-  }
+if (driveId) {
+  imageUrl = `https://lh3.googleusercontent.com/d/${driveId}=w1200`;
+} else if (firstImage.startsWith('http')) {
+  imageUrl = firstImage;
 }
+
+// サブ画像（複数画像）のリストを作成
+const subImages = [];
+[spot.image2, spot.image3, spot.image4].forEach(img => {
+  if (img) {
+    const dId = getDriveId(img);
+    if (dId) subImages.push({ id: dId, url: `https://lh3.googleusercontent.com/d/${dId}=w1200` });
+  }
+});
 
 // Googleマップ用URLの準備
 let mapUrl = spot.map_url || '';
@@ -147,6 +164,28 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
     }
     .serif-custom { font-family: 'Noto Serif JP', serif; }
     
+    /* ▼ 横スクロールギャラリー用 ▼ */
+    .gallery-container {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none; /* Firefox */
+      -webkit-overflow-scrolling: touch;
+    }
+    .gallery-container::-webkit-scrollbar {
+      display: none; /* Chrome/Safari */
+    }
+    .gallery-item {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+      /* PCでのドラッグ時に画像だけ引っ張れるのを防ぐ */
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .gallery-item img {
+      pointer-events: none; /* 画像自体のドラッグを禁止 */
+    }
+
     /* シェアボタン用のスタイル */
     .share-btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
     .share-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 16px; transition: all 0.3s; text-decoration: none; border: 1px solid transparent; cursor: pointer; }
@@ -158,7 +197,7 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
     #copy-success-msg { font-size: 10px; font-weight: bold; color: #004098; opacity: 0; transition: opacity 0.3s ease; height: 14px; text-align: center; }
     #copy-success-msg.show { opacity: 1; }
 
-    /* ▼ 完全切り替え用のCSS ▼ */
+    /* 完全切り替え用のCSS */
     .lang-jp, .lang-en { display: none; }
     body.is-jp .lang-jp { display: block; }
     body.is-jp span.lang-jp, body.is-jp a.lang-jp, body.is-jp div.lang-jp { display: inline; }
@@ -228,20 +267,80 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
     <!-- 隠しデータ -->
     <span id="title-en-data" style="display:none;">{finalTitleEn}</span>
 
-    <div class="w-full h-[60vh] sm:h-[80vh] bg-[#f8f9fa] flex items-center justify-center relative">
-        <img 
-            src={imageUrl} 
-            alt={spot.title} 
-            class="w-full h-full object-contain" 
-            data-f-step="0" 
-            onerror={`handleFallbackErr(this, '${driveId}')`} 
-        />
-        <div class="absolute top-4 left-4 bg-[#004098]/90 text-white text-[10px] font-bold px-3 py-1.5 rounded flex items-center gap-1.5 shadow-lg z-10">
-            <i class="fa-solid fa-location-dot"></i> 
-            <span class="lang-jp">{displayArea}</span>
-            <span class="lang-en">{displayAreaEn}</span>
+    <!-- ▼ ギャラリー部分（横スクロール対応） ▼ -->
+    <div class="w-full bg-[#f8f9fa]">
+        
+        <div class="relative">
+            <!-- 写真部分 -->
+            <div id="spot-gallery" class="gallery-container w-full h-[60vh] sm:h-[80vh] cursor-grab">
+                <div class="gallery-item h-full flex items-center justify-center relative">
+                    <img src={imageUrl} alt={spot.title} class="w-full h-full object-contain" data-f-step="0" onerror={`handleFallbackErr(this, '${driveId}')`} />
+                </div>
+                <!-- さんぽログに写真2〜4があれば表示する -->
+                {subImages.map((img, index) => (
+                    <div class="gallery-item h-full flex items-center justify-center relative bg-[#f1f5f9]">
+                        <img src={img.url} alt={`${spot.title} - 写真${index + 2}`} class="w-full h-full object-contain" data-f-step="0" onerror={`handleFallbackErr(this, '${img.id}')`} />
+                    </div>
+                ))}
+            </div>
+            
+            <div class="absolute top-4 left-4 bg-[#004098]/90 text-white text-[10px] font-bold px-3 py-1.5 rounded flex items-center gap-1.5 shadow-lg z-10 pointer-events-none">
+                <i class="fa-solid fa-location-dot"></i> 
+                <span class="lang-jp">{displayArea}</span>
+                <span class="lang-en">{displayAreaEn}</span>
+            </div>
         </div>
+        
+        <!-- 写真枠の下に配置されるスワイプ案内（複数枚ある時だけ表示） -->
+        {subImages.length > 0 && (
+            <div class="flex justify-center items-center gap-4 py-3 bg-[#f8f9fa] border-t border-gray-200/50 text-gray-400 pointer-events-none">
+                <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                <div class="text-[10px] font-bold tracking-widest flex items-center gap-1.5 uppercase">
+                    <span class="lang-jp">写真をスワイプ</span>
+                    <span class="lang-en">Swipe Photos</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </div>
+        )}
+        
     </div>
+
+    <!-- ▼ PCでのドラッグ（スワイプ）を可能にする魔法のプログラム ▼ -->
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', () => {
+          const slider = document.getElementById('spot-gallery');
+          if (!slider) return;
+
+          let isDown = false;
+          let startX;
+          let scrollLeft;
+
+          slider.addEventListener('mousedown', (e) => {
+              isDown = true;
+              slider.classList.add('cursor-grabbing'); 
+              slider.classList.remove('cursor-grab');
+              startX = e.pageX - slider.offsetLeft;
+              scrollLeft = slider.scrollLeft;
+          });
+          slider.addEventListener('mouseleave', () => {
+              isDown = false;
+              slider.classList.remove('cursor-grabbing');
+              slider.classList.add('cursor-grab');
+          });
+          slider.addEventListener('mouseup', () => {
+              isDown = false;
+              slider.classList.remove('cursor-grabbing');
+              slider.classList.add('cursor-grab');
+          });
+          slider.addEventListener('mousemove', (e) => {
+              if (!isDown) return;
+              e.preventDefault(); 
+              const x = e.pageX - slider.offsetLeft;
+              const walk = (x - startX) * 1.5; 
+              slider.scrollLeft = scrollLeft - walk;
+          });
+      });
+    </script>
     
     <div class="px-6 sm:px-10 py-8 sm:py-12">
         
