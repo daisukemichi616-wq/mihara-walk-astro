@@ -774,10 +774,10 @@
                     const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                     
                     const displayTitle = escapeHtml(getLocalizedSpotField(spot, 'title'));
-                    const slug = encodeURIComponent((spot.title || '').replace(/[\/\\]/g, '-'));
+                    const slug = (spot.title || '').replace(/[\/\\]/g, '-');
                     
                     const popupContent = `
-                        <a href="/spot/${slug}" onclick="event.preventDefault(); window.location.href='/spot/${slug}'" style="display:block; text-decoration:none; color:inherit;">
+                        <a href="/spot/${slug}/" style="display:block; text-decoration:none; color:inherit;">
                             <div class="popup-img-wrap"><img src="${imgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
                             <div class="popup-info">
                                 <span class="popup-area">${areaLabel}</span>
@@ -828,17 +828,10 @@
                 const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                 const areaName = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                 
-                const slug = encodeURIComponent((spot.title || '').replace(/[\/\\]/g, '-'));
+                const slug = (spot.title || '').replace(/[\/\\]/g, '-');
                 const item = document.createElement('a');
-                item.href = `/spot/${slug}`;
+                item.href = `/spot/${slug}/`;
                 item.className = 'photo-item block';
-                
-                item.onclick = (e) => {
-                    if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
-                        e.preventDefault();
-                        window.location.href = item.href;
-                    }
-                };
                 
                 const safeAlt = escapeHtml(getLocalizedSpotField(spot, 'title'));
                 
@@ -927,9 +920,9 @@
                 
                 const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][lang] : (lang==='en'?'MIHARA':'三原');
 
-                const slug = encodeURIComponent((spot.title || '').replace(/[\/\\]/g, '-'));
+                const slug = (spot.title || '').replace(/[\/\\]/g, '-');
                 const card = document.createElement('a');
-                card.href = `/local-log/${slug}`;
+                card.href = `/local-log/${slug}/`;
                 card.className = 'local-card-horizontal block';
                 card.dataset.title = spot.title; 
                 
@@ -937,9 +930,6 @@
                 card.onclick = (e) => {
                     if (window.isDragged) {
                         e.preventDefault();
-                    } else if (!e.ctrlKey && !e.metaKey && !e.shiftKey) {
-                        e.preventDefault();
-                        window.location.href = card.href;
                     }
                 };
 
@@ -970,7 +960,7 @@
                         const popupImgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                         
                         const popupContent = `
-                            <a href="/local-log/${slug}" onclick="event.preventDefault(); window.location.href='/local-log/${slug}'" style="display:block; text-decoration:none; color:inherit;">
+                            <a href="/local-log/${slug}/" style="display:block; text-decoration:none; color:inherit;">
                                 <div class="popup-img-wrap"><img src="${popupImgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
                                 <div class="popup-info">
                                     <span class="popup-area">${areaLabel}</span>
