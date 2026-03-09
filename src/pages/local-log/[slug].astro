@@ -66,7 +66,20 @@ export async function getStaticPaths() {
     spot.lat_lng_raw = rawSpot['lat_lng_raw'] || rawSpot['緯度経度'] || '';
     spot.map_url = rawSpot['googleマップのurl'] || rawSpot['googleマップのurl(共有リンク)'] || rawSpot['地図url'] || rawSpot['map_url'] || '';
     spot.author = rawSpot['ニックネーム'] || rawSpot['撮影者'] || rawSpot['author'] || rawSpot['nickname'] || '';
+    
+    // ▼ ここが「最強の探し方」です ▼
     spot.sns = rawSpot['sns'] || rawSpot['snsurl'] || rawSpot['url'] || rawSpot['link'] || '';
+    
+    // もし見出しの名前違いなどで sns が見つからなかった場合、
+    // 行の全データの中から「instagram.com」の文字が含まれるURLを強制的に探し出します！
+    if (!spot.sns) {
+      const allValues = Object.values(rawSpot);
+      const instaData = allValues.find(val => val && val.includes('instagram.com'));
+      if (instaData) {
+        spot.sns = instaData.trim();
+      }
+    }
+    // ▲ ここまで ▲
 
     if(spot.title) {
       spots.push(spot);
@@ -358,6 +371,7 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
            <span class="lang-en font-sans">{finalTitleEn}</span>
        </h1>
        
+       <!-- 元の状態のまま（タグなし） -->
        <div id="desc-container-jp" class="lang-jp block-elem text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12">
          {spot.desc}
        </div>
