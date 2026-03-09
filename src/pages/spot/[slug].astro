@@ -1,13 +1,12 @@
 ---
 // 1. Astroのビルド時に実行される処理（サーバーサイド）
 export async function getStaticPaths() {
-  // スプレッドシート（CSV形式で公開したもの）のURL
-  const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
+  // PHOTO MAP用のスプレッドシートURL
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33pmO60BCd0hIr_v5xh34cJ_IWAHkF0pTaj855pzicmNoVx6W8CPK3MEhlp-irodPSE/pub?gid=1232979489&single=true&output=csv";
   
-  const response = await fetch(LOCAL_CSV_URL);
+  const response = await fetch(CSV_URL);
   const csvText = await response.text();
 
-  // CSVをパース（解析）する関数
   function parseCSV(text) {
     const result = [];
     let row = [];
@@ -32,7 +31,6 @@ export async function getStaticPaths() {
   const rows = parseCSV(csvText);
   if (rows.length < 2) return [];
 
-  // ヘッダー行を整形（空白削除・小文字化）
   const header = rows[0].map(h => h.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase());
   
   const spots = [];
@@ -40,7 +38,6 @@ export async function getStaticPaths() {
     const values = rows[i];
     if(!values || values.length <= 1) continue;
     
-    // 一旦生のデータを取得
     const rawSpot = {};
     header.forEach((h, index) => {
       rawSpot[h] = values[index] ? values[index].trim() : '';
@@ -48,23 +45,19 @@ export async function getStaticPaths() {
 
     const spot = {};
     spot.title = rawSpot['スポット名'] || rawSpot['タイトル'] || rawSpot['title'] || '';
-    spot.desc = rawSpot['紹介文（パパママ目線）'] || rawSpot['紹介文'] || rawSpot['説明'] || rawSpot['desc'] || '';
+    spot.desc = rawSpot['紹介文'] || rawSpot['説明'] || rawSpot['desc'] || '';
     
-    // 英語用の列データを取得
     spot.title_en = rawSpot['title_en'] || '';
     spot.desc_en = rawSpot['desc_en'] || '';
-    spot.tag_en = rawSpot['tag_en'] || '';
-
-    // 写真の複数枚対応
+    
     spot.image = rawSpot['写真'] || rawSpot['画像'] || rawSpot['image'] || '';
     spot.image2 = rawSpot['写真2'] || rawSpot['画像2'] || rawSpot['image2'] || '';
     spot.image3 = rawSpot['写真3'] || rawSpot['画像3'] || rawSpot['image3'] || '';
     spot.image4 = rawSpot['写真4'] || rawSpot['画像4'] || rawSpot['image4'] || '';
-
     spot.area = rawSpot['エリア'] || rawSpot['area'] || '';
-    spot.tag = rawSpot['タグ'] || rawSpot['tag'] || '';
     spot.lat_lng_raw = rawSpot['lat_lng_raw'] || rawSpot['緯度経度'] || '';
     spot.map_url = rawSpot['googleマップのurl'] || rawSpot['googleマップのurl(共有リンク)'] || rawSpot['地図url'] || rawSpot['map_url'] || '';
+    spot.hotel_url = rawSpot['hotel_url'] || rawSpot['ホテルurl'] || '';
     spot.author = rawSpot['ニックネーム'] || rawSpot['撮影者'] || rawSpot['author'] || rawSpot['nickname'] || '';
     spot.sns = rawSpot['sns'] || rawSpot['snsurl'] || rawSpot['url'] || rawSpot['link'] || '';
 
@@ -73,7 +66,6 @@ export async function getStaticPaths() {
     }
   }
 
-  // 記事の数だけページ（URL）を生成
   return spots.map(spot => {
     let slug = spot.title.replace(/[\/\\]/g, '-');
     return {
@@ -93,16 +85,16 @@ function getDriveId(urlOrId) {
   return match ? match[0] : '';
 }
 
-// 画像URLの整形（メイン画像）
+// メイン画像の処理
 let rawImage = spot.image || '';
 let firstImage = rawImage.includes(',') ? rawImage.split(',')[0].trim() : rawImage.trim();
-let imageUrl = "https://placehold.co/600x800/e2e8f0/94a3b8?text=No+Image";
-let driveId = getDriveId(firstImage);
+let mainImageUrl = "https://placehold.co/600x800/e2e8f0/94a3b8?text=No+Image";
+let mainDriveId = getDriveId(firstImage);
 
-if (driveId) {
-  imageUrl = `https://lh3.googleusercontent.com/d/${driveId}=w1200`;
+if (mainDriveId) {
+  mainImageUrl = `https://lh3.googleusercontent.com/d/${mainDriveId}=w1200`;
 } else if (firstImage.startsWith('http')) {
-  imageUrl = firstImage;
+  mainImageUrl = firstImage;
 }
 
 // サブ画像（複数画像）のリストを作成
@@ -114,13 +106,15 @@ const subImages = [];
   }
 });
 
-// Googleマップ用URLの準備
+// Googleマップ用URL
 let mapUrl = spot.map_url || '';
 if(!mapUrl && spot.lat_lng_raw) {
    mapUrl = `https://www.google.com/maps/search/?api=1&query=${spot.lat_lng_raw}`;
 }
 
-// エリアの表示名
+const defaultHotelUrl = "https://a.r10.to/hRIwm0";
+const hotelUrl = (spot.hotel_url && spot.hotel_url.trim() !== "") ? spot.hotel_url.trim() : defaultHotelUrl;
+
 const areaLabels = {
   'all': 'ぜんぶ', 'mihara': '三原市街', 'daiwa': '大和', 'kui': '久井', 'hongo': '本郷', 'sagi': '佐木島'
 };
@@ -130,10 +124,8 @@ const areaLabelsEn = {
 const displayArea = areaLabels[spot.area] || spot.area || '三原市';
 const displayAreaEn = areaLabelsEn[spot.area] || spot.area || 'Mihara';
 
-// 英語データがない場合のフォールバック
 const finalTitleEn = spot.title_en || spot.title;
 const finalDescEn = spot.desc_en || "No description available in English yet.";
-const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
 ---
 
 <!DOCTYPE html>
@@ -142,13 +134,13 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
-  <title>{spot.title} | みはらさんぽログ</title>
+  <title>{spot.title} | 三原市まち歩き - PHOTO MAP</title>
   <meta name="description" content={spot.desc}>
   
   <meta property="og:type" content="article">
-  <meta property="og:title" content={`${spot.title} | みはらさんぽログ`}>
+  <meta property="og:title" content={`${spot.title} | PHOTO MAP`}>
   <meta property="og:description" content={spot.desc}>
-  <meta property="og:image" content={imageUrl}>
+  <meta property="og:image" content={mainImageUrl}>
   <meta name="twitter:card" content="summary_large_image">
 
   <script is:inline src="https://cdn.tailwindcss.com"></script>
@@ -164,7 +156,7 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
     }
     .serif-custom { font-family: 'Noto Serif JP', serif; }
     
-    /* ▼ 横スクロールギャラリー用 ▼ */
+    /* 横スクロールギャラリー用 */
     .gallery-container {
       display: flex;
       overflow-x: auto;
@@ -186,7 +178,6 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
       pointer-events: none; /* 画像自体のドラッグを禁止 */
     }
 
-    /* シェアボタン用のスタイル */
     .share-btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
     .share-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 16px; transition: all 0.3s; text-decoration: none; border: 1px solid transparent; cursor: pointer; }
     .share-btn:hover { transform: translateY(-2px); color: white; }
@@ -207,31 +198,25 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
     body.is-en div.lang-en.block-elem { display: block; }
   </style>
 
-  <!-- ▼ 言語判定プログラム ▼ -->
   <script is:inline>
     document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         let lang = urlParams.get('lang');
-        
-        if (!lang) {
-             lang = localStorage.getItem('siteLang') || 'jp';
-        }
+        if (!lang) lang = localStorage.getItem('siteLang') || 'jp';
         
         if (lang === 'en') {
             document.body.classList.add('is-en');
             const spotTitleEn = document.getElementById('title-en-data').textContent;
-            document.title = spotTitleEn + " | Mihara Walk Log";
+            document.title = spotTitleEn + " | Mihara Walk - PHOTO MAP";
             const backLink = document.getElementById('back-link');
-            if(backLink) backLink.href = '/?lang=en#local-insights';
+            if(backLink) backLink.href = '/?lang=en#gallery';
         } else {
             document.body.classList.add('is-jp');
             const backLink = document.getElementById('back-link');
-            if(backLink) backLink.href = '/?lang=jp#local-insights';
+            if(backLink) backLink.href = '/?lang=jp#gallery';
         }
     });
-  </script>
 
-  <script is:inline>
     function handleFallbackErr(img, driveId) {
       if (!img || !driveId) return;
       const step = parseInt(img.dataset.fStep || '0');
@@ -254,29 +239,27 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
 <body>
   
   <nav class="bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 py-3 sticky top-0 z-50 flex items-center justify-between shadow-sm">
-      <a href="/#local-insights" id="back-link" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
-        <i class="fa-solid fa-arrow-left"></i> 
-        <span class="lang-jp">さんぽログへ戻る</span>
-        <span class="lang-en">Back to Walk Log</span>
+      <a href="/#gallery" id="back-link" class="text-[#004098] font-bold text-xs sm:text-sm flex items-center gap-2 hover:opacity-70 transition">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="lang-jp">マップへ戻る</span>
+        <span class="lang-en">Back to Map</span>
       </a>
       <div class="text-[10px] sm:text-xs font-bold text-gray-400 tracking-widest uppercase">Mihara Rediscover</div>
   </nav>
 
   <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-md pb-24">
     
-    <!-- 隠しデータ -->
     <span id="title-en-data" style="display:none;">{finalTitleEn}</span>
 
-    <!-- ▼ ギャラリー部分（横スクロール対応） ▼ -->
+    <!-- ▼ ここからギャラリー部分 ▼ -->
     <div class="w-full bg-[#f8f9fa]">
         
         <div class="relative">
             <!-- 写真部分 -->
             <div id="spot-gallery" class="gallery-container w-full h-[60vh] sm:h-[80vh] cursor-grab">
                 <div class="gallery-item h-full flex items-center justify-center relative">
-                    <img src={imageUrl} alt={spot.title} class="w-full h-full object-contain" data-f-step="0" onerror={`handleFallbackErr(this, '${driveId}')`} />
+                    <img src={mainImageUrl} alt={spot.title} class="w-full h-full object-contain" data-f-step="0" onerror={`handleFallbackErr(this, '${mainDriveId}')`} />
                 </div>
-                <!-- さんぽログに写真2〜4があれば表示する -->
                 {subImages.map((img, index) => (
                     <div class="gallery-item h-full flex items-center justify-center relative bg-[#f1f5f9]">
                         <img src={img.url} alt={`${spot.title} - 写真${index + 2}`} class="w-full h-full object-contain" data-f-step="0" onerror={`handleFallbackErr(this, '${img.id}')`} />
@@ -284,14 +267,13 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
                 ))}
             </div>
             
-            <div class="absolute top-4 left-4 bg-[#004098]/90 text-white text-[10px] font-bold px-3 py-1.5 rounded flex items-center gap-1.5 shadow-lg z-10 pointer-events-none">
-                <i class="fa-solid fa-location-dot"></i> 
+            <div class="absolute top-4 left-4 bg-white/90 text-[#004098] border border-[#004098] text-[9px] font-bold px-3 py-1 rounded uppercase tracking-widest shadow-sm z-10 pointer-events-none">
                 <span class="lang-jp">{displayArea}</span>
                 <span class="lang-en">{displayAreaEn}</span>
             </div>
         </div>
         
-        <!-- 写真枠の下に配置されるスワイプ案内（複数枚ある時だけ表示） -->
+        <!-- 写真枠の下に配置されるスワイプ案内 -->
         {subImages.length > 0 && (
             <div class="flex justify-center items-center gap-4 py-3 bg-[#f8f9fa] border-t border-gray-200/50 text-gray-400 pointer-events-none">
                 <i class="fa-solid fa-chevron-left text-[10px]"></i>
@@ -304,8 +286,8 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
         )}
         
     </div>
-
-    <!-- ▼ PCでのドラッグ（スワイプ）を可能にする魔法のプログラム ▼ -->
+    
+    <!-- ▼ PCでのドラッグ（スワイプ）を可能にするプログラム ▼ -->
     <script is:inline>
       document.addEventListener('DOMContentLoaded', () => {
           const slider = document.getElementById('spot-gallery');
@@ -343,23 +325,20 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
     </script>
     
     <div class="px-6 sm:px-10 py-8 sm:py-12">
-        
-       <div class="flex items-center gap-2 mb-4">
-         <span class="text-white bg-[#004098]/90 text-[10px] font-bold px-3 py-1.5 rounded shadow-sm lang-jp">
-           {spot.tag || '👟 みはらさんぽ'}
-         </span>
-         <span class="text-white bg-[#004098]/90 text-[10px] font-bold px-3 py-1.5 rounded shadow-sm lang-en">
-           {finalTagEn}
-         </span>
-       </div>
        
-       <h1 class="text-2xl sm:text-3xl font-bold text-[#004098] serif-custom mb-8 leading-relaxed border-b-2 border-blue-50 pb-6">
+       <h1 class="text-2xl sm:text-3xl font-bold text-slate-800 serif-custom mb-8 leading-relaxed border-b-2 border-blue-50 pb-6 mt-4">
            <span class="lang-jp">{spot.title}</span>
            <span class="lang-en font-sans">{finalTitleEn}</span>
        </h1>
        
-       <div id="desc-container-jp" class="lang-jp block-elem text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12" set:html={spot.desc}></div>
-       <div id="desc-container-en" class="lang-en block-elem text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12" set:html={finalDescEn}></div>
+       <!-- ▼ ここを set:html なし（元の状態）に戻しました ▼ -->
+       <div id="desc-container-jp" class="lang-jp block-elem text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12">
+         {spot.desc}
+       </div>
+       <div id="desc-container-en" class="lang-en block-elem text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12">
+         {finalDescEn}
+       </div>
+       <!-- ▲ ここまで ▲ -->
 
        <script is:inline>
          ['desc-container-jp', 'desc-container-en'].forEach(id => {
@@ -373,24 +352,29 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
          });
        </script>
 
-       {mapUrl && (
-         <a href={mapUrl} target="_blank" rel="noopener noreferrer" class="block w-full text-center bg-blue-50 text-[#004098] border border-[#004098] font-bold py-4 rounded-lg hover:bg-[#004098] hover:text-white transition-all shadow-sm">
-           <i class="fa-solid fa-map-location-dot mr-2"></i> 
-           <span class="lang-jp">この場所をGoogleマップで見る</span>
-           <span class="lang-en">View on Google Maps</span>
-         </a>
-       )}
+       <div class="space-y-4">
+           {mapUrl && (
+             <a href={mapUrl} target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full border border-blue-900 text-blue-900 font-bold text-xs py-4 rounded hover:bg-blue-50 transition">
+               <i class="fa-solid fa-map-location-dot text-lg"></i> 
+               <span class="lang-jp">この場所をGoogleマップで見る</span>
+               <span class="lang-en">View on Google Maps</span>
+             </a>
+           )}
 
-       {spot.sns && (
-         <a href={spot.sns} target="_blank" rel="noopener noreferrer" class="block w-full mt-4 text-center text-white font-bold py-4 rounded-lg shadow-md transition-transform hover:-translate-y-1" style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
-           <i class="fa-brands fa-instagram text-xl mr-2 align-middle"></i> 
-           <span class="lang-jp">Instagramでこの投稿を見る</span>
-           <span class="lang-en">View this post on Instagram</span>
-         </a>
-       )}
+           <a href={hotelUrl} target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full text-white font-bold text-xs py-4 rounded hover:opacity-90 transition shadow-md" style="background: linear-gradient(to right, #1a2a6c, #11998e);">
+             <i class="fa-solid fa-bed text-lg"></i> 
+             <span class="lang-jp">周辺のホテル・宿を探す</span>
+             <span class="lang-en">Find Hotels Nearby</span>
+           </a>
+       </div>
        
        <div class="mt-16 pt-8 border-t border-dashed border-gray-200 flex justify-between items-center mb-8">
          <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Photo by {spot.author || 'MICHIM'}</span>
+         {spot.sns && (
+           <a href={spot.sns} target="_blank" rel="noopener noreferrer" class="text-gray-900 font-bold text-[10px] border-b border-gray-900 pb-1 uppercase hover:opacity-70 transition">
+             Instagram Link
+           </a>
+         )}
        </div>
        
        <div class="pt-4 text-center">
@@ -415,8 +399,8 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
            const spotTitleJp = document.title.split(' | ')[0];
            const spotTitleEn = document.getElementById('title-en-data').textContent;
            
-           const shareTextJp = `みはらさんぽログ！「${spotTitleJp}」\n#三原市まち歩き #みはらさんぽ`;
-           const shareTextEn = `Mihara Walk Log! "${spotTitleEn}"\n#Mihara #JapanTravel`;
+           const shareTextJp = `三原のいいとこ見つけた！「${spotTitleJp}」\n#三原市まち歩き #Mihara`;
+           const shareTextEn = `Found a great spot in Mihara! "${spotTitleEn}"\n#Mihara #JapanTravel`;
            
            const finalShareText = isEn ? shareTextEn : shareTextJp;
            
