@@ -210,9 +210,12 @@
         .local-area { font-size: 10px; font-weight: 700; color: #9ca3af; letter-spacing: 0.1em; text-transform: uppercase; }
         .local-btn { font-size: 10px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 4px; }
         
-        #local-map-container { height: 50vh; min-height: 400px; width: calc(100% + 48px); margin-left: -24px; border-radius: 0; border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); border-left: none; border-right: none; margin-top: 10px; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
+        /* ▼ ここから書き換え： height を 50vh から 65vh に、min-height を 400px から 500px に変更しました ▼ */
+        #local-map-container { height: 65vh; min-height: 500px; width: calc(100% + 48px); margin-left: -24px; border-radius: 0; border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); border-left: none; border-right: none; margin-top: 10px; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
         @media (min-width: 640px) { #local-map-container { width: 100%; margin-left: 0; border-radius: 12px; border: 1px solid var(--border-soft); } }
-        @media (min-width: 1024px) { #local-map-container { height: 65vh; min-height: 550px; } }
+        /* ▼ PC用も少し広げます： height を 75vh に、min-height を 600px に変更 ▼ */
+        @media (min-width: 1024px) { #local-map-container { height: 75vh; min-height: 600px; } }
+        /* ▲ ここまで ▲ */
         
         .h2-one-line { font-size: 1.6rem; font-weight: 700 !important; margin-bottom: 50px; line-height: 1.2; text-align: center; white-space: nowrap; letter-spacing: -0.07em; color: var(--palette-blue); }
         .insta-cta-box { margin-top: 60px; padding: 40px 20px; background: #fff; border: 2px dashed var(--palette-blue-light); border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
@@ -483,12 +486,10 @@
             'weather-magic-hour': { normal: { jp: 'MAGIC HOUR', en: 'MAGIC HOUR' } },
             'weather-sunrise': { normal: { jp: 'SUNRISE', en: 'SUNRISE' } },
             'weather-weekly-toggle': { normal: { jp: '週間天気', en: 'Weekly' } },
-            // ▼ ここにフッターリンクの翻訳データを追加 ▼
             'footer-profile': { normal: { jp: '運営者情報', en: 'About Us' } },
             'footer-guideline': { normal: { jp: '写真掲載についてのご案内', en: 'Submission Guidelines' } },
             'footer-privacy': { normal: { jp: 'プライバシーポリシー・免責事項', en: 'Privacy Policy & Disclaimer' } },
             'footer-contact': { normal: { jp: 'お問い合わせ', en: 'Contact' } }
-            // ▲ ここまで ▲
         };
 
         let weatherDataCache = null;
@@ -600,7 +601,6 @@
             const langTextEl = document.getElementById('lang-text');
             if (langTextEl) langTextEl.textContent = currentLang === 'jp' ? 'EN' : 'JP';
 
-            // ▼ ここを追加：bodyタグに現在の言語の目印（class）をつける！
             if (currentLang === 'en') {
                 document.body.classList.add('lang-en');
                 document.body.classList.remove('lang-jp');
@@ -608,7 +608,6 @@
                 document.body.classList.add('lang-jp');
                 document.body.classList.remove('lang-en');
             }
-            // ▲ ここまで ▲
 
             updateWeatherUI();
             if(spotsData.length > 0) render(currentActiveArea);
@@ -618,7 +617,6 @@
 
         window.toggleLanguage = function() {
             currentLang = currentLang === 'jp' ? 'en' : 'jp';
-            // 選んだ言語をブラウザに記憶させる！
             localStorage.setItem('siteLang', currentLang); 
             updateUI();
         };
@@ -675,7 +673,6 @@
         let markersClusterGroup = null; 
         let currentViewMode = 'grid'; 
 
-        // イベントの表示件数設定（最初は10件表示）
         const EVENTS_PER_PAGE = 10;
         let eventsDisplayedCount = 0;
 
@@ -920,6 +917,9 @@
                 
                 const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][lang] : (lang==='en'?'MIHARA':'三原');
 
+                // ▼ 追加：日付を安全な形式で取得する魔法 ▼
+                const safeDate = spot.date ? escapeHtml(spot.date.split(' ')[0].replace(/\//g, '.')) : '';
+
                 const slug = (spot.title || '').replace(/[\/\\]/g, '-');
                 const card = document.createElement('a');
                 card.href = `/local-log/${slug}/`;
@@ -936,6 +936,7 @@
                 const safeAlt = escapeHtml(title);
                 const safeDesc = stripHtml(desc);
 
+                // ▼ 変更：カードの下部（footer）に日付を表示するようにしました！ ▼
                 card.innerHTML = `
                     <div class="local-card-img-wrap">
                         <div class="local-tag-badge">${escapeHtml(tag)}</div>
@@ -945,7 +946,10 @@
                         <h4 class="local-card-title">${safeAlt}</h4>
                         <p class="local-card-desc">${safeDesc}</p>
                         <div class="local-card-footer">
-                            <span class="local-area"><i class="fa-solid fa-location-dot mr-1"></i> ${areaLabel}</span>
+                            <div class="flex flex-col gap-1.5">
+                                <span class="local-area"><i class="fa-solid fa-location-dot mr-1"></i> ${areaLabel}</span>
+                                ${safeDate ? `<span class="text-[9px] text-gray-400 font-bold tracking-widest"><i class="fa-regular fa-clock mr-1"></i>${safeDate}</span>` : ''}
+                            </div>
                             <span class="local-btn">${lang === 'en' ? 'Details' : '詳細を見る'} <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i></span>
                         </div>
                     </div>
@@ -993,7 +997,6 @@
             const loadMoreArea = document.getElementById('event-load-more-area');
             if (!container) return;
             
-            // 初回読み込み時は中身を空にしてカウントを0にする
             if (!append) {
                 container.innerHTML = '';
                 eventsDisplayedCount = 0;
@@ -1014,7 +1017,6 @@
                 return;
             }
 
-            // 次に表示するイベントだけを切り取る
             const nextEvents = eventsData.slice(eventsDisplayedCount, eventsDisplayedCount + EVENTS_PER_PAGE);
 
             nextEvents.forEach(event => {
@@ -1022,7 +1024,6 @@
                 const title = (lang === 'en' && event.title_en) ? event.title_en : event.title;
                 const desc = (lang === 'en' && event.desc_en) ? event.desc_en : event.desc;
                 const dateStr = (lang === 'en' && event.date_str_en) ? event.date_str_en : event.date_str;
-                const btnText = i18nData['event-detail-btn']['normal'][lang];
 
                 const safeTitle = escapeHtml(title);
                 
@@ -1047,7 +1048,6 @@
                 
                 card.className = `event-card ${!isLink ? 'cursor-default hover:transform-none hover:shadow-[0_4px_15px_rgba(0,64,152,0.02)] hover:border-[var(--border-soft)]' : ''}`;
 
-                // ▼ ここから書き換え：リンクの有無で右下の表示を変化させます ▼
                 card.innerHTML = `
                     <div class="event-date-box">
                         <i class="fa-regular fa-calendar text-xl mb-1.5 opacity-70"></i>
@@ -1067,10 +1067,8 @@
                 container.appendChild(card);
             });
 
-            // 表示した数をカウントアップ
             eventsDisplayedCount += nextEvents.length;
 
-            // まだ表示していないイベントが残っているかチェックして、ボタンの表示/非表示を切り替える
             if (loadMoreArea) {
                 if (eventsDisplayedCount < eventsData.length) {
                     loadMoreArea.classList.remove('hidden');
@@ -1080,7 +1078,6 @@
             }
         }
 
-        // ボタンが押された時に実行される関数
         window.loadMoreEvents = function() {
             renderEvents(true);
         };
@@ -1129,16 +1126,15 @@
         window.addEventListener('load', () => {
             fetchWeather();
             
-            // URLだけでなく「記憶」からも言語を読み取るように変更
             const urlParams = new URLSearchParams(window.location.search);
             const paramLang = urlParams.get('lang');
             const savedLang = localStorage.getItem('siteLang');
             
             if (paramLang === 'en' || paramLang === 'jp') {
                 currentLang = paramLang;
-                localStorage.setItem('siteLang', currentLang); // URLで指定されたらそれを記憶
+                localStorage.setItem('siteLang', currentLang);
             } else if (savedLang === 'en' || savedLang === 'jp') {
-                currentLang = savedLang; // URLになければ記憶から呼び出す
+                currentLang = savedLang;
             }
             
             updateUI();
@@ -1152,7 +1148,7 @@
                             spotsData = results.data.map(row => {
                                 const clean = {};
                                 Object.keys(row).forEach(k => {
-                                    if (!k) return; // ←【安全装置1】空の列を無視してエラーを防ぎます
+                                    if (!k) return; 
                                     let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
                                     clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
                                 });
@@ -1191,7 +1187,7 @@
                                 localInsightsData = results.data.map(row => {
                                     const clean = {};
                                     Object.keys(row).forEach(k => {
-                                        if (!k) return; // ←【安全装置2】空の列を無視します
+                                        if (!k) return;
                                         let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
                                         clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
                                     });
@@ -1201,6 +1197,9 @@
                                     if (!clean.image) clean.image = clean['写真'] || clean['画像'] || '';
                                     if (!clean.area) clean.area = clean['エリア'] || '';
                                     if (!clean.tag) clean.tag = clean['タグ'] || '';
+
+                                    // ▼ 追加：スプレッドシートから「タイムスタンプ（日付）」を読み込む魔法 ▼
+                                    if (!clean.date) clean.date = clean['タイムスタンプ'] || clean['日付'] || clean['date'] || '';
 
                                     if (clean.lat_lng_raw) {
                                         const parts = String(clean.lat_lng_raw).split(',');
@@ -1212,6 +1211,9 @@
 
                                     return clean;
                                 }).filter(s => s.title); 
+                                
+                                // ▼ 最新順（一番新しいものが左にくる）に並び替え ▼
+                                localInsightsData.reverse();
                                 
                                 renderLocalInsights();
                             } catch (e) { console.warn('Local Data parse warning:', e); }
@@ -1245,14 +1247,12 @@
                                     if (!clean.title) clean.title = clean['イベント名'] || clean['タイトル'] || '';
                                     if (!clean.desc) clean.desc = clean['説明'] || clean['紹介文'] || '';
                                     
-                                    // 英語用の列も取得
                                     if (!clean.title_en) clean.title_en = clean['title_en'] || '';
                                     if (!clean.desc_en) clean.desc_en = clean['desc_en'] || '';
                                     
                                     if (!clean.start_date) clean.start_date = clean['開始日'] || '';
                                     if (!clean.end_date) clean.end_date = clean['終了日'] || '';
 
-                                    // ▼ 修正ポイント：日本語用と英語用の両方の日付を自動生成する ▼
                                     let autoDateStrJp = '';
                                     let autoDateStrEn = '';
                                     
@@ -1267,7 +1267,6 @@
                                         
                                         const currentYear = new Date().getFullYear();
 
-                                        // 日本語フォーマット
                                         const fmtFullJp = (d) => {
                                             const yobi = ['日', '月', '火', '水', '木', '金', '土'][d.getDay()];
                                             return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日(${yobi})`;
@@ -1277,7 +1276,6 @@
                                             return `${d.getMonth() + 1}月${d.getDate()}日(${yobi})`;
                                         };
 
-                                        // 英語フォーマット（例: Mar 10 (Fri)）
                                         const fmtFullEn = (d) => {
                                             const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                                             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -1291,15 +1289,12 @@
                                         
                                         if (sD && eD) {
                                             if (sD.getTime() === eD.getTime()) {
-                                                // 1日だけの場合
                                                 autoDateStrJp = sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD);
                                                 autoDateStrEn = sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD);
                                             } else if (sD.getFullYear() === eD.getFullYear()) {
-                                                // 同じ年で2日以上の期間がある場合
                                                 autoDateStrJp = `${sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD)}〜${fmtJp(eD)}`;
                                                 autoDateStrEn = `${sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD)} - ${fmtEn(eD)}`;
                                             } else {
-                                                // 違う年をまたぐ場合
                                                 autoDateStrJp = `${fmtFullJp(sD)}〜${fmtFullJp(eD)}`;
                                                 autoDateStrEn = `${fmtFullEn(sD)} - ${fmtFullEn(eD)}`;
                                             }
@@ -1312,19 +1307,13 @@
                                         }
                                     }
 
-                                    // 日本語の日付を決定（手入力優先）
                                     if (!clean.date_str) clean.date_str = clean['表示用日付'] || clean['日付'] || autoDateStrJp || '';
-                                    
-                                    // 英語の日付を決定（手入力優先）
                                     if (!clean.date_str_en) clean.date_str_en = clean['date_str_en'] || autoDateStrEn || '';
-                                    // ▲ ここまで ▲
-                                    
                                     if (!clean.url) clean.url = clean['リンク'] || clean['公式サイト'] || clean['url'] || '';
 
                                     return clean;
                                 }).filter(e => e.title);
 
-                                // 終了したイベントを除外
                                 eventsData = eventsData.filter(e => {
                                     if (!e.end_date) return true; 
                                     const endDate = new Date(e.end_date.replace(/-/g, '/')); 
@@ -1332,7 +1321,6 @@
                                     return endDate >= today; 
                                 });
                                 
-                                // 最強の並び替え（ソート）処理
                                 eventsData.sort((a, b) => {
                                     const todayTime = today.getTime();
                                     
