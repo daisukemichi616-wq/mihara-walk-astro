@@ -344,20 +344,21 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
     <div class="px-6 sm:px-10 py-8 sm:py-12">
         
        <div class="flex items-center gap-2 mb-4">
-         <!-- ▼ 日付を表示するタグを追加しました！ ▼ -->
-         {spot.date && (
-           <span class="text-gray-500 text-[11px] font-bold tracking-wider mr-2">
-             <i class="fa-regular fa-clock"></i> {spot.date.split(' ')[0].replace(/\//g, '.')}
-           </span>
-         )}
-         <!-- ▲ ここまで ▲ -->
-         
+         <!-- ▼ タグを先にしました ▼ -->
          <span class="text-white bg-[#004098]/90 text-[10px] font-bold px-3 py-1.5 rounded shadow-sm lang-jp">
            {spot.tag || '👟 みはらさんぽ'}
          </span>
          <span class="text-white bg-[#004098]/90 text-[10px] font-bold px-3 py-1.5 rounded shadow-sm lang-en">
            {finalTagEn}
          </span>
+         
+         <!-- ▼ 日付をタグの後ろ（右側）に移動しました ▼ -->
+         {spot.date && (
+           <span class="text-gray-500 text-[11px] font-bold tracking-wider ml-2">
+             <i class="fa-regular fa-clock"></i> {spot.date.split(' ')[0].replace(/\//g, '.')}
+           </span>
+         )}
+         <!-- ▲ ここまで ▲ -->
        </div>
        
        <h1 class="text-2xl sm:text-3xl font-bold text-[#004098] serif-custom mb-8 leading-relaxed border-b-2 border-blue-50 pb-6">
