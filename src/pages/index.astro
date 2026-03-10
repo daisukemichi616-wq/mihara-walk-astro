@@ -210,10 +210,9 @@
         .local-area { font-size: 10px; font-weight: 700; color: #9ca3af; letter-spacing: 0.1em; text-transform: uppercase; }
         .local-btn { font-size: 10px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 4px; }
         
-        /* ▼ ここから書き換え： height を 50vh から 65vh に、min-height を 400px から 500px に変更しました ▼ */
-        #local-map-container { height: 65vh; min-height: 500px; width: calc(100% + 48px); margin-left: -24px; border-radius: 0; border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); border-left: none; border-right: none; margin-top: 10px; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
-        @media (min-width: 640px) { #local-map-container { width: 100%; margin-left: 0; border-radius: 12px; border: 1px solid var(--border-soft); } }
-        /* ▼ PC用も少し広げます： height を 75vh に、min-height を 600px に変更 ▼ */
+        /* ▼ さんぽログの地図の高さをスマホとPCで別々に設定します ▼ */
+        #local-map-container { height: 50vh; min-height: 400px; width: calc(100% + 48px); margin-left: -24px; border-radius: 0; border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); border-left: none; border-right: none; margin-top: 10px; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
+        @media (min-width: 640px) { #local-map-container { width: 100%; margin-left: 0; border-radius: 12px; border: 1px solid var(--border-soft); height: 65vh; min-height: 500px; } }
         @media (min-width: 1024px) { #local-map-container { height: 75vh; min-height: 600px; } }
         /* ▲ ここまで ▲ */
         
@@ -917,7 +916,7 @@
                 
                 const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][lang] : (lang==='en'?'MIHARA':'三原');
 
-                // ▼ 追加：日付を安全な形式で取得する魔法 ▼
+                // ▼ 日付を安全な形式で取得する魔法 ▼
                 const safeDate = spot.date ? escapeHtml(spot.date.split(' ')[0].replace(/\//g, '.')) : '';
 
                 const slug = (spot.title || '').replace(/[\/\\]/g, '-');
@@ -936,7 +935,7 @@
                 const safeAlt = escapeHtml(title);
                 const safeDesc = stripHtml(desc);
 
-                // ▼ 変更：カードの下部（footer）に日付を表示するようにしました！ ▼
+                // ▼ カードの下部（footer）に日付を表示するようにしました！ ▼
                 card.innerHTML = `
                     <div class="local-card-img-wrap">
                         <div class="local-tag-badge">${escapeHtml(tag)}</div>
@@ -1198,7 +1197,7 @@
                                     if (!clean.area) clean.area = clean['エリア'] || '';
                                     if (!clean.tag) clean.tag = clean['タグ'] || '';
 
-                                    // ▼ 追加：スプレッドシートから「タイムスタンプ（日付）」を読み込む魔法 ▼
+                                    // ▼ スプレッドシートから「タイムスタンプ（日付）」を読み込む魔法 ▼
                                     if (!clean.date) clean.date = clean['タイムスタンプ'] || clean['日付'] || clean['date'] || '';
 
                                     if (clean.lat_lng_raw) {
