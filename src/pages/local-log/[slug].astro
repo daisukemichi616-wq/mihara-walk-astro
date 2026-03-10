@@ -67,11 +67,12 @@ export async function getStaticPaths() {
     spot.map_url = rawSpot['googleマップのurl'] || rawSpot['googleマップのurl(共有リンク)'] || rawSpot['地図url'] || rawSpot['map_url'] || '';
     spot.author = rawSpot['ニックネーム'] || rawSpot['撮影者'] || rawSpot['author'] || rawSpot['nickname'] || '';
     
-    // ▼ ここが「最強の探し方」です ▼
+    // ▼ ここに「タイムスタンプ（日付）」を取得する処理を追加 ▼
+    spot.date = rawSpot['タイムスタンプ'] || rawSpot['日付'] || rawSpot['date'] || '';
+    
+    // ▼ 最強の探し方（SNS） ▼
     spot.sns = rawSpot['sns'] || rawSpot['snsurl'] || rawSpot['url'] || rawSpot['link'] || '';
     
-    // もし見出しの名前違いなどで sns が見つからなかった場合、
-    // 行の全データの中から「instagram.com」の文字が含まれるURLを強制的に探し出します！
     if (!spot.sns) {
       const allValues = Object.values(rawSpot);
       const instaData = allValues.find(val => val && val.includes('instagram.com'));
@@ -79,7 +80,6 @@ export async function getStaticPaths() {
         spot.sns = instaData.trim();
       }
     }
-    // ▲ ここまで ▲
 
     if(spot.title) {
       spots.push(spot);
@@ -143,7 +143,6 @@ const areaLabelsEn = {
 const displayArea = areaLabels[spot.area] || spot.area || '三原市';
 const displayAreaEn = areaLabelsEn[spot.area] || spot.area || 'Mihara';
 
-// 英語データがない場合のフォールバック
 const finalTitleEn = spot.title_en || spot.title;
 const finalDescEn = spot.desc_en || "No description available in English yet.";
 const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
@@ -177,29 +176,26 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
     }
     .serif-custom { font-family: 'Noto Serif JP', serif; }
     
-    /* ▼ 横スクロールギャラリー用 ▼ */
     .gallery-container {
       display: flex;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
-      scrollbar-width: none; /* Firefox */
+      scrollbar-width: none; 
       -webkit-overflow-scrolling: touch;
     }
     .gallery-container::-webkit-scrollbar {
-      display: none; /* Chrome/Safari */
+      display: none; 
     }
     .gallery-item {
       flex: 0 0 100%;
       scroll-snap-align: start;
-      /* PCでのドラッグ時に画像だけ引っ張れるのを防ぐ */
       user-select: none;
       -webkit-user-drag: none;
     }
     .gallery-item img {
-      pointer-events: none; /* 画像自体のドラッグを禁止 */
+      pointer-events: none; 
     }
 
-    /* シェアボタン用のスタイル */
     .share-btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 10px; }
     .share-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 16px; transition: all 0.3s; text-decoration: none; border: 1px solid transparent; cursor: pointer; }
     .share-btn:hover { transform: translateY(-2px); color: white; }
@@ -210,7 +206,6 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
     #copy-success-msg { font-size: 10px; font-weight: bold; color: #004098; opacity: 0; transition: opacity 0.3s ease; height: 14px; text-align: center; }
     #copy-success-msg.show { opacity: 1; }
 
-    /* 完全切り替え用のCSS */
     .lang-jp, .lang-en { display: none; }
     body.is-jp .lang-jp { display: block; }
     body.is-jp span.lang-jp, body.is-jp a.lang-jp, body.is-jp div.lang-jp { display: inline; }
@@ -220,7 +215,6 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
     body.is-en div.lang-en.block-elem { display: block; }
   </style>
 
-  <!-- ▼ 言語判定プログラム ▼ -->
   <script is:inline>
     document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -277,19 +271,14 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
 
   <main class="max-w-3xl mx-auto bg-white min-h-screen shadow-md pb-24">
     
-    <!-- 隠しデータ -->
     <span id="title-en-data" style="display:none;">{finalTitleEn}</span>
 
-    <!-- ▼ ギャラリー部分（横スクロール対応） ▼ -->
     <div class="w-full bg-[#f8f9fa]">
-        
         <div class="relative">
-            <!-- 写真部分 -->
             <div id="spot-gallery" class="gallery-container w-full h-[60vh] sm:h-[80vh] cursor-grab">
                 <div class="gallery-item h-full flex items-center justify-center relative">
                     <img src={imageUrl} alt={spot.title} class="w-full h-full object-contain" data-f-step="0" onerror={`handleFallbackErr(this, '${driveId}')`} />
                 </div>
-                <!-- さんぽログに写真2〜4があれば表示する -->
                 {subImages.map((img, index) => (
                     <div class="gallery-item h-full flex items-center justify-center relative bg-[#f1f5f9]">
                         <img src={img.url} alt={`${spot.title} - 写真${index + 2}`} class="w-full h-full object-contain" data-f-step="0" onerror={`handleFallbackErr(this, '${img.id}')`} />
@@ -304,7 +293,6 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
             </div>
         </div>
         
-        <!-- 写真枠の下に配置されるスワイプ案内（複数枚ある時だけ表示） -->
         {subImages.length > 0 && (
             <div class="flex justify-center items-center gap-4 py-3 bg-[#f8f9fa] border-t border-gray-200/50 text-gray-400 pointer-events-none">
                 <i class="fa-solid fa-chevron-left text-[10px]"></i>
@@ -315,10 +303,8 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
                 <i class="fa-solid fa-chevron-right text-[10px]"></i>
             </div>
         )}
-        
     </div>
 
-    <!-- ▼ PCでのドラッグ（スワイプ）を可能にする魔法のプログラム ▼ -->
     <script is:inline>
       document.addEventListener('DOMContentLoaded', () => {
           const slider = document.getElementById('spot-gallery');
@@ -358,6 +344,14 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
     <div class="px-6 sm:px-10 py-8 sm:py-12">
         
        <div class="flex items-center gap-2 mb-4">
+         <!-- ▼ 日付を表示するタグを追加しました！ ▼ -->
+         {spot.date && (
+           <span class="text-gray-500 text-[11px] font-bold tracking-wider mr-2">
+             <i class="fa-regular fa-clock"></i> {spot.date.split(' ')[0].replace(/\//g, '.')}
+           </span>
+         )}
+         <!-- ▲ ここまで ▲ -->
+         
          <span class="text-white bg-[#004098]/90 text-[10px] font-bold px-3 py-1.5 rounded shadow-sm lang-jp">
            {spot.tag || '👟 みはらさんぽ'}
          </span>
@@ -371,7 +365,6 @@ const finalTagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
            <span class="lang-en font-sans">{finalTitleEn}</span>
        </h1>
        
-       <!-- 元の状態のまま（タグなし） -->
        <div id="desc-container-jp" class="lang-jp block-elem text-gray-700 leading-loose text-sm sm:text-base whitespace-pre-line mb-12">
          {spot.desc}
        </div>
