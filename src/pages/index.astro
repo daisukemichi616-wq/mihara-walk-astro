@@ -47,7 +47,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-    <!-- ▼ 没入感アニメーション用のGSAPは残します ▼ -->
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
@@ -97,7 +96,6 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
         }
 
-        /* ▼ ヘッダーの背景を真っ白にして、ぼかし効果を消しました ▼ */
         .fixed-nav {
             position: fixed; top: 0; left: 0; width: 100%; height: 60px;
             background: #ffffff;
@@ -107,7 +105,6 @@
             padding: 0 15px;
             transition: all 0.5s ease;
         }
-        /* ▲ ここまで ▲ */
 
         .header-logo { font-weight: 700 !important; font-size: 0.8rem; color: var(--palette-blue); letter-spacing: 0.05em; }
         .nav-links-wrap { display: flex; gap: 8px; align-items: center; }
@@ -135,18 +132,13 @@
             @media (max-width: 380px) { .header-logo { display: none; } .fixed-nav { justify-content: center; } }
         }
         
-        /* 没入感を高めるヒーローセクションの設定 */
         .hero-view { position: relative; width: 100%; height: 80vh; height: 80dvh; background-color: #000; overflow: hidden; }
         .slider-container { position: absolute; inset: -5%; width: 110%; height: 110%; z-index: 1; }
         .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 2.5s ease-in-out; }
         .slide.active { opacity: 1; z-index: 2; }
         .slide img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.0); transition: transform 8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         .slide.active img { transform: scale(1.05); }
-        
-        /* ▼ 写真が暗くならないように、かぶせていた黒いベールを極限まで薄く（透明に近く）しました ▼ */
         .hero-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 100%); z-index: 3; }
-        /* ▲ ここまで ▲ */
-        
         .hero-content { position: relative; z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: white; padding: 0 20px; text-align: center; }
         .hero-label { font-size: 0.75rem; font-weight: 700 !important; letter-spacing: 0.4em; color: var(--palette-gold); margin-bottom: 25px; display: block; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
         .hero-title { font-size: 1.65rem; line-height: 1.8; text-shadow: 0 0 20px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5); }
@@ -160,10 +152,7 @@
         .card-frame h4 { font-weight: 700 !important; color: var(--palette-blue); margin-bottom: 12px; font-size: 1rem; border-left: 5px solid var(--palette-blue); padding-left: 15px; }
         .card-frame p { font-size: 0.85rem; font-weight: 500 !important; line-height: 2.3; color: var(--text-sub); }
         
-        /* ▼ タブの背景も真っ白にして、ぼかし効果を消しました ▼ */
         .sticky-tab-bar { position: sticky; top: 60px; background: #ffffff; z-index: 900; border-bottom: 2px solid var(--palette-blue); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
-        /* ▲ ここまで ▲ */
-
         .sticky-tab-bar::-webkit-scrollbar { display: none; }
         .tab-flex { display: flex; padding: 0 10px; justify-content: center; }
         .tab-item { padding: 22px 18px; font-size: 0.85rem; font-weight: 700 !important; color: #9ca3af; border-bottom: 4px solid transparent; cursor: pointer; }
@@ -203,28 +192,33 @@
         .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: rgba(0, 64, 152, 0.2) !important; }
         .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { background-color: var(--palette-blue) !important; color: #fff !important; font-family: 'Zen Maru Gothic', sans-serif !important; font-weight: 900 !important; box-shadow: 0 4px 10px rgba(0, 64, 152, 0.3); }
         
+        /* ▼ さんぽログの完璧な中央スナップ＆余白設定 ▼ */
         .horizontal-scroll-container {
             display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px;
-            padding: 10px 0 20px 0; margin-left: -24px; margin-right: -24px; padding-left: 24px; padding-right: 24px;
+            /* 最初と最後のカードが画面中央に来るように、左右に計算された大きなパディングを設ける */
+            padding: 10px 30vw 20px 30vw;
+            margin-left: -24px; margin-right: -24px;
             scrollbar-width: none; cursor: grab;
+            scroll-behavior: smooth; /* スナップ時の動きを滑らかに */
+        }
+        @media (min-width: 640px) {
+            .horizontal-scroll-container {
+                padding: 10px 35vw 20px 35vw;
+                margin-left: 0; margin-right: 0; gap: 16px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .horizontal-scroll-container {
+                padding: 10px 38vw 20px 38vw;
+            }
         }
         .horizontal-scroll-container::-webkit-scrollbar { display: none; }
         .horizontal-scroll-container.active { cursor: grabbing; }
-
-        /* ▼ 確実に見えない余白を追加（ここが抜けていた原因です！） ▼ */
-        .horizontal-scroll-container::after {
-            content: "";
-            flex: 0 0 60vw;
-            display: block;
-            pointer-events: none;
-        }
-        @media (min-width: 640px) { .horizontal-scroll-container::after { flex: 0 0 70%; } }
-        @media (min-width: 1024px) { .horizontal-scroll-container::after { flex: 0 0 75%; } }
-        /* ▲ ここまで ▲ */
         
         .local-card-horizontal {
             flex: 0 0 35%;
-            scroll-snap-align: start;
+            /* ▼ 「中央（center）」でピタッと止まるように変更！ ▼ */
+            scroll-snap-align: center;
             display: flex; flex-direction: column; background: #fff;
             border: 2px solid transparent; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; user-select: none;
@@ -233,12 +227,10 @@
         .local-card-horizontal:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,64,152,0.08); }
         .horizontal-scroll-container.active .local-card-horizontal { transition: none; transform: none; }
         .local-card-horizontal.active-card { border-color: var(--palette-blue); box-shadow: 0 8px 20px rgba(0,64,152,0.15); }
-        @media (min-width: 640px) {
-            .local-card-horizontal { flex: 0 0 25%; scroll-snap-align: start; }
-            .horizontal-scroll-container { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; gap: 16px; }
-        }
-        @media (min-width: 1024px) { .local-card-horizontal { flex: 0 0 20%; scroll-snap-align: start; } }
-        
+        @media (min-width: 640px) { .local-card-horizontal { flex: 0 0 25%; } }
+        @media (min-width: 1024px) { .local-card-horizontal { flex: 0 0 20%; } }
+        /* ▲ ここまで ▲ */
+
         .local-card-img-wrap { position: relative; width: 100%; aspect-ratio: 3/4; background: #f1f5f9; overflow: hidden; pointer-events: none; }
         .local-card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; pointer-events: none; }
         .local-card-horizontal:hover .local-card-img-wrap img { transform: scale(1.05); }
@@ -290,7 +282,6 @@
         </div>
     </nav>
 
-    <!-- ▼ ヒーローセクション（没入感アニメーションの対象） ▼ -->
     <section class="hero-view">
         <div class="slider-container">
             <div class="slide active"><img src="https://i.postimg.cc/Dy2sThhC/IMG-9586.jpg" alt="桜"></div>
@@ -299,7 +290,6 @@
         </div>
         <div class="hero-overlay"></div>
         <div class="hero-content">
-            <!-- reveal-up クラスを外し、専用のアニメーションをかけます -->
             <span class="hero-label" id="hero-label" data-i18n="hero-label">MIHARA REDISCOVER PROJECT</span>
             <h1 class="hero-title serif-custom" id="hero-title" data-i18n="hero-title">
                 まだ知らない三原の景色を、<br class="mobile-br">
@@ -307,7 +297,6 @@
             </h1>
         </div>
     </section>
-    <!-- ▲ ここまで ▲ -->
 
     <section id="about" class="section-wrap bg-white">
         <div class="inner-limit">
@@ -390,6 +379,12 @@
             <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-2">
                 <div class="w-full text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
+
+            <!-- ▼ 新機能：「さんぽログ」用のMOREボタン ▼ -->
+            <div id="local-load-more-area" class="text-center py-6 hidden">
+                <button onclick="loadMoreLocalInsights()" class="bg-[#004098] text-white text-[10px] font-bold py-2.5 px-8 rounded-full hover:opacity-90 transition shadow-md tracking-widest">MORE LOGS</button>
+            </div>
+            <!-- ▲ ここまで ▲ -->
             
             <div id="local-map-container"></div>
         </div>
@@ -469,7 +464,6 @@
     <script is:inline>
         let currentLang = 'jp';
 
-        // ▼ トップの没入感（シネマティック）アニメーションのみ残しました ▼
         function initAnimations() {
             gsap.registerPlugin(ScrollTrigger);
 
@@ -477,7 +471,6 @@
             const heroTitle = document.getElementById('hero-title');
 
             if (heroLabel && heroTitle) {
-                // 映画のオープニングのように、ぼやけた状態からゆっくりピントが合う
                 gsap.fromTo(heroLabel, 
                     { opacity: 0, filter: 'blur(10px)', scale: 1.1 }, 
                     { opacity: 1, filter: 'blur(0px)', scale: 1, duration: 2.5, ease: "power2.out", delay: 0.3 }
@@ -488,7 +481,6 @@
                     { opacity: 1, filter: 'blur(0px)', y: 0, duration: 3, ease: "power2.out", delay: 0.8 }
                 );
 
-                // スクロール時の奥行き（パララックス）効果
                 gsap.to('.hero-content', {
                     y: "40%", 
                     opacity: 0, 
@@ -761,6 +753,11 @@
         const EVENTS_PER_PAGE = 10;
         let eventsDisplayedCount = 0;
 
+        // ▼ 追加：さんぽログ用の表示件数とカウント ▼
+        const LOCAL_ITEMS_PER_PAGE = 8;
+        let localDisplayedCount = 0;
+        // ▲ ここまで ▲
+
         function getDriveId(urlOrId) {
             if (!urlOrId) return '';
             const match = urlOrId.toString().match(/[-\w]{25,}/);
@@ -945,11 +942,15 @@
             localMapInstance.once('focus', function() { localMapInstance.scrollWheelZoom.enable(); });
         }
 
+        // ▼ さんぽログの初期化と描画処理を大幅にアップデート！ ▼
         function renderLocalInsights() {
             const container = document.getElementById('local-scroll-container');
             const mapContainer = document.getElementById('local-map-container');
             if (!container) return;
+            
+            // 全体をリセットしてカウントをゼロに
             container.innerHTML = '';
+            localDisplayedCount = 0;
 
             if (localInsightsData.length === 0) {
                 container.innerHTML = `
@@ -970,8 +971,8 @@
             if (!localMapInstance) initLocalMap();
             if (localMarkersGroup) localMarkersGroup.clearLayers();
             localMarkersMap = {};
-            let hasMarkers = false;
 
+            /* 新しいスクロール判定：「画面の真ん中」に一番近いカードを選ぶ魔法 */
             let scrollTimeout;
             const handleScroll = () => {
                 if (scrollTimeout) clearTimeout(scrollTimeout);
@@ -979,18 +980,23 @@
                     let activeCard = null;
                     let minDiff = Infinity;
                     const containerRect = container.getBoundingClientRect();
-                    const baseline = containerRect.left + 50; 
+                    // 基準を「コンテナの中心（ど真ん中）」にする
+                    const baseline = containerRect.left + (containerRect.width / 2); 
                     
                     const cards = container.querySelectorAll('.local-card-horizontal');
                     cards.forEach(card => {
                         const cardRect = card.getBoundingClientRect();
-                        const diff = Math.abs(cardRect.left - baseline);
+                        // カード自身の中心点
+                        const cardCenter = cardRect.left + (cardRect.width / 2);
+                        // カードの中心と、コンテナの中心との距離を測る
+                        const diff = Math.abs(cardCenter - baseline);
                         if (diff < minDiff) {
                             minDiff = diff;
                             activeCard = card;
                         }
                     });
 
+                    // 一番中央に近いカードが見つかったら、それをアクティブにして地図を動かす
                     if (activeCard && !activeCard.classList.contains('active-card')) {
                         cards.forEach(c => c.classList.remove('active-card'));
                         activeCard.classList.add('active-card');
@@ -1007,7 +1013,21 @@
             container.removeEventListener('scroll', handleScroll);
             container.addEventListener('scroll', handleScroll);
 
-            localInsightsData.forEach((spot) => {
+            // 最初の数件だけを読み込む（「もっと見る」ボタン用）
+            loadMoreLocalInsights();
+        }
+
+        // ▼ 新機能：さんぽログ用の「もっと見る（ロード）」関数 ▼
+        window.loadMoreLocalInsights = function() {
+            const container = document.getElementById('local-scroll-container');
+            const loadMoreArea = document.getElementById('local-load-more-area');
+            if (!container) return;
+
+            // まだ表示していない次の数件（最初は8件）を切り取る
+            const nextItems = localInsightsData.slice(localDisplayedCount, localDisplayedCount + LOCAL_ITEMS_PER_PAGE);
+            let hasNewMarkers = false;
+
+            nextItems.forEach((spot) => {
                 const driveId = getDriveId(spot.image);
                 const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w800');
                 const lang = currentLang;
@@ -1019,22 +1039,15 @@
                 const tag = lang === 'en' ? (spot.tag_en || spot.tag || defaultTagEn) : (spot.tag || defaultTagJp);
                 
                 const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][lang] : (lang==='en'?'MIHARA':'三原');
-
                 const safeDate = spot.date ? escapeHtml(spot.date.split(' ')[0].replace(/\//g, '.')) : '';
-
                 const slug = (spot.title || '').replace(/[\/\\]/g, '-');
+                
                 const card = document.createElement('a');
                 card.href = `/local-log/${slug}/`;
-                
                 card.className = 'local-card-horizontal block';
                 card.dataset.title = spot.title; 
-                
                 card.ondragstart = () => false;
-                card.onclick = (e) => {
-                    if (window.isDragged) {
-                        e.preventDefault();
-                    }
-                };
+                card.onclick = (e) => { if (window.isDragged) e.preventDefault(); };
 
                 const safeAlt = escapeHtml(title);
                 const safeDesc = stripHtml(desc);
@@ -1061,7 +1074,7 @@
                 if (spot.lat && spot.lng) {
                     const lat = parseFloat(spot.lat); const lng = parseFloat(spot.lng);
                     if (!isNaN(lat) && !isNaN(lng)) {
-                        hasMarkers = true;
+                        hasNewMarkers = true;
                         const popupImgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                         
                         const popupContent = `
@@ -1083,29 +1096,43 @@
                 }
             });
 
-            if (hasMarkers && localMapInstance && localMarkersGroup) {
+            // 表示した数を増やす
+            localDisplayedCount += nextItems.length;
+
+            // まだ続きがあれば「MORE LOGS」ボタンを表示する
+            if (loadMoreArea) {
+                if (localDisplayedCount < localInsightsData.length) {
+                    loadMoreArea.classList.remove('hidden');
+                } else {
+                    loadMoreArea.classList.add('hidden');
+                }
+            }
+
+            // マーカー（ピン）が追加されたら、地図の枠を調整する
+            if (hasNewMarkers && localMapInstance && localMarkersGroup) {
                 setTimeout(() => {
                     localMapInstance.invalidateSize();
                     localMapInstance.fitBounds(localMarkersGroup.getBounds(), { padding: [30, 30], maxZoom: 14 });
                     
-                    const cards = container.querySelectorAll('.local-card-horizontal');
-                    cards.forEach(c => c.classList.remove('active-card'));
-                    
-                    const firstCard = cards[0];
-                    if (firstCard) {
-                        firstCard.classList.add('active-card');
-                        const title = firstCard.dataset.title;
-                        const marker = localMarkersMap[title];
-                        if (marker && localMapInstance) {
-                            localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
-                            setTimeout(() => {
-                                marker.openPopup();
-                            }, 500); 
+                    // 「初回」の読み込み時だけ、一番左のカードを強制的にアクティブにする
+                    if (localDisplayedCount === nextItems.length) {
+                        const cards = container.querySelectorAll('.local-card-horizontal');
+                        cards.forEach(c => c.classList.remove('active-card'));
+                        const firstCard = cards[0];
+                        if (firstCard) {
+                            firstCard.classList.add('active-card');
+                            const title = firstCard.dataset.title;
+                            const marker = localMarkersMap[title];
+                            if (marker) {
+                                localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
+                                setTimeout(() => { marker.openPopup(); }, 500); 
+                            }
                         }
                     }
                 }, 300); 
             }
-        }
+        };
+        // ▲ ここまで ▲
 
         function renderEvents(append = false) {
             const container = document.getElementById('events-container');
