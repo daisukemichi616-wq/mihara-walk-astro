@@ -210,6 +210,17 @@
         }
         .horizontal-scroll-container::-webkit-scrollbar { display: none; }
         .horizontal-scroll-container.active { cursor: grabbing; }
+
+        /* ▼ 確実に見えない余白を追加（ここが抜けていた原因です！） ▼ */
+        .horizontal-scroll-container::after {
+            content: "";
+            flex: 0 0 60vw;
+            display: block;
+            pointer-events: none;
+        }
+        @media (min-width: 640px) { .horizontal-scroll-container::after { flex: 0 0 70%; } }
+        @media (min-width: 1024px) { .horizontal-scroll-container::after { flex: 0 0 75%; } }
+        /* ▲ ここまで ▲ */
         
         .local-card-horizontal {
             flex: 0 0 35%;
@@ -961,7 +972,6 @@
             localMarkersMap = {};
             let hasMarkers = false;
 
-            /* ▼ スクロール連動プログラムを一番シンプルな「左端判定」に戻しました ▼ */
             let scrollTimeout;
             const handleScroll = () => {
                 if (scrollTimeout) clearTimeout(scrollTimeout);
@@ -996,7 +1006,6 @@
 
             container.removeEventListener('scroll', handleScroll);
             container.addEventListener('scroll', handleScroll);
-            /* ▲ ここまで ▲ */
 
             localInsightsData.forEach((spot) => {
                 const driveId = getDriveId(spot.image);
