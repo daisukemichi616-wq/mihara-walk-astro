@@ -193,25 +193,21 @@
         .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: rgba(0, 64, 152, 0.2) !important; }
         .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { background-color: var(--palette-blue) !important; color: #fff !important; font-family: 'Zen Maru Gothic', sans-serif !important; font-weight: 900 !important; box-shadow: 0 4px 10px rgba(0, 64, 152, 0.3); }
         
-        /* ▼ さんぽログの完璧な余白とスナップ設定（絶対潰れない魔法！） ▼ */
         .horizontal-scroll-container {
             display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px;
             padding: 10px 0 20px 0;
             margin-left: -24px; margin-right: -24px; padding-left: 24px;
-            /* 最後の要素が確実に左端まで来るように、右側に大きな見えない余白をつける */
             padding-right: 80vw;
             scrollbar-width: none; cursor: grab; scroll-behavior: smooth;
-            /* スナップ（止まる）位置を、コンテナの左の余白（24px）に合わせる */
             scroll-padding-left: 24px;
         }
         .horizontal-scroll-container::-webkit-scrollbar { display: none; }
         .horizontal-scroll-container.active { cursor: grabbing; }
         
         .local-card-horizontal {
-            /* ▼ 絶対に幅を固定する魔法！これで細長くなりません ▼ */
+            /* ▼ スマホで「約2.8枚（3枚近く）」が見えるように幅を小さく調整！ ▼ */
             flex: none;
-            width: 135px; /* スマホで約3枚が綺麗に見える黄金サイズ */
-            /* 常に左端（start）でピタッと止まる */
+            width: 120px; 
             scroll-snap-align: start;
             display: flex; flex-direction: column; background: #fff;
             border: 2px solid transparent; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -241,7 +237,6 @@
         .local-card-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; border-top: 1px dashed var(--border-soft); padding-top: 8px; }
         .local-area { font-size: 9px; font-weight: 700; color: #9ca3af; letter-spacing: 0.05em; text-transform: uppercase; }
         .local-btn { font-size: 9px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 2px; }
-        /* ▲ ここまで ▲ */
         
         #local-map-container { height: 45vh; min-height: 350px; width: calc(100% + 48px); margin-left: -24px; border-radius: 0; border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); border-left: none; border-right: none; margin-top: 15px; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
         @media (min-width: 640px) { #local-map-container { width: 100%; margin-left: 0; border-radius: 12px; border: 1px solid var(--border-soft); height: 50vh; min-height: 400px; } }
@@ -973,7 +968,7 @@
                     let minDiff = Infinity;
                     const containerRect = container.getBoundingClientRect();
                     // コンテナの左端から少しだけ右（50px）を基準線にする
-                    const baseline = containerRect.left + 30; 
+                    const baseline = containerRect.left + 50; 
                     
                     const cards = container.querySelectorAll('.local-card-horizontal');
                     cards.forEach(card => {
@@ -1094,13 +1089,13 @@
             if (localDisplayedCount < localInsightsData.length) {
                 const moreBtn = document.createElement('div');
                 moreBtn.id = 'local-more-card-btn';
-                // クラス名でデザインと大きさを指定
-                moreBtn.className = 'flex-[0_0_35%] sm:flex-[0_0_20%] flex flex-col items-center justify-center bg-slate-50 border border-dashed border-slate-300 rounded-lg cursor-pointer hover:bg-slate-100 transition min-h-[250px] snap-start';
+                // ▼ MORE LOGS ボタンをカードと同じ幅にし、文字を中央揃えにするように修正 ▼
+                moreBtn.className = 'flex-none w-[120px] sm:w-[180px] lg:w-[220px] flex flex-col items-center justify-center bg-slate-50 border border-dashed border-slate-300 rounded-lg cursor-pointer hover:bg-slate-100 transition py-10 snap-start';
                 moreBtn.innerHTML = `
-                    <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm mb-3">
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm mb-3">
                         <i class="fa-solid fa-arrow-right text-[var(--palette-blue)]"></i>
                     </div>
-                    <span class="text-[10px] font-bold text-[var(--palette-blue)] tracking-widest uppercase">MORE LOGS</span>
+                    <span class="text-[10px] font-bold text-[var(--palette-blue)] tracking-widest uppercase text-center leading-tight">MORE<br>LOGS</span>
                 `;
                 // タップされたら続きを読み込み、少し右に自動スクロールする
                 moreBtn.onclick = () => {
