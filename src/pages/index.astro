@@ -193,21 +193,20 @@
         .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: rgba(0, 64, 152, 0.2) !important; }
         .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { background-color: var(--palette-blue) !important; color: #fff !important; font-family: 'Zen Maru Gothic', sans-serif !important; font-weight: 900 !important; box-shadow: 0 4px 10px rgba(0, 64, 152, 0.3); }
         
+        /* ▼ さんぽログ：ぴったり3枚が美しく収まる魔法のCSS ▼ */
         .horizontal-scroll-container {
             display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px;
-            padding: 10px 0 20px 0;
-            margin-left: -24px; margin-right: -24px; padding-left: 24px;
-            padding-right: 80vw;
+            padding: 10px 0 5px 0; /* 下の余白を少し減らし、ドットに繋げる */
+            margin-left: -24px; margin-right: -24px; padding-left: 24px; padding-right: 24px; /* 巨大な余白を削除し通常に戻しました */
             scrollbar-width: none; cursor: grab; scroll-behavior: smooth;
-            scroll-padding-left: 24px;
         }
         .horizontal-scroll-container::-webkit-scrollbar { display: none; }
         .horizontal-scroll-container.active { cursor: grabbing; }
         
         .local-card-horizontal {
-            /* ▼ スマホで「約2.8枚（3枚近く）」が見えるように幅を小さく調整！ ▼ */
+            /* 画面幅から左右の余白(24px×2)とカード間の隙間(12px×2)を引いた幅を3等分！ これで絶対に潰れず3枚入ります */
             flex: none;
-            width: 120px; 
+            width: calc((100vw - 72px) / 3); 
             scroll-snap-align: start;
             display: flex; flex-direction: column; background: #fff;
             border: 2px solid transparent; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -219,11 +218,10 @@
         .local-card-horizontal.active-card { border-color: var(--palette-blue); box-shadow: 0 8px 20px rgba(0,64,152,0.15); }
         @media (min-width: 640px) {
             .local-card-horizontal { width: 180px; }
-            .horizontal-scroll-container { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 40vw; gap: 16px; scroll-padding-left: 0; }
+            .horizontal-scroll-container { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; gap: 16px; }
         }
         @media (min-width: 1024px) { 
             .local-card-horizontal { width: 220px; } 
-            .horizontal-scroll-container { padding-right: 30vw; }
         }
 
         .local-card-img-wrap { position: relative; width: 100%; aspect-ratio: 3/4; background: #f1f5f9; overflow: hidden; pointer-events: none; }
@@ -231,14 +229,28 @@
         .local-card-horizontal:hover .local-card-img-wrap img { transform: scale(1.05); }
         .local-tag-badge { position: absolute; top: 6px; left: 6px; background: rgba(0,64,152,0.9); color: white; font-size: 8px; font-weight: 700; padding: 3px 6px; border-radius: 4px; z-index: 2; display: flex; align-items: center; gap: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
-        .local-card-content { flex: 1; padding: 10px; display: flex; flex-direction: column; justify-content: flex-start; pointer-events: none; }
-        .local-card-title { font-size: 0.85rem; font-weight: 700; color: var(--palette-blue); margin-bottom: 4px; font-family: 'Noto Serif JP', serif !important; line-height: 1.3; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-        .local-card-desc { font-size: 0.65rem; font-weight: 500; color: var(--text-sub); line-height: 1.5; margin-bottom: 8px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-        .local-card-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; border-top: 1px dashed var(--border-soft); padding-top: 8px; }
-        .local-area { font-size: 9px; font-weight: 700; color: #9ca3af; letter-spacing: 0.05em; text-transform: uppercase; }
-        .local-btn { font-size: 9px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 2px; }
+        .local-card-content { flex: 1; padding: 8px; display: flex; flex-direction: column; justify-content: flex-start; pointer-events: none; }
+        .local-card-title { font-size: 0.75rem; font-weight: 700; color: var(--palette-blue); margin-bottom: 4px; font-family: 'Noto Serif JP', serif !important; line-height: 1.3; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+        .local-card-desc { font-size: 0.6rem; font-weight: 500; color: var(--text-sub); line-height: 1.4; margin-bottom: 6px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+        .local-card-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; border-top: 1px dashed var(--border-soft); padding-top: 6px; }
+        .local-area { font-size: 8px; font-weight: 700; color: #9ca3af; letter-spacing: 0.05em; text-transform: uppercase; }
+        .local-btn { font-size: 8px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 2px; }
         
-        #local-map-container { height: 45vh; min-height: 350px; width: calc(100% + 48px); margin-left: -24px; border-radius: 0; border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); border-left: none; border-right: none; margin-top: 15px; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
+        /* ▼ Instagram風ドット（インジケーター）のスタイル ▼ */
+        .scroll-dots-container {
+            display: flex; justify-content: center; align-items: center; gap: 6px;
+            padding-top: 10px; padding-bottom: 20px;
+        }
+        .scroll-dot {
+            width: 5px; height: 5px; border-radius: 50%; background: #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        .scroll-dot.active {
+            background: var(--palette-blue); width: 14px; border-radius: 4px;
+        }
+        /* ▲ ここまで ▲ */
+
+        #local-map-container { height: 45vh; min-height: 350px; width: calc(100% + 48px); margin-left: -24px; border-radius: 0; border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); border-left: none; border-right: none; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
         @media (min-width: 640px) { #local-map-container { width: 100%; margin-left: 0; border-radius: 12px; border: 1px solid var(--border-soft); height: 50vh; min-height: 400px; } }
         @media (min-width: 1024px) { #local-map-container { height: 60vh; min-height: 500px; } }
         
@@ -371,9 +383,13 @@
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-local" data-i18n="title-local">みはらさんぽログ</h2>
             <p class="text-xs sm:text-sm font-bold text-gray-500 mb-6 px-4 sm:px-6 leading-relaxed" id="desc-local" data-i18n="desc-local">ガイドブックには載らない、三原の何気ない日常と<br>新しい発見。歩いて見つける三原の魅力ログ。</p>
             
-            <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-2">
+            <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-0">
                 <div class="w-full text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
+            
+            <!-- ▼ 新機能：Instagram風のドットインジケーター ▼ -->
+            <div id="local-scroll-dots" class="scroll-dots-container"></div>
+            <!-- ▲ ここまで ▲ -->
             
             <div id="local-map-container"></div>
         </div>
@@ -959,55 +975,73 @@
             if (localMarkersGroup) localMarkersGroup.clearLayers();
             localMarkersMap = {};
 
-            /* ▼ 左端のカードを正確に検知するスクロール連動プログラムに戻しました ▼ */
             let scrollTimeout;
             const handleScroll = () => {
                 if (scrollTimeout) clearTimeout(scrollTimeout);
                 scrollTimeout = setTimeout(() => {
-                    let activeCard = null;
+                    const cards = container.querySelectorAll('.local-card-horizontal');
+                    if (cards.length === 0) return;
+
+                    let activeIndex = 0;
                     let minDiff = Infinity;
                     const containerRect = container.getBoundingClientRect();
-                    // コンテナの左端から少しだけ右（50px）を基準線にする
-                    const baseline = containerRect.left + 50; 
-                    
-                    const cards = container.querySelectorAll('.local-card-horizontal');
-                    cards.forEach(card => {
+                    const baseline = containerRect.left + 30; // 左端の基準線
+
+                    // 見えない余白をなくしたので、純粋に左端に近いカードを選ぶだけでOK！
+                    cards.forEach((card, index) => {
                         const cardRect = card.getBoundingClientRect();
                         const diff = Math.abs(cardRect.left - baseline);
                         if (diff < minDiff) {
                             minDiff = diff;
-                            activeCard = card;
+                            activeIndex = index;
                         }
                     });
 
-                    if (activeCard && !activeCard.classList.contains('active-card')) {
-                        cards.forEach(c => c.classList.remove('active-card'));
-                        activeCard.classList.add('active-card');
-                        const title = activeCard.dataset.title;
-                        if (title) { // タイトルがある場合（MOREボタン以外）
-                            const marker = localMarkersMap[title];
-                            if (marker && localMapInstance) {
-                                localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
-                                marker.openPopup();
+                    // カードと地図のアクティブ状態を更新
+                    cards.forEach((c, index) => {
+                        if (index === activeIndex) {
+                            if (!c.classList.contains('active-card')) {
+                                c.classList.add('active-card');
+                                const title = c.dataset.title;
+                                if (title) { // MOREボタンにはtitleがないのでスキップ
+                                    const marker = localMarkersMap[title];
+                                    if (marker && localMapInstance) {
+                                        localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
+                                        marker.openPopup();
+                                    }
+                                }
                             }
+                        } else {
+                            c.classList.remove('active-card');
                         }
-                    }
+                    });
+
+                    // ▼ Instagram風ドットの更新 ▼
+                    const dots = document.querySelectorAll('#local-scroll-dots .scroll-dot');
+                    dots.forEach((dot, index) => {
+                        if (index === activeIndex) {
+                            dot.classList.add('active');
+                        } else {
+                            dot.classList.remove('active');
+                        }
+                    });
+                    // ▲ ここまで ▲
                 }, 50); 
             };
 
             container.removeEventListener('scroll', handleScroll);
             container.addEventListener('scroll', handleScroll);
 
-            // 最初の数件だけを読み込む（横スクロール内にMOREボタンを追加）
+            // 最初の数件だけを読み込む
             loadMoreLocalInsights();
         }
 
-        // ▼ 横スクロールの中に「MORE」カードを追加する魔法 ▼
+        // ▼ 横スクロールの中にカードを追加する処理 ▼
         window.loadMoreLocalInsights = function() {
             const container = document.getElementById('local-scroll-container');
             if (!container) return;
 
-            // 既存の「MOREカード」や「透明な余白」があれば一旦消す（常に一番後ろにするため）
+            // 既存の「MOREカード」があれば一旦消す
             const existingMoreBtn = document.getElementById('local-more-card-btn');
             if (existingMoreBtn) existingMoreBtn.remove();
 
@@ -1089,8 +1123,8 @@
             if (localDisplayedCount < localInsightsData.length) {
                 const moreBtn = document.createElement('div');
                 moreBtn.id = 'local-more-card-btn';
-                // ▼ MORE LOGS ボタンをカードと同じ幅にし、文字を中央揃えにするように修正 ▼
-                moreBtn.className = 'flex-none w-[120px] sm:w-[180px] lg:w-[220px] flex flex-col items-center justify-center bg-slate-50 border border-dashed border-slate-300 rounded-lg cursor-pointer hover:bg-slate-100 transition py-10 snap-start';
+                // ▼ MOREボタンもカードと同じ幅の魔法のクラスを追加し、中央揃えを完璧に ▼
+                moreBtn.className = 'local-card-horizontal justify-center items-center bg-slate-50 border-2 border-dashed border-slate-300 hover:bg-slate-100 min-h-[180px] snap-start';
                 moreBtn.innerHTML = `
                     <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm mb-3">
                         <i class="fa-solid fa-arrow-right text-[var(--palette-blue)]"></i>
@@ -1107,12 +1141,24 @@
                 container.appendChild(moreBtn);
             }
 
+            // ▼ 新機能：Instagram風ドットの生成（カードの枚数分だけ丸を作る） ▼
+            const dotsContainer = document.getElementById('local-scroll-dots');
+            if (dotsContainer) {
+                const totalCards = container.querySelectorAll('.local-card-horizontal').length;
+                let dotsHTML = '';
+                for (let i = 0; i < totalCards; i++) {
+                    dotsHTML += `<div class="scroll-dot ${i === 0 ? 'active' : ''}"></div>`;
+                }
+                dotsContainer.innerHTML = dotsHTML;
+            }
+            // ▲ ここまで ▲
+
             if (hasNewMarkers && localMapInstance && localMarkersGroup) {
                 setTimeout(() => {
                     localMapInstance.invalidateSize();
                     localMapInstance.fitBounds(localMarkersGroup.getBounds(), { padding: [30, 30], maxZoom: 14 });
                     
-                    // 「初回」の読み込み時だけ、一番左のカードを強制的にアクティブにする
+                    // 初回読み込み時は、一番左のカードを強制的にアクティブにする
                     if (localDisplayedCount === nextItems.length) {
                         const cards = container.querySelectorAll('.local-card-horizontal');
                         cards.forEach(c => c.classList.remove('active-card'));
