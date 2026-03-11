@@ -959,23 +959,42 @@
             localMarkersMap = {};
             let hasMarkers = false;
 
-            const observerOptions = { root: container, rootMargin: '0px', threshold: 0.8 };
-            const cardObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const title = entry.target.dataset.title;
-                        const marker = localMarkersMap[title];
-                        
-                        document.querySelectorAll('.local-card-horizontal').forEach(c => c.classList.remove('active-card'));
-                        entry.target.classList.add('active-card');
+            /* ▼ 古いルール（IntersectionObserver）を消し、新しいスクロール連動ルールを追加 ▼ */
+            let scrollTimeout;
+            const handleScroll = () => {
+                if (scrollTimeout) clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    let activeCard = null;
+                    let minDiff = Infinity;
+                    const containerRect = container.getBoundingClientRect();
+                    const baseline = containerRect.left + 30; // 左端を基準にする
+                    
+                    const cards = container.querySelectorAll('.local-card-horizontal');
+                    cards.forEach(card => {
+                        const cardRect = card.getBoundingClientRect();
+                        const diff = Math.abs(cardRect.left - baseline);
+                        if (diff < minDiff) {
+                            minDiff = diff;
+                            activeCard = card;
+                        }
+                    });
 
-                        if (marker) {
+                    if (activeCard && !activeCard.classList.contains('active-card')) {
+                        cards.forEach(c => c.classList.remove('active-card'));
+                        activeCard.classList.add('active-card');
+                        const title = activeCard.dataset.title;
+                        const marker = localMarkersMap[title];
+                        if (marker && localMapInstance) {
                             localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
                             marker.openPopup();
                         }
                     }
-                });
-            }, observerOptions);
+                }, 50); // スクロールが止まった瞬間に素早く反応
+            };
+
+            container.removeEventListener('scroll', handleScroll);
+            container.addEventListener('scroll', handleScroll);
+            /* ▲ ここまで ▲ */
 
             localInsightsData.forEach((spot) => {
                 const driveId = getDriveId(spot.image);
@@ -996,7 +1015,6 @@
                 const card = document.createElement('a');
                 card.href = `/local-log/${slug}/`;
                 
-                // ▼ reveal-up クラスを外しました ▼
                 card.className = 'local-card-horizontal block';
                 card.dataset.title = spot.title; 
                 
@@ -1028,7 +1046,6 @@
                     </div>
                 `;
                 container.appendChild(card);
-                cardObserver.observe(card);
 
                 if (spot.lat && spot.lng) {
                     const lat = parseFloat(spot.lat); const lng = parseFloat(spot.lng);
@@ -1059,8 +1076,19 @@
                 setTimeout(() => {
                     localMapInstance.invalidateSize();
                     localMapInstance.fitBounds(localMarkersGroup.getBounds(), { padding: [30, 30], maxZoom: 14 });
+                    
+                    /* ▼ 初期状態で必ず一番左（最新）のカードをアクティブにする ▼ */
                     const firstCard = container.querySelector('.local-card-horizontal');
-                    if (firstCard) firstCard.classList.add('active-card');
+                    if (firstCard) {
+                        firstCard.classList.add('active-card');
+                        const title = firstCard.dataset.title;
+                        const marker = localMarkersMap[title];
+                        if (marker && localMapInstance) {
+                            localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
+                            marker.openPopup();
+                        }
+                    }
+                    /* ▲ ここまで ▲ */
                 }, 300);
             }
         }
