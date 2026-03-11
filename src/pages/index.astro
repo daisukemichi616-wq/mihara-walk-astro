@@ -961,27 +961,37 @@
             localMarkersMap = {};
             let hasMarkers = false;
 
-            /* ▼ スクロール連動プログラムの修正：一番左のカードを正確に検知するようにしました ▼ */
+            /* ▼ 修正：右端までスクロールしきったかを判定して確実に最後のカードを選択する処理 ▼ */
             let scrollTimeout;
             const handleScroll = () => {
                 if (scrollTimeout) clearTimeout(scrollTimeout);
                 scrollTimeout = setTimeout(() => {
                     let activeCard = null;
-                    let minDiff = Infinity;
-                    const containerRect = container.getBoundingClientRect();
-                    // 基準線をコンテナの左端から少し右に設定（ここを通過したカードをアクティブにする）
-                    const baseline = containerRect.left + 50; 
-                    
                     const cards = container.querySelectorAll('.local-card-horizontal');
-                    cards.forEach(card => {
-                        const cardRect = card.getBoundingClientRect();
-                        // カードの左端と基準線の距離を計算
-                        const diff = Math.abs(cardRect.left - baseline);
-                        if (diff < minDiff) {
-                            minDiff = diff;
-                            activeCard = card;
-                        }
-                    });
+                    
+                    if (cards.length === 0) return;
+
+                    // スクロール位置が一番右端（またはその手前10px以内）に到達しているかチェック
+                    const isAtEnd = Math.ceil(container.scrollLeft + container.clientWidth) >= container.scrollWidth - 10;
+
+                    if (isAtEnd) {
+                        // 右端まで来ていたら、無条件で一番最後のカードを選択！
+                        activeCard = cards[cards.length - 1];
+                    } else {
+                        // 途中なら今まで通り「一番左のカード」を探す
+                        let minDiff = Infinity;
+                        const containerRect = container.getBoundingClientRect();
+                        const baseline = containerRect.left + 50; 
+                        
+                        cards.forEach(card => {
+                            const cardRect = card.getBoundingClientRect();
+                            const diff = Math.abs(cardRect.left - baseline);
+                            if (diff < minDiff) {
+                                minDiff = diff;
+                                activeCard = card;
+                            }
+                        });
+                    }
 
                     if (activeCard && !activeCard.classList.contains('active-card')) {
                         cards.forEach(c => c.classList.remove('active-card'));
@@ -1081,12 +1091,9 @@
                     localMapInstance.invalidateSize();
                     localMapInstance.fitBounds(localMarkersGroup.getBounds(), { padding: [30, 30], maxZoom: 14 });
                     
-                    /* ▼ アニメーションがない状態でも、一番左のカードを正しくアクティブにする処理 ▼ */
-                    // 全てのカードのアクティブ状態を一旦解除
                     const cards = container.querySelectorAll('.local-card-horizontal');
                     cards.forEach(c => c.classList.remove('active-card'));
                     
-                    // DOM上の最初のカード（一番左）を取得してアクティブにする
                     const firstCard = cards[0];
                     if (firstCard) {
                         firstCard.classList.add('active-card');
@@ -1094,14 +1101,12 @@
                         const marker = localMarkersMap[title];
                         if (marker && localMapInstance) {
                             localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
-                            // 少し遅らせてポップアップを開くことで、地図の移動と被らないようにする
                             setTimeout(() => {
                                 marker.openPopup();
                             }, 500); 
                         }
                     }
-                    /* ▲ ここまで ▲ */
-                }, 300); // 描画完了を少し待つ
+                }, 300); 
             }
         }
 
