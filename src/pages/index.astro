@@ -279,6 +279,7 @@
         </div>
     </nav>
 
+    <!-- ▼ ヒーローセクション（没入感アニメーションの対象） ▼ -->
     <section class="hero-view">
         <div class="slider-container">
             <div class="slide active"><img src="https://i.postimg.cc/Dy2sThhC/IMG-9586.jpg" alt="桜"></div>
@@ -287,6 +288,7 @@
         </div>
         <div class="hero-overlay"></div>
         <div class="hero-content">
+            <!-- reveal-up クラスを外し、専用のアニメーションをかけます -->
             <span class="hero-label" id="hero-label" data-i18n="hero-label">MIHARA REDISCOVER PROJECT</span>
             <h1 class="hero-title serif-custom" id="hero-title" data-i18n="hero-title">
                 まだ知らない三原の景色を、<br class="mobile-br">
@@ -294,6 +296,7 @@
             </h1>
         </div>
     </section>
+    <!-- ▲ ここまで ▲ -->
 
     <section id="about" class="section-wrap bg-white">
         <div class="inner-limit">
@@ -900,7 +903,6 @@
                 const item = document.createElement('a');
                 item.href = `/spot/${slug}/`;
                 
-                // ▼ reveal-up クラスを外しました ▼
                 item.className = 'photo-item block';
                 
                 const safeAlt = escapeHtml(getLocalizedSpotField(spot, 'title'));
@@ -959,7 +961,7 @@
             localMarkersMap = {};
             let hasMarkers = false;
 
-            /* ▼ 古いルール（IntersectionObserver）を消し、新しいスクロール連動ルールを追加 ▼ */
+            /* ▼ スクロール連動プログラムの修正：一番左のカードを正確に検知するようにしました ▼ */
             let scrollTimeout;
             const handleScroll = () => {
                 if (scrollTimeout) clearTimeout(scrollTimeout);
@@ -967,11 +969,13 @@
                     let activeCard = null;
                     let minDiff = Infinity;
                     const containerRect = container.getBoundingClientRect();
-                    const baseline = containerRect.left + 30; // 左端を基準にする
+                    // 基準線をコンテナの左端から少し右に設定（ここを通過したカードをアクティブにする）
+                    const baseline = containerRect.left + 50; 
                     
                     const cards = container.querySelectorAll('.local-card-horizontal');
                     cards.forEach(card => {
                         const cardRect = card.getBoundingClientRect();
+                        // カードの左端と基準線の距離を計算
                         const diff = Math.abs(cardRect.left - baseline);
                         if (diff < minDiff) {
                             minDiff = diff;
@@ -989,7 +993,7 @@
                             marker.openPopup();
                         }
                     }
-                }, 50); // スクロールが止まった瞬間に素早く反応
+                }, 50); 
             };
 
             container.removeEventListener('scroll', handleScroll);
@@ -1077,19 +1081,27 @@
                     localMapInstance.invalidateSize();
                     localMapInstance.fitBounds(localMarkersGroup.getBounds(), { padding: [30, 30], maxZoom: 14 });
                     
-                    /* ▼ 初期状態で必ず一番左（最新）のカードをアクティブにする ▼ */
-                    const firstCard = container.querySelector('.local-card-horizontal');
+                    /* ▼ アニメーションがない状態でも、一番左のカードを正しくアクティブにする処理 ▼ */
+                    // 全てのカードのアクティブ状態を一旦解除
+                    const cards = container.querySelectorAll('.local-card-horizontal');
+                    cards.forEach(c => c.classList.remove('active-card'));
+                    
+                    // DOM上の最初のカード（一番左）を取得してアクティブにする
+                    const firstCard = cards[0];
                     if (firstCard) {
                         firstCard.classList.add('active-card');
                         const title = firstCard.dataset.title;
                         const marker = localMarkersMap[title];
                         if (marker && localMapInstance) {
                             localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
-                            marker.openPopup();
+                            // 少し遅らせてポップアップを開くことで、地図の移動と被らないようにする
+                            setTimeout(() => {
+                                marker.openPopup();
+                            }, 500); 
                         }
                     }
                     /* ▲ ここまで ▲ */
-                }, 300);
+                }, 300); // 描画完了を少し待つ
             }
         }
 
@@ -1147,7 +1159,6 @@
                     card.rel = "noopener noreferrer";
                 }
                 
-                // ▼ reveal-up クラスを外しました ▼
                 card.className = `event-card ${!isLink ? 'cursor-default hover:transform-none hover:shadow-[0_4px_15px_rgba(0,64,152,0.02)] hover:border-[var(--border-soft)]' : ''}`;
 
                 card.innerHTML = `
@@ -1228,7 +1239,6 @@
         window.addEventListener('load', () => {
             fetchWeather();
             
-            // ▼ GSAPアニメーションの初期化を実行 ▼
             initAnimations();
             
             const urlParams = new URLSearchParams(window.location.search);
