@@ -97,16 +97,18 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
         }
 
+        /* ▼ ヘッダーの背景を真っ白にして、ぼかし効果を消しました ▼ */
         .fixed-nav {
             position: fixed; top: 0; left: 0; width: 100%; height: 60px;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(15px);
+            background: #ffffff;
             border-bottom: 1px solid var(--border-soft);
             z-index: 9999;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 15px;
             transition: all 0.5s ease;
         }
+        /* ▲ ここまで ▲ */
+
         .header-logo { font-weight: 700 !important; font-size: 0.8rem; color: var(--palette-blue); letter-spacing: 0.05em; }
         .nav-links-wrap { display: flex; gap: 8px; align-items: center; }
         .nav-simple-link {
@@ -140,7 +142,11 @@
         .slide.active { opacity: 1; z-index: 2; }
         .slide img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.0); transition: transform 8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         .slide.active img { transform: scale(1.05); }
-        .hero-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.5) 100%); z-index: 3; }
+        
+        /* ▼ 写真が暗くならないように、かぶせていた黒いベールを極限まで薄く（透明に近く）しました ▼ */
+        .hero-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 100%); z-index: 3; }
+        /* ▲ ここまで ▲ */
+        
         .hero-content { position: relative; z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: white; padding: 0 20px; text-align: center; }
         .hero-label { font-size: 0.75rem; font-weight: 700 !important; letter-spacing: 0.4em; color: var(--palette-gold); margin-bottom: 25px; display: block; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
         .hero-title { font-size: 1.65rem; line-height: 1.8; text-shadow: 0 0 20px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5); }
@@ -153,7 +159,11 @@
         .card-frame { background: white; border-radius: 12px; padding: 40px 25px; margin-bottom: 30px; text-align: left; border: 1px solid var(--border-soft); box-shadow: 0 10px 30px rgba(0,64,152,0.03); transition: all 0.5s ease; }
         .card-frame h4 { font-weight: 700 !important; color: var(--palette-blue); margin-bottom: 12px; font-size: 1rem; border-left: 5px solid var(--palette-blue); padding-left: 15px; }
         .card-frame p { font-size: 0.85rem; font-weight: 500 !important; line-height: 2.3; color: var(--text-sub); }
-        .sticky-tab-bar { position: sticky; top: 60px; background: rgba(255,255,255,0.98); z-index: 900; border-bottom: 2px solid var(--palette-blue); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
+        
+        /* ▼ タブの背景も真っ白にして、ぼかし効果を消しました ▼ */
+        .sticky-tab-bar { position: sticky; top: 60px; background: #ffffff; z-index: 900; border-bottom: 2px solid var(--palette-blue); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
+        /* ▲ ここまで ▲ */
+
         .sticky-tab-bar::-webkit-scrollbar { display: none; }
         .tab-flex { display: flex; padding: 0 10px; justify-content: center; }
         .tab-item { padding: 22px 18px; font-size: 0.85rem; font-weight: 700 !important; color: #9ca3af; border-bottom: 4px solid transparent; cursor: pointer; }
