@@ -195,19 +195,20 @@
         
         /* ▼ さんぽログの完璧な余白とスナップ設定 ▼ */
         .horizontal-scroll-container {
-            display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px;
-            /* 左右のパディングを元に戻し、自然な余白に */
+            display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px;
             padding: 10px 0 20px 0;
-            margin-left: -24px; margin-right: -24px; padding-left: 24px; padding-right: 24px;
+            margin-left: -24px; margin-right: -24px; padding-left: 24px;
+            /* 最後の要素が確実に左端まで来るように、右側に大きな見えない余白をつける */
+            padding-right: 60vw;
             scrollbar-width: none; cursor: grab; scroll-behavior: smooth;
         }
         .horizontal-scroll-container::-webkit-scrollbar { display: none; }
         .horizontal-scroll-container.active { cursor: grabbing; }
         
         .local-card-horizontal {
-            /* ▼ スマホで約2.2枚分見える「ちょうどいい幅」に変更 ▼ */
-            flex: 0 0 45%;
-            /* ▼ 「左端（start）」でピタッと止まる一番確実な方法に戻しました ▼ */
+            /* ▼ スマホで約3枚見える綺麗なサイズに戻しました！ ▼ */
+            flex: 0 0 35%;
+            /* 常に左端（start）でピタッと止まる一番確実な方法 */
             scroll-snap-align: start;
             display: flex; flex-direction: column; background: #fff;
             border: 2px solid transparent; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -218,21 +219,23 @@
         .horizontal-scroll-container.active .local-card-horizontal { transition: none; transform: none; }
         .local-card-horizontal.active-card { border-color: var(--palette-blue); box-shadow: 0 8px 20px rgba(0,64,152,0.15); }
         @media (min-width: 640px) {
-            .local-card-horizontal { flex: 0 0 28%; }
-            .horizontal-scroll-container { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; gap: 20px; }
+            .local-card-horizontal { flex: 0 0 25%; }
+            .horizontal-scroll-container { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 40vw; gap: 16px; }
         }
-        @media (min-width: 1024px) { .local-card-horizontal { flex: 0 0 22%; } }
+        @media (min-width: 1024px) { 
+            .local-card-horizontal { flex: 0 0 20%; } 
+            .horizontal-scroll-container { padding-right: 30vw; }
+        }
 
-        /* 画像は縦長のまま、文字が潰れないように余白を調整 */
         .local-card-img-wrap { position: relative; width: 100%; aspect-ratio: 3/4; background: #f1f5f9; overflow: hidden; pointer-events: none; }
         .local-card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; pointer-events: none; }
         .local-card-horizontal:hover .local-card-img-wrap img { transform: scale(1.05); }
-        .local-tag-badge { position: absolute; top: 8px; left: 8px; background: rgba(0,64,152,0.9); color: white; font-size: 9px; font-weight: 700; padding: 4px 8px; border-radius: 4px; z-index: 2; display: flex; align-items: center; gap: 3px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .local-tag-badge { position: absolute; top: 6px; left: 6px; background: rgba(0,64,152,0.9); color: white; font-size: 8px; font-weight: 700; padding: 3px 6px; border-radius: 4px; z-index: 2; display: flex; align-items: center; gap: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
-        .local-card-content { flex: 1; padding: 15px 12px; display: flex; flex-direction: column; justify-content: flex-start; pointer-events: none; }
-        .local-card-title { font-size: 0.95rem; font-weight: 700; color: var(--palette-blue); margin-bottom: 6px; font-family: 'Noto Serif JP', serif !important; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-        .local-card-desc { font-size: 0.75rem; font-weight: 500; color: var(--text-sub); line-height: 1.6; margin-bottom: 10px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-        .local-card-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; border-top: 1px dashed var(--border-soft); padding-top: 10px; }
+        .local-card-content { flex: 1; padding: 10px; display: flex; flex-direction: column; justify-content: flex-start; pointer-events: none; }
+        .local-card-title { font-size: 0.85rem; font-weight: 700; color: var(--palette-blue); margin-bottom: 4px; font-family: 'Noto Serif JP', serif !important; line-height: 1.3; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+        .local-card-desc { font-size: 0.65rem; font-weight: 500; color: var(--text-sub); line-height: 1.5; margin-bottom: 8px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+        .local-card-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; border-top: 1px dashed var(--border-soft); padding-top: 8px; }
         .local-area { font-size: 9px; font-weight: 700; color: #9ca3af; letter-spacing: 0.05em; text-transform: uppercase; }
         .local-btn { font-size: 9px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 2px; }
         
@@ -373,8 +376,6 @@
             <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-2">
                 <div class="w-full text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
-            
-            <!-- 下にあったMOREボタンは削除し、JSで横スクロール内に追加します -->
             
             <div id="local-map-container"></div>
         </div>
@@ -969,7 +970,7 @@
                     let minDiff = Infinity;
                     const containerRect = container.getBoundingClientRect();
                     // コンテナの左端から少しだけ右（50px）を基準線にする
-                    const baseline = containerRect.left + 50; 
+                    const baseline = containerRect.left + 30; 
                     
                     const cards = container.querySelectorAll('.local-card-horizontal');
                     cards.forEach(card => {
@@ -1011,8 +1012,6 @@
             // 既存の「MOREカード」や「透明な余白」があれば一旦消す（常に一番後ろにするため）
             const existingMoreBtn = document.getElementById('local-more-card-btn');
             if (existingMoreBtn) existingMoreBtn.remove();
-            const existingSpacer = document.getElementById('local-spacer');
-            if (existingSpacer) existingSpacer.remove();
 
             const nextItems = localInsightsData.slice(localDisplayedCount, localDisplayedCount + LOCAL_ITEMS_PER_PAGE);
             let hasNewMarkers = false;
@@ -1108,12 +1107,6 @@
                     }, 100);
                 };
                 container.appendChild(moreBtn);
-            } else {
-                // 全ての投稿を読み込み終わったら、最後のカードが左端に到達できるように「見えない大きな余白」を追加
-                const spacer = document.createElement('div');
-                spacer.id = 'local-spacer';
-                spacer.className = 'flex-[0_0_65vw] sm:flex-[0_0_75vw] pointer-events-none';
-                container.appendChild(spacer);
             }
 
             if (hasNewMarkers && localMapInstance && localMarkersGroup) {
