@@ -193,22 +193,25 @@
         .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: rgba(0, 64, 152, 0.2) !important; }
         .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { background-color: var(--palette-blue) !important; color: #fff !important; font-family: 'Zen Maru Gothic', sans-serif !important; font-weight: 900 !important; box-shadow: 0 4px 10px rgba(0, 64, 152, 0.3); }
         
-        /* ▼ さんぽログの完璧な余白とスナップ設定 ▼ */
+        /* ▼ さんぽログの完璧な余白とスナップ設定（絶対潰れない魔法！） ▼ */
         .horizontal-scroll-container {
             display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px;
             padding: 10px 0 20px 0;
             margin-left: -24px; margin-right: -24px; padding-left: 24px;
             /* 最後の要素が確実に左端まで来るように、右側に大きな見えない余白をつける */
-            padding-right: 60vw;
+            padding-right: 80vw;
             scrollbar-width: none; cursor: grab; scroll-behavior: smooth;
+            /* スナップ（止まる）位置を、コンテナの左の余白（24px）に合わせる */
+            scroll-padding-left: 24px;
         }
         .horizontal-scroll-container::-webkit-scrollbar { display: none; }
         .horizontal-scroll-container.active { cursor: grabbing; }
         
         .local-card-horizontal {
-            /* ▼ スマホで約3枚見える綺麗なサイズに戻しました！ ▼ */
-            flex: 0 0 35%;
-            /* 常に左端（start）でピタッと止まる一番確実な方法 */
+            /* ▼ 絶対に幅を固定する魔法！これで細長くなりません ▼ */
+            flex: none;
+            width: 135px; /* スマホで約3枚が綺麗に見える黄金サイズ */
+            /* 常に左端（start）でピタッと止まる */
             scroll-snap-align: start;
             display: flex; flex-direction: column; background: #fff;
             border: 2px solid transparent; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -219,11 +222,11 @@
         .horizontal-scroll-container.active .local-card-horizontal { transition: none; transform: none; }
         .local-card-horizontal.active-card { border-color: var(--palette-blue); box-shadow: 0 8px 20px rgba(0,64,152,0.15); }
         @media (min-width: 640px) {
-            .local-card-horizontal { flex: 0 0 25%; }
-            .horizontal-scroll-container { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 40vw; gap: 16px; }
+            .local-card-horizontal { width: 180px; }
+            .horizontal-scroll-container { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 40vw; gap: 16px; scroll-padding-left: 0; }
         }
         @media (min-width: 1024px) { 
-            .local-card-horizontal { flex: 0 0 20%; } 
+            .local-card-horizontal { width: 220px; } 
             .horizontal-scroll-container { padding-right: 30vw; }
         }
 
@@ -238,11 +241,11 @@
         .local-card-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; border-top: 1px dashed var(--border-soft); padding-top: 8px; }
         .local-area { font-size: 9px; font-weight: 700; color: #9ca3af; letter-spacing: 0.05em; text-transform: uppercase; }
         .local-btn { font-size: 9px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 2px; }
+        /* ▲ ここまで ▲ */
         
         #local-map-container { height: 45vh; min-height: 350px; width: calc(100% + 48px); margin-left: -24px; border-radius: 0; border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); border-left: none; border-right: none; margin-top: 15px; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
         @media (min-width: 640px) { #local-map-container { width: 100%; margin-left: 0; border-radius: 12px; border: 1px solid var(--border-soft); height: 50vh; min-height: 400px; } }
         @media (min-width: 1024px) { #local-map-container { height: 60vh; min-height: 500px; } }
-        /* ▲ ここまで ▲ */
         
         .h2-one-line { font-size: 1.6rem; font-weight: 700 !important; margin-bottom: 50px; line-height: 1.2; text-align: center; white-space: nowrap; letter-spacing: -0.07em; color: var(--palette-blue); }
         .insta-cta-box { margin-top: 60px; padding: 40px 20px; background: #fff; border: 2px dashed var(--palette-blue-light); border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
@@ -1338,7 +1341,7 @@
                                     if (!clean.title) clean.title = clean['スポット名'] || clean['タイトル'] || '';
                                     if (!clean.desc) clean.desc = clean['紹介文（パパママ目線）'] || clean['紹介文'] || clean['説明'] || '';
                                     if (!clean.image) clean.image = clean['写真'] || clean['画像'] || '';
-                                    if (!clean.area) clean.area = clean['エリア'] || '';
+                                    if (!clean.area) clean.area = clean['エリア'] || clean['エリア'] || '';
                                     if (!clean.tag) clean.tag = clean['タグ'] || '';
 
                                     if (!clean.date) clean.date = clean['タイムスタンプ'] || clean['日付'] || clean['date'] || '';
