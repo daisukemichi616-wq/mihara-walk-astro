@@ -1,10 +1,10 @@
 ---
 // ▼ 1. Astroのビルド時（裏側のサーバー）で三原市のAPIからデータを取得 ▼
-// プロキシを使わず、サイト更新時に直接データを取得してHTMLに埋め込みます。
-// これによりCORSエラーや通信エラーを完全に回避できます！
 
-// 1-1. 人口データの取得と計算（最新月のみを抽出して正確に計算します）
+// 1-1. 人口データの取得と計算
 let popData = { population: 0, households: 0, latestDate: '', isError: false };
+let formattedDate = ''; // 表示用の日本語日付
+
 try {
   const popApiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=8b68f856-ffe2-48ab-ab71-d011f7982816&limit=3000&sort=" + encodeURIComponent("_id desc");
   const popRes = await fetch(popApiUrl);
@@ -38,7 +38,11 @@ try {
     if (totalPop > 0) {
       popData.population = totalPop;
       popData.households = totalHouse;
-      popData.latestDate = latestDate.split('T')[0].replace(/-/g, '/');
+      popData.latestDate = latestDate.split('T')[0].replace(/-/g, '/'); // 例: 2026/02/28
+      
+      // 日本語の綺麗な日付に変換
+      const [y, m, d] = popData.latestDate.split('/');
+      formattedDate = `${y}年${parseInt(m)}月${parseInt(d)}日`;
     } else {
       popData.isError = true;
     }
@@ -75,7 +79,6 @@ try {
   toiletData.isError = true;
 }
 
-// ▼ 取得したトイレデータを「安全なJSON文字列」に変換（HTML崩れを防止）▼
 const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u003c');
 ---
 
@@ -364,7 +367,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
 <body id="top" class="is-jp">
 
     <!-- ▼ ここにサーバーで取得したデータを安全にHTMLに埋め込みます ▼ -->
-    <!-- これにより、ブラウザがエラーを起こして真っ白になる現象を完全に防ぎます -->
     <script type="application/json" id="toilet-data-json" set:html={safeToiletSpotsJson}></script>
     <script type="application/json" id="toilet-error-status" set:html={toiletData.isError ? "true" : "false"}></script>
 
@@ -382,19 +384,52 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         </div>
     </nav>
 
+    <!-- ▼ ヒーロービュー（トップ写真） ▼ -->
     <section class="hero-view">
         <div class="slider-container">
             <div class="slide active"><img src="https://i.postimg.cc/Dy2sThhC/IMG-9586.jpg" alt="桜"></div>
             <div class="slide"><img src="https://i.postimg.cc/Z56hFGB9/IMG-9585.jpg" alt="旗"></div>
             <div class="slide"><img src="https://i.postimg.cc/cLypHF9y/IMG-9584.jpg" alt="海"></div>
         </div>
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
+        <!-- 文字を読みやすくするための暗いグラデーション -->
+        <div class="hero-overlay" style="background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);"></div>
+        
+        <div class="hero-content w-full">
             <span class="hero-label" id="hero-label" data-i18n="hero-label">MIHARA REDISCOVER PROJECT</span>
             <h1 class="hero-title serif-custom" id="hero-title" data-i18n="hero-title">
                 まだ知らない三原の景色を、<br class="mobile-br">
                 みんなで描くフォトマップ
             </h1>
+            
+            <!-- ▼ 写真の上にドカンと表示されるオープンデータカウンター ▼ -->
+            <div class="mt-10 sm:mt-16 flex flex-row justify-center items-end gap-8 sm:gap-16 w-full px-4 reveal-on-load">
+                <!-- 人口 -->
+                <div class="flex flex-col items-center">
+                    <div>
+                        <span class="text-5xl sm:text-7xl font-black text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.5)] count-up" data-val={popData.isError ? 0 : popData.population}>{popData.isError ? '---' : '0'}</span>
+                        <span class="text-sm sm:text-xl text-white font-bold ml-1 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp">人</span>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-md border border-white/40 text-white text-[9px] sm:text-xs font-bold px-4 py-1.5 rounded-full mt-2 shadow-lg">
+                        <span class="lang-jp">{popData.isError ? 'データ取得中...' : (formattedDate + ' 現在の人口')}</span>
+                        <span class="lang-en hidden">{popData.isError ? 'Loading...' : 'Population as of ' + popData.latestDate}</span>
+                    </div>
+                </div>
+                
+                <!-- 世帯数 -->
+                <div class="flex flex-col items-center">
+                    <div>
+                        <span class="text-4xl sm:text-6xl font-black text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.5)] count-up" data-val={popData.isError ? 0 : popData.households}>{popData.isError ? '---' : '0'}</span>
+                        <span class="text-xs sm:text-lg text-white font-bold ml-1 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp">世帯</span>
+                        <span class="text-xs sm:text-lg text-white font-bold ml-1 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-en hidden">Households</span>
+                    </div>
+                    <div class="bg-white/20 backdrop-blur-md border border-white/40 text-white text-[9px] sm:text-xs font-bold px-4 py-1.5 rounded-full mt-2 shadow-lg">
+                        <span class="lang-jp">{popData.isError ? 'データ取得中...' : (formattedDate + ' 現在の世帯数')}</span>
+                        <span class="lang-en hidden">{popData.isError ? 'Loading...' : 'Households as of ' + popData.latestDate}</span>
+                    </div>
+                </div>
+            </div>
+            <!-- ▲ ここまで ▲ -->
+            
         </div>
     </section>
 
@@ -405,40 +440,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             <h3 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-8 reveal-up" id="title-about" data-i18n="title-about">みんなで描く、三原の未来</h3>
             
             <div class="bg-blue-50/50 rounded-2xl p-6 sm:p-10 mb-10 border border-blue-100 reveal-up">
-                
-                <div class="text-center mb-6">
-                    <p class="text-sm font-bold text-gray-500 mb-2">
-                        <span class="lang-jp">現在の三原市の推計人口</span>
-                        <span class="lang-en">Current Estimated Population</span>
-                    </p>
-                    <div class="flex flex-wrap justify-center items-end gap-x-8 gap-y-4">
-                        <div>
-                            <!-- ▼ サーバーで取得した「最新の正確な人口」を確実に表示します ▼ -->
-                            <span class="text-4xl sm:text-5xl font-black text-blue-700 count-up" data-val={popData.isError ? 0 : popData.population}>
-                                {popData.isError ? '---' : '0'}
-                            </span>
-                            <span class="text-sm text-blue-900 font-bold ml-1 lang-jp">人</span>
-                        </div>
-                        <div>
-                            <!-- ▼ サーバーで取得した「最新の正確な世帯数」を確実に表示します ▼ -->
-                            <span class="text-2xl sm:text-3xl font-black text-blue-600 count-up" data-val={popData.isError ? 0 : popData.households}>
-                                {popData.isError ? '---' : '0'}
-                            </span>
-                            <span class="text-xs text-blue-900 font-bold ml-1 lang-jp">世帯</span>
-                            <span class="text-xs text-blue-900 font-bold ml-1 lang-en">Households</span>
-                        </div>
-                    </div>
-                    <p class="text-[9px] text-gray-400 mt-3">
-                        {popData.isError ? (
-                            <span class="text-red-500 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> 市のサーバーが一時的に混雑しています</span>
-                        ) : (
-                            <>
-                                <span class="lang-jp">※三原市オープンデータ APIより自動集計（基準日: {popData.latestDate}）</span>
-                                <span class="lang-en hidden">※Automatically aggregated from Mihara City Open Data API</span>
-                            </>
-                        )}
-                    </p>
-                </div>
                 
                 <!-- 人数に合わせたエモーショナルなメッセージ -->
                 <div class="lang-jp text-sm font-bold text-gray-600 leading-loose text-center">
@@ -454,6 +455,11 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                     Why don't we collect the beauty of Mihara from the perspective of each of these <span class="text-blue-600">{popData.isError ? '---' : popData.population.toLocaleString()}</span> people, and create one big "Photo Map" together?
                 </div>
                 
+            </div>
+            
+            <div class="text-sm font-bold text-gray-500 leading-loose text-justify px-4 reveal-up">
+                <span class="lang-jp">広島県三原市（みはらし）は、瀬戸内海の穏やかな気候と豊かな自然に恵まれた、歴史と文化が息づく街です。陸・海・空の交通の要衝として知られ、「広島空港」がある空の玄関口でもあります。<br><br>このプロジェクトは、そんな三原の日常にある「美しさ」を再発見するためのものです。皆さまから寄せられた写真を通じて、三原の新しい魅力を発信していきます。</span>
+                <span class="lang-en">Mihara City in Hiroshima Prefecture is a town full of history and culture, blessed with the mild climate and rich nature of the Seto Inland Sea. It is known as a transportation hub for land, sea, and air, serving as the gateway to the sky with Hiroshima Airport.<br><br>This project aims to rediscover the everyday "beauty" of Mihara. Through the photos submitted by everyone, we will share the new charm of Mihara.</span>
             </div>
             
         </div>
@@ -551,7 +557,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         </div>
     </section>
 
-    <!-- ▼ 便利データ（トイレマップ） ▼ -->
     <section id="opendata" class="section-wrap bg-slate-50 border-t border-slate-200">
         <div class="inner-limit max-w-5xl px-0 sm:px-6">
             <span class="section-tag-label reveal-up" data-i18n="label-opendata">OPEN DATA API</span>
@@ -580,7 +585,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
     </section>
-    <!-- ▲ ここまで ▲ -->
 
     <section id="contact" class="section-wrap" style="background-color: var(--palette-sky); border-top: 1px solid var(--border-soft);">
         <div class="inner-limit">
@@ -702,6 +706,29 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                     { opacity: 0, filter: 'blur(15px)', y: 10 }, 
                     { opacity: 1, filter: 'blur(0px)', y: 0, duration: 3, ease: "power2.out", delay: 0.8 }
                 );
+                
+                // ▼ ヒーローの人口カウントアップアニメーション（ロード直後に実行） ▼
+                gsap.fromTo('.reveal-on-load', 
+                    { opacity: 0, y: 20 },
+                    { opacity: 1, y: 0, duration: 2, ease: "power2.out", delay: 1.2 }
+                );
+
+                setTimeout(() => {
+                    document.querySelectorAll('.count-up').forEach(el => {
+                        const endVal = parseInt(el.getAttribute('data-val'), 10) || 0;
+                        if (endVal === 0) return; 
+                        const obj = { val: 0 };
+                        
+                        gsap.to(obj, {
+                            val: endVal,
+                            duration: 3,
+                            ease: "power2.out",
+                            onUpdate: () => {
+                                el.innerHTML = Math.round(obj.val).toLocaleString();
+                            }
+                        });
+                    });
+                }, 1000);
 
                 gsap.to('.hero-content', {
                     y: "40%", 
@@ -724,31 +751,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                     }
                 });
             }
-
-            // ▼ 人口カウントアップのアニメーション ▼
-            let isCounted = false;
-            ScrollTrigger.create({
-                trigger: '#about',
-                start: 'top 80%', 
-                onEnter: () => {
-                    if(isCounted) return;
-                    isCounted = true;
-                    document.querySelectorAll('.count-up').forEach(el => {
-                        const endVal = parseInt(el.getAttribute('data-val'), 10) || 0;
-                        if (endVal === 0) return; 
-                        const obj = { val: 0 };
-                        
-                        gsap.to(obj, {
-                            val: endVal,
-                            duration: 3,
-                            ease: "power2.out",
-                            onUpdate: () => {
-                                el.innerHTML = Math.round(obj.val).toLocaleString();
-                            }
-                        });
-                    });
-                }
-            });
 
             // オアシスマップはOpendataセクションに入った時に初期化
             ScrollTrigger.create({
@@ -780,7 +782,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             'hero-title': { normal: { jp: 'まだ知らない三原の景色を、<br class="mobile-br">みんなで描くフォトマップ', en: 'Discovering the unseen Mihara,<br class="mobile-br">a community photo map.' } },
             'label-about': { normal: { jp: 'About Project', en: 'About Project' } },
             'title-about': { normal: { jp: 'みんなで描く、三原の未来', en: 'Mapping the Future of Mihara' } },
-            'desc-about': { normal: { jp: '広島県三原市（みはらし）は、瀬戸内海の穏やかな気候と豊かな自然に恵まれた、歴史と文化が息づく街です。陸・海・空の交通の要衝として知られ、「広島空港」がある空の玄関口でもあります。<br><br>このプロジェクトは、そんな三原の日常にある「美しさ」を再発見するためのもの。地元の人だけが知る特別な場所や、日常のふとした風景を写真で紡ぎ、共有していきます。', en: 'Mihara City in Hiroshima Prefecture is a town full of history and culture, blessed with the mild climate and rich nature of the Seto Inland Sea. It is known as a transportation hub for land, sea, and air, serving as the gateway to the sky with Hiroshima Airport.<br><br>This project aims to rediscover the everyday "beauty" of Mihara. We collect and share photos of special places known only to locals and casual everyday landscapes.' } },
             'title-map': { normal: { jp: 'PHOTO MAP', en: 'PHOTO MAP' } },
             'sub-map': { normal: { jp: 'Find Your Favorite Spot', en: 'Find Your Favorite Spot' } },
             'btn-view-grid-text': { normal: { jp: 'PHOTO', en: 'PHOTO' } },
