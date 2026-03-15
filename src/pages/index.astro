@@ -402,27 +402,27 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </h1>
             
             <!-- ▼ 写真の上にドカンと表示されるオープンデータカウンター ▼ -->
-            <div class="mt-8 sm:mt-16 flex flex-row justify-center items-end gap-6 sm:gap-16 w-full px-2 reveal-on-load">
+            <div class="mt-8 sm:mt-16 flex flex-row justify-center items-end gap-4 sm:gap-12 w-full px-2 reveal-on-load">
                 <!-- 人口 -->
                 <div class="flex flex-col items-center">
-                    <div class="flex items-baseline mb-3 sm:mb-4">
-                        <span class="text-6xl sm:text-8xl font-black text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.5)] count-up tracking-tighter" data-val={popData.isError ? 0 : popData.population}>{popData.isError ? '---' : '0'}</span>
-                        <span class="text-base sm:text-3xl text-white font-bold ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp">人</span>
+                    <div class="flex flex-col items-center leading-none mb-3 sm:mb-4">
+                        <span class="text-[4.5rem] sm:text-[6.5rem] font-sans font-bold text-white drop-shadow-[0_4px_15px_rgba(0,0,0,0.5)] count-up tracking-tighter" data-val={popData.isError ? 0 : popData.population}>{popData.isError ? '---' : '0'}</span>
+                        <span class="text-base sm:text-2xl text-white font-bold drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp -mt-1 sm:-mt-2">人</span>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-md border border-white/40 text-white text-[9px] sm:text-sm font-bold px-5 sm:px-8 py-2 sm:py-3 rounded-full shadow-lg">
+                    <div class="bg-white/10 backdrop-blur-md border border-white/40 text-white text-[9.5px] sm:text-sm font-bold px-5 sm:px-8 py-2 sm:py-3 rounded-full shadow-lg whitespace-nowrap">
                         <span class="lang-jp">{popData.isError ? 'データ取得中...' : (formattedDate + ' 現在の人口')}</span>
                         <span class="lang-en hidden">{popData.isError ? 'Loading...' : 'Population as of ' + popData.latestDate}</span>
                     </div>
                 </div>
                 
                 <!-- 世帯数 -->
-                <div class="flex flex-col items-center">
-                    <div class="flex items-baseline mb-3 sm:mb-4">
-                        <span class="text-5xl sm:text-7xl font-black text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.5)] count-up tracking-tighter" data-val={popData.isError ? 0 : popData.households}>{popData.isError ? '---' : '0'}</span>
-                        <span class="text-sm sm:text-xl text-white font-bold ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp">世帯</span>
-                        <span class="text-sm sm:text-xl text-white font-bold ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-en hidden">Households</span>
+                <div class="flex flex-col items-center mb-1 sm:mb-2">
+                    <div class="flex items-baseline leading-none mb-4 sm:mb-6">
+                        <span class="text-5xl sm:text-[4.5rem] font-sans font-bold text-white drop-shadow-[0_4px_15px_rgba(0,0,0,0.5)] count-up tracking-tighter" data-val={popData.isError ? 0 : popData.households}>{popData.isError ? '---' : '0'}</span>
+                        <span class="text-sm sm:text-xl text-white font-bold ml-1.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp">世帯</span>
+                        <span class="text-sm sm:text-xl text-white font-bold ml-1.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-en hidden">Households</span>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-md border border-white/40 text-white text-[9px] sm:text-sm font-bold px-5 sm:px-8 py-2 sm:py-3 rounded-full shadow-lg">
+                    <div class="bg-white/10 backdrop-blur-md border border-white/40 text-white text-[9.5px] sm:text-sm font-bold px-5 sm:px-8 py-2 sm:py-3 rounded-full shadow-lg whitespace-nowrap">
                         <span class="lang-jp">{popData.isError ? 'データ取得中...' : (formattedDate + ' 現在の世帯数')}</span>
                         <span class="lang-en hidden">{popData.isError ? 'Loading...' : 'Households as of ' + popData.latestDate}</span>
                     </div>
@@ -432,9 +432,11 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         </div>
 
         <!-- ▼ 下部をおしゃれなウェーブ（波）にするSVG ▼ -->
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[80px]">
-                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="#ffffff"></path>
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px]">
+            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[60px] sm:h-[120px]">
+                <path fill="#ffffff" fill-opacity="0.3" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,272,576,250.7C672,229,768,160,864,138.7C960,117,1056,144,1152,160C1248,176,1344,181,1392,184L1440,186.7L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="#ffffff" fill-opacity="0.6" d="M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,101.3C672,107,768,149,864,165.3C960,181,1056,165,1152,144C1248,123,1344,96,1392,82.7L1440,69.3L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="#ffffff" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,160C672,160,768,192,864,197.3C960,203,1056,181,1152,160C1248,139,1344,117,1392,106.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
             </svg>
         </div>
     </section>
