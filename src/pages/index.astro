@@ -271,8 +271,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .card-frame h4 { font-weight: 700 !important; color: var(--palette-blue); margin-bottom: 12px; font-size: 1rem; border-left: 5px solid var(--palette-blue); padding-left: 15px; }
         .card-frame p { font-size: 0.85rem; font-weight: 500 !important; line-height: 2.3; color: var(--text-sub); }
         
-        /* ▼ Galleryの背景色に合わせてタブバーも水色に馴染ませます ▼ */
-        .sticky-tab-bar { position: sticky; top: 60px; background: #f0f7ff; z-index: 900; border-bottom: 2px solid var(--palette-blue); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
+        .sticky-tab-bar { position: sticky; top: 60px; background: #f0f7ff; z-index: 900; border-bottom: 1px solid rgba(0,64,152,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
         .sticky-tab-bar::-webkit-scrollbar { display: none; }
         .tab-flex { display: flex; padding: 0 10px; justify-content: flex-start; }
         .tab-item { padding: 22px 16px; font-size: 0.85rem; font-weight: 700 !important; color: #9ca3af; border-bottom: 4px solid transparent; cursor: pointer; }
@@ -381,7 +380,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .bottom-view-container img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
         .bottom-view-overlay { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 50px; }
         .floating-badge { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 20px 35px; text-align: center; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; }
-        .footer-main { text-align: center; background-color: #fff; border-top: 1px solid var(--border-soft); padding: 60px 20px 60px 20px; transition: background-color 0.5s ease; }
+        .footer-main { text-align: center; background-color: #fff; padding: 60px 20px 60px 20px; transition: background-color 0.5s ease; }
         .footer-copy { font-size: 9px; font-weight: 700 !important; color: #9ca3af; letter-spacing: 0.3em; margin-bottom: 12px; text-transform: uppercase; }
         .footer-produced { font-size: 8px; font-weight: 500 !important; color: #cbd5e1; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
 
@@ -410,7 +409,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         <div class="header-logo" id="header-logo" data-i18n="header-logo">MIHARA REDISCOVER</div>
         <div class="nav-links-wrap flex items-center">
             
-            <!-- ▼ PC用メニュー（900px以上で表示） ▼ -->
+            <!-- ▼ PC用メニュー ▼ -->
             <div class="desktop-nav-links">
                 <div class="nav-simple-link" onclick="scrollToId('gallery')" data-i18n="nav-map">PHOTO MAP</div>
                 <div class="nav-simple-link" onclick="scrollToId('local-insights')" data-i18n="nav-local">みはらさんぽログ</div>
@@ -423,7 +422,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                 <i class="fa-solid fa-globe"></i> <span id="lang-text">EN</span>
             </button>
 
-            <!-- ▼ スマホ用メニューボタン（ハンバーガー） ▼ -->
+            <!-- ▼ スマホ用メニューボタン ▼ -->
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
                 <i class="fa-solid fa-bars"></i>
             </button>
@@ -462,19 +461,16 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             
             <!-- ▼ 写真の上にドカンと表示されるオープンデータカウンター ▼ -->
             <div class="mt-6 sm:mt-10 flex flex-col w-full max-w-2xl px-4 sm:px-6 reveal-on-load relative z-30">
-                <!-- ▼ スマホでも世帯が横書きになるように、数字を少し小さくし、gapを調整しました ▼ -->
                 <div class="flex flex-row justify-center items-baseline gap-4 sm:gap-10 w-full">
                     <!-- 人口 -->
                     <div class="flex items-baseline leading-none">
                         <span class="text-[3rem] sm:text-[4.5rem] font-normal text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom" data-val={popData.isError ? 0 : popData.population}>{popData.isError ? '---' : '0'}</span>
-                        <!-- ▼ whitespace-nowrapで絶対に改行させない ▼ -->
                         <span class="text-xs sm:text-base text-white ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp serif-custom tracking-widest whitespace-nowrap">人</span>
                     </div>
                     
                     <!-- 世帯数 -->
                     <div class="flex items-baseline leading-none">
                         <span class="text-[1.8rem] sm:text-[3rem] font-normal text-white/90 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom" data-val={popData.isError ? 0 : popData.households}>{popData.isError ? '---' : '0'}</span>
-                        <!-- ▼ whitespace-nowrapで絶対に改行させない ▼ -->
                         <span class="text-[10px] sm:text-sm text-white/90 ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp serif-custom tracking-widest whitespace-nowrap">世帯</span>
                         <span class="text-[10px] sm:text-sm text-white/90 ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-en hidden serif-custom tracking-widest whitespace-nowrap">Households</span>
                     </div>
@@ -501,7 +497,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
 
     <!-- ▼ About Project (白背景) ▼ -->
     <section id="about" class="section-wrap bg-white relative pb-16 sm:pb-24 border-none">
-        <div class="inner-limit relative z-30">
+        <div class="inner-limit relative z-30 pt-4 sm:pt-8">
             <span class="section-tag-label reveal-up" id="label-about" data-i18n="label-about">About Project</span>
             <h3 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-8 reveal-up" id="title-about" data-i18n="title-about">みんなで描く、三原の未来</h3>
             
@@ -522,18 +518,19 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                 <span class="lang-en">Mihara City in Hiroshima Prefecture is a town full of history and culture, blessed with the mild climate and rich nature of the Seto Inland Sea.<br class="sm:hidden">It is known as a transportation hub for land, sea, and air, serving as the gateway to the sky with Hiroshima Airport.<br><br>This project aims to rediscover the everyday "beauty" of Mihara.<br class="sm:hidden">Through the photos submitted by everyone, we will share the new charm of Mihara.</span>
             </div>
         </div>
-
-        <!-- ▼ セクション間の波（白から水色へ） ▼ -->
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-[#f0f7ff]">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
-                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
-            </svg>
-        </div>
     </section>
 
     <!-- ▼ Gallery（マップ）セクション (水色背景) ▼ -->
     <section id="gallery" class="bg-[#f0f7ff] relative pb-16 sm:pb-24 border-none" style="padding-top: 0;">
-        <div class="pt-0 pb-8 px-6 text-center relative z-30">
+        
+        <!-- ▼ セクション間の波（Z-index問題解決のため、下の要素の上に置く） ▼ -->
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-white rotate-180">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+            </svg>
+        </div>
+
+        <div class="pt-12 sm:pt-16 pb-8 px-6 text-center relative z-30">
             <h3 class="serif-custom text-blue-900 text-2xl mb-4" id="title-map" data-i18n="title-map">PHOTO MAP</h3>
             <p id="sub-map" class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6" data-i18n="sub-map">Find Your Favorite Spot</p>
             
@@ -580,7 +577,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </nav>
         
-        <div id="gallery-wrap" class="relative z-30">
+        <div id="gallery-wrap" class="relative z-30 pt-2 sm:pt-4">
             <div id="gallery-grid" class="photo-grid">
                 <div class="col-span-3 py-32 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
@@ -589,18 +586,18 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
         <div id="map-container" class="relative z-30 mb-8 sm:mb-12"></div>
-        
-        <!-- ▼ セクション間の波（水色から濃い水色へ） ▼ -->
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-[#e1f5fe]">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
-                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
-            </svg>
-        </div>
     </section>
 
     <!-- ▼ Local Insights セクション (濃い水色背景) ▼ -->
     <section id="local-insights" class="section-wrap bg-[#e1f5fe] relative pb-16 sm:pb-24 border-none">
-        <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30">
+        <!-- ▼ セクション間の波 ▼ -->
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#f0f7ff] rotate-180">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+            </svg>
+        </div>
+
+        <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30 pt-4 sm:pt-8">
             <span class="section-tag-label" id="label-local" data-i18n="label-local">MIHARA WALK LOG</span>
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-local" data-i18n="title-local">みはらさんぽログ</h2>
             <p class="text-xs sm:text-sm font-bold text-gray-500 mb-6 px-4 sm:px-6 leading-relaxed" id="desc-local" data-i18n="desc-local">ガイドブックには載らない、三原の何気ない日常と<br>新しい発見。歩いて見つける三原の魅力ログ。</p>
@@ -613,18 +610,18 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             
             <div id="local-map-container"></div>
         </div>
-        
-        <!-- ▼ セクション間の波（濃い水色から白へ、反転して動きをつける） ▼ -->
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-white scale-x-[-1]">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
-                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
-            </svg>
-        </div>
     </section>
 
     <!-- ▼ Events セクション (白背景) ▼ -->
     <section id="events" class="section-wrap bg-white relative pb-16 sm:pb-24 border-none">
-        <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30">
+        <!-- ▼ セクション間の波 ▼ -->
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#e1f5fe] rotate-180">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+            </svg>
+        </div>
+
+        <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30 pt-4 sm:pt-8">
             <span class="section-tag-label" id="label-event" data-i18n="label-event">UPCOMING EVENTS</span>
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-event" data-i18n="title-event">三原のイベント情報</h2>
             <p class="text-xs sm:text-sm font-bold text-gray-500 mb-8 px-4 sm:px-6 leading-relaxed" id="desc-event" data-i18n="desc-event">週末のお出かけにぴったりな、<br>三原市内のイベントや催し物をお届けします。</p>
@@ -637,24 +634,32 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                 <button onclick="loadMoreEvents()" class="bg-[#004098] text-white text-xs font-bold py-3 px-10 rounded-full hover:opacity-90 transition shadow-lg tracking-widest">MORE EVENTS</button>
             </div>
         </div>
-        
-        <!-- ▼ セクション間の波（白から水色へ） ▼ -->
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-[#f0f7ff]">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
-                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
-            </svg>
-        </div>
     </section>
 
     <!-- ▼ Opendata セクション (水色背景) ▼ -->
     <section id="opendata" class="section-wrap bg-[#f0f7ff] relative pb-16 sm:pb-24 border-none">
-        <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30">
+        <!-- ▼ セクション間の波 ▼ -->
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-white rotate-180">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+            </svg>
+        </div>
+
+        <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30 pt-4 sm:pt-8">
             <span class="section-tag-label reveal-up" data-i18n="label-opendata">OPEN DATA API</span>
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4 reveal-up" data-i18n="title-opendata">お出かけオアシスマップ</h2>
             
-            <p class="text-xs sm:text-sm font-bold text-gray-500 mb-8 px-4 sm:px-6 leading-relaxed reveal-up" data-i18n="desc-opendata">
-                三原市が公開しているオープンデータを活用し、<br class="sm:hidden">市内の「公衆トイレ」をマップにまとめました。<br>
-                まち歩きや写真撮影の際の、<br class="sm:hidden">安心な休憩スポットとして<br class="sm:hidden">ご活用ください。
+            <!-- ▼ 改行を美しく調整しました ▼ -->
+            <p class="text-xs sm:text-sm font-bold text-gray-500 mb-8 px-4 sm:px-6 leading-relaxed reveal-up">
+                <span class="lang-jp">
+                    三原市が公開しているオープンデータを活用し、<br class="sm:hidden">市内の「公衆トイレ」をマップにまとめました。<br>
+                    まち歩きや写真撮影の際の、安心な休憩スポットとして、<br>
+                    ご活用ください。
+                </span>
+                <span class="lang-en hidden">
+                    Utilizing open data published by Mihara City, we have mapped "public toilets" in the city.<br>
+                    Please use it as a safe rest spot during your walk or photo shoot.
+                </span>
             </p>
 
             <div class="px-6 sm:px-0 reveal-up">
@@ -675,18 +680,18 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                 </div>
             </div>
         </div>
-        
-        <!-- ▼ セクション間の波（水色から濃い水色へ、反転して動きをつける） ▼ -->
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-[#e1f5fe] scale-x-[-1]">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
-                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
-            </svg>
-        </div>
     </section>
 
     <!-- ▼ Contact セクション (濃い水色背景) ▼ -->
     <section id="contact" class="section-wrap bg-[#e1f5fe] relative border-none">
-        <div class="inner-limit relative z-30">
+        <!-- ▼ セクション間の波 ▼ -->
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#f0f7ff] rotate-180">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+            </svg>
+        </div>
+
+        <div class="inner-limit relative z-30 pt-4 sm:pt-8">
             <span class="section-tag-label" id="label-contact" data-i18n="label-contact">Photo Submission</span>
             <h2 class="h2-one-line serif-custom" id="title-contact" data-i18n="title-contact">三原の魅力を教えてください</h2>
             <p id="text-contact-desc" class="text-sm text-gray-500 leading-loose font-bold mb-8" data-i18n="desc-contact">
@@ -719,9 +724,9 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
 
     <!-- ▼ Bottom Image セクション ▼ -->
     <section class="bottom-view-container relative border-none">
-        <!-- ▼ 写真上部の波（Contactセクションの濃い水色に合わせて逆向きに配置） ▼ -->
+        <!-- ▼ 上の波（Contactセクションからの繋がり） ▼ -->
         <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#e1f5fe] rotate-180">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
                 <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
             </svg>
         </div>
@@ -757,11 +762,11 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         
         <p class="footer-produced">PRODUCED BY MICHIM | PHOTOS BY MIHARA LOVERS</p>
         
-        <!-- ▼ スマホで見たときに「しています。」が孤立しないように改行を整えました ▼ -->
+        <!-- ▼ 「APIを活用して作成しています。」で綺麗に改行されるように調整 ▼ -->
         <p class="text-[9px] text-gray-400 mt-3 font-bold leading-relaxed text-center">
             ※本サイトの一部コンテンツは、<br class="sm:hidden">
             「三原市オープンデータカタログサイト」の<br class="sm:hidden">
-            APIを利用しています。
+            APIを活用して作成しています。
         </p>
     </footer>
 
@@ -770,7 +775,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
 
         // =========================================================================
         // 🚀 マップ初期化プログラム 🚀
-        // HTML内に安全に埋め込まれたJSONを読み込んでピンを立てます。
         // =========================================================================
 
         let opendataMapInstance = null;
@@ -938,10 +942,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
 
             'label-opendata': { normal: { jp: 'OPEN DATA API', en: 'OPEN DATA' } },
             'title-opendata': { normal: { jp: 'お出かけオアシスマップ', en: 'Oasis Map (Public Toilets)' } },
-            
-            // ▼ 言語切り替え用データも改行を修正しました ▼
-            'desc-opendata': { normal: { jp: '三原市が公開しているオープンデータを活用し、<br class="sm:hidden">市内の「公衆トイレ」をマップにまとめました。<br>まち歩きや写真撮影の際の、<br class="sm:hidden">安心な休憩スポットとして<br class="sm:hidden">ご活用ください。', en: 'Utilizing open data published by Mihara City, we have mapped "public toilets" in the city.<br>Please use it as a safe rest spot during your walk or photo shoot.' } },
-
             'label-contact': { normal: { jp: 'Photo Submission', en: 'Photo Submission' } },
             'title-contact': { normal: { jp: '三原の魅力を教えてください', en: 'Share the Charm of Mihara' } },
             'desc-contact': { normal: { jp: '隠れた名所、美味しいグルメ、四季折々の風景、まちのイベント、あるいは何気ない日常のひとコマなど、三原の魅力が伝わる写真を幅広く募集しています。', en: 'We are looking for a wide range of photos that convey the charm of Mihara, such as hidden spots, delicious food, seasonal scenery, local events, or just casual everyday moments.' } },
@@ -1950,6 +1950,19 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                     render(tab.getAttribute('data-area'));
                     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
+
+                    // ▼ タブを切り替えた時に、1行目の画像がタブバーの下に潜り込まないようにスクロール位置を自動調整 ▼
+                    const tabContainer = document.querySelector('.sticky-tab-bar');
+                    if(tabContainer) {
+                        const tabRect = tabContainer.getBoundingClientRect();
+                        if (tabRect.top <= 61) {
+                            const galleryWrap = document.getElementById('gallery-wrap');
+                            if(galleryWrap) {
+                                const offsetPosition = galleryWrap.getBoundingClientRect().top + window.pageYOffset - tabRect.height - 60;
+                                window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                            }
+                        }
+                    }
                 });
             });
         });
