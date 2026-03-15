@@ -1953,19 +1953,21 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
 
-                    // ▼ 修正3：タブを切り替えた時に、少し余裕を持たせてスクロール位置を自動調整 ▼
-                    const tabContainer = document.querySelector('.sticky-tab-bar');
-                    if(tabContainer) {
-                        const tabRect = tabContainer.getBoundingClientRect();
-                        if (tabRect.top <= 61) {
-                            const galleryWrap = document.getElementById('gallery-wrap');
-                            if(galleryWrap) {
-                                // 余白分（24px）を引いて、写真がタブバーの下にめり込まないように計算
-                                const offsetPosition = galleryWrap.getBoundingClientRect().top + window.pageYOffset - tabRect.height - 60 - 24;
-                                window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                    // ▼ 修正2：タブ切り替え時のスクロールを、確実に画像全体が見える位置まで大幅に下げる ▼
+                    setTimeout(() => {
+                        const tabContainer = document.querySelector('.sticky-tab-bar');
+                        if(tabContainer) {
+                            const tabRect = tabContainer.getBoundingClientRect();
+                            if (tabRect.top <= 65) {
+                                const galleryWrap = document.getElementById('gallery-wrap');
+                                if(galleryWrap) {
+                                    // 画像が上に潜り込まないように、計算値を大きく引く（- 180）
+                                    const offsetPosition = galleryWrap.getBoundingClientRect().top + window.pageYOffset - 180;
+                                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                                }
                             }
                         }
-                    }
+                    }, 50); // DOMの更新（画像の準備）を一瞬待ってからスクロールする
                 });
             });
         });
