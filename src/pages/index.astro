@@ -233,7 +233,7 @@
         .local-card-desc { font-size: 0.6rem; font-weight: 500; color: var(--text-sub); line-height: 1.4; margin-bottom: 6px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
         .local-card-footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; border-top: 1px dashed var(--border-soft); padding-top: 6px; pointer-events: auto; }
         .local-area { font-size: 8px; font-weight: 700; color: #9ca3af; letter-spacing: 0.05em; text-transform: uppercase; pointer-events: none; }
-        .local-btn { font-size: 8px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 2px; padding: 4px; margin: -4px; position: relative; z-index: 10; text-decoration: none; }
+        .local-btn { font-size: 8px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 2px; padding: 4px; margin: -4px; position: relative; z-index: 10; text-decoration: none; cursor: pointer; }
         
         .scroll-dots-container {
             display: flex; justify-content: center; align-items: center; gap: 6px;
@@ -411,14 +411,14 @@
 
     <section id="opendata" class="section-wrap bg-slate-50 border-t border-slate-200">
         <div class="inner-limit max-w-5xl px-0 sm:px-6">
-            <span class="section-tag-label" data-i18n="label-opendata">OPEN DATA</span>
+            <span class="section-tag-label" data-i18n="label-opendata">OPEN DATA API</span>
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" data-i18n="title-opendata">三原お役立ちデータ</h2>
             <p class="text-xs sm:text-sm font-bold text-gray-500 mb-8 px-4 sm:px-6 leading-relaxed" data-i18n="desc-opendata">
                 三原市が公開している「オープンデータ」を活用し、<br>お出かけに役立つ情報や、市の現状を分かりやすくお伝えします。
             </p>
 
             <div class="px-6 sm:px-0 grid gap-6 md:grid-cols-2 text-left">
-                <!-- 人口ダッシュボード -->
+                
                 <div class="bg-white p-6 sm:p-8 rounded-xl border border-gray-200 shadow-[0_4px_15px_rgba(0,64,152,0.03)] flex flex-col justify-center">
                     <h4 class="font-bold text-blue-900 text-sm mb-6 flex items-center gap-2">
                         <i class="fa-solid fa-chart-pie text-blue-400"></i> 三原市のいま（推計人口）
@@ -436,20 +436,20 @@
                         </div>
                     </div>
                     <p class="text-[9px] text-gray-400 mt-4 text-right" id="od-date">
-                        <i class="fa-solid fa-spinner fa-spin mr-1"></i> データ取得中...
+                        <i class="fa-solid fa-spinner fa-spin mr-1"></i> 三原市サーバーに接続中...
                     </p>
                 </div>
 
-                <!-- お出かけ安心マップ（赤ちゃんの駅） -->
                 <div class="bg-white p-6 sm:p-8 rounded-xl border border-gray-200 shadow-[0_4px_15px_rgba(0,64,152,0.03)]">
                     <h4 class="font-bold text-blue-900 text-sm mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-baby text-orange-400 text-lg"></i> お出かけ安心マップ（赤ちゃんの駅）
+                        <i class="fa-solid fa-restroom text-blue-500 text-lg"></i> お出かけオアシスマップ（公衆トイレ）
                     </h4>
                     <div id="opendata-map" class="w-full h-48 sm:h-56 bg-gray-100 rounded-lg relative z-10 border border-gray-200"></div>
                     <p class="text-[9px] text-gray-400 mt-4 text-right" id="od-map-status">
-                        <i class="fa-solid fa-spinner fa-spin mr-1"></i> データ取得中...
+                        <i class="fa-solid fa-spinner fa-spin mr-1"></i> 三原市サーバーに接続中...
                     </p>
                 </div>
+
             </div>
         </div>
     </section>
@@ -507,24 +507,15 @@
         <p class="footer-copy" data-i18n="footer-copy">© 2026 Mihara Walk Photo Map</p>
         
         <p class="footer-produced">PRODUCED BY MICHIM | PHOTOS BY MIHARA LOVERS</p>
-        <p class="text-[9px] text-gray-400 mt-3 font-bold">※本サイトの一部コンテンツは「三原市オープンデータカタログサイト」のデータを利用しています。</p>
+        <p class="text-[9px] text-gray-400 mt-3 font-bold">※本サイトの一部コンテンツは「三原市オープンデータカタログサイト」のAPIを利用しています。</p>
     </footer>
 
-    <!-- プログラム部分 -->
     <script is:inline>
         let currentLang = 'jp';
 
         // =========================================================================
-        // ▼ オープンデータ連携：ここに市から取得した「CSVのURL」を貼り付けます ▼
-        // ※現在は、テスト用に私が用意した「本物と同じ構成のCSVデータURL」をセットしています！
-        // =========================================================================
-        
-        // 人口データのテストURL（令和8年のダミーデータ）
-        const OPENDATA_POPULATION_CSV_URL = "data:text/csv;charset=utf-8,%E7%B7%8F%E4%BA%BA%E5%8F%A3%2C%E4%B8%96%E5%B8%AF%E6%95%B0%2C%E6%97%A5%E4%BB%98%0A83500%2C41200%2C%E4%BB%A4%E5%92%8C8%E5%B9%B4%EF%BC%882026%E5%B9%B4%EF%BC%892%E6%9C%88%E6%9C%AB%E6%99%82%E7%82%B9"; 
-        
-        // 赤ちゃんの駅データのテストURL（フジグランなどのデータ）
-        const OPENDATA_BABY_CSV_URL = "data:text/csv;charset=utf-8,%E6%96%BD%E8%A8%AD%E5%90%8D%2C%E7%B7%AF%E5%BA%A6%2C%E7%B5%8C%E5%BA%A6%0A%E3%83%95%E3%82%B8%E3%82%B0%E3%83%A9%E3%83%B3%E4%B8%89%E5%8E%9F%2C34.3985%2C133.0832%0A%E9%81%93%E3%81%AE%E9%A7%85%20%E3%81%BF%E3%81%AF%E3%82%89%E7%A5%9E%E6%98%8E%E3%81%AE%E9%87%8C%2C34.4051%2C133.1023%0A%E4%B8%89%E5%8E%9F%E5%B8%82%E4%B8%AD%E5%A4%AE%E5%9B%B3%E6%9B%B8%E9%A4%A8%2C34.3992%2C133.0784%0A%E3%83%9D%E3%83%9D%E3%83%AD%EF%BC%88%E4%B8%89%E5%8E%9F%E5%B8%82%E8%8A%B8%E8%A1%93%E6%96%87%E5%8C%96%E3%82%BB%E3%83%B3%E3%82%BF%E3%83%BC%EF%BC%89%2C34.3965%2C133.0711";
-
+        // 🚀 完全自動化 API連携システム 🚀
+        // スプレッドシートは不要！みちむさんが見つけたURLを使って直接市と通信します！
         // =========================================================================
 
         async function fetchOpenDataStats() {
@@ -532,32 +523,41 @@
             const houEl = document.getElementById('od-households');
             const dateEl = document.getElementById('od-date');
 
-            if (!OPENDATA_POPULATION_CSV_URL) {
-                if (dateEl) dateEl.innerHTML = "<span class='text-red-500 font-bold'><i class='fa-solid fa-triangle-exclamation'></i> URL未設定、またはデータ取得中…</span>";
-                return;
-            }
-
             try {
-                const response = await fetch(OPENDATA_POPULATION_CSV_URL);
-                if (!response.ok) throw new Error('Network response was not ok');
-                const csvText = await response.text();
-                const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+                // みちむさんが見つけた「町別人口集計表」のAPI窓口URL（limit=1000で全町を取得）
+                const apiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=8b68f856-ffe2-48ab-ab71-d011f7982816&limit=1000";
                 
-                const data = parsed.data[0]; 
-                const population = parseInt(data['総人口'] || data['人口'] || 0, 10);
-                const households = parseInt(data['世帯数'] || 0, 10);
-                const dateText = data['日付'] || "三原市オープンデータより取得";
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('APIに接続できませんでした');
+                const json = await response.json();
+                
+                if (json.success) {
+                    const records = json.result.records;
+                    let totalPop = 0;
+                    let totalHouse = 0;
 
-                if (population > 0) {
-                    if (popEl) popEl.setAttribute('data-val', population);
-                    if (houEl) houEl.setAttribute('data-val', households);
-                    if (dateEl) dateEl.innerHTML = `※${escapeHtml(dateText)}`;
+                    // 取得した何百もの町のデータを、一瞬で足し算します！
+                    records.forEach(row => {
+                        let h = parseInt(row['世帯数'], 10) || 0;
+                        let m = parseInt(row['男性[人]'], 10) || 0;
+                        let f = parseInt(row['女性[人]'], 10) || 0;
+                        totalHouse += h;
+                        totalPop += (m + f);
+                    });
+
+                    if (totalPop > 0) {
+                        if (popEl) popEl.setAttribute('data-val', totalPop);
+                        if (houEl) houEl.setAttribute('data-val', totalHouse);
+                        if (dateEl) dateEl.innerHTML = "※三原市オープンデータ APIより全自動集計";
+                    } else {
+                        throw new Error('データの形式が変わっています');
+                    }
                 } else {
-                    throw new Error('Data format mismatch');
+                    throw new Error('市側のデータが一時的に非公開です');
                 }
             } catch (error) {
-                console.error("人口データの取得に失敗しました", error);
-                if (dateEl) dateEl.innerHTML = "<span class='text-red-500 font-bold'><i class='fa-solid fa-triangle-exclamation'></i> URLが変更されたためデータ取得中…</span>";
+                console.error("人口データの自動取得エラー:", error);
+                if (dateEl) dateEl.innerHTML = "<span class='text-red-500 font-bold'><i class='fa-solid fa-triangle-exclamation'></i> 市のサーバーが混雑中、またはデータ更新中です</span>";
             }
         }
 
@@ -565,53 +565,55 @@
         async function initOpendataMap() {
             if (opendataMapInstance) return;
             
-            opendataMapInstance = L.map('opendata-map', { scrollWheelZoom: false }).setView([34.3980, 133.0800], 13);
+            opendataMapInstance = L.map('opendata-map', { scrollWheelZoom: false }).setView([34.3980, 133.0800], 12);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OSM', subdomains: 'abcd' }).addTo(opendataMapInstance);
             opendataMapInstance.once('focus', function() { opendataMapInstance.scrollWheelZoom.enable(); });
 
-            const babyIcon = L.divIcon({
-                className: 'custom-baby-icon',
-                html: '<div style="background-color:#fb923c; color:white; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.2);"><i class="fa-solid fa-baby text-[12px]"></i></div>',
+            // オアシスマップ用のトイレアイコン（青色）
+            const toiletIcon = L.divIcon({
+                className: 'custom-toilet-icon',
+                html: '<div style="background-color:#3b82f6; color:white; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.2);"><i class="fa-solid fa-restroom text-[12px]"></i></div>',
                 iconSize: [28, 28],
                 iconAnchor: [14, 14]
             });
 
             const statusEl = document.getElementById('od-map-status');
 
-            if (!OPENDATA_BABY_CSV_URL) {
-                if (statusEl) statusEl.innerHTML = "<span class='text-red-500 font-bold'><i class='fa-solid fa-triangle-exclamation'></i> URL未設定、またはデータ取得中…</span>";
-                return;
-            }
-
             try {
-                const response = await fetch(OPENDATA_BABY_CSV_URL);
-                if (!response.ok) throw new Error('Network response was not ok');
-                const csvText = await response.text();
-                const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+                // みちむさんが見つけた「公衆トイレ」のAPI窓口URL
+                const apiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=c5f248f0-ab12-4cb6-af0a-fef54523ee00&limit=1000";
                 
-                let validSpots = 0;
-                parsed.data.forEach(row => {
-                    const name = row['施設名'] || row['名称'] || row['name'];
-                    const lat = parseFloat(row['緯度'] || row['lat']);
-                    const lng = parseFloat(row['経度'] || row['lng']);
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('APIに接続できませんでした');
+                const json = await response.json();
+                
+                if (json.success) {
+                    let validSpots = 0;
+                    json.result.records.forEach(row => {
+                        // トイレの名前と場所を読み取ってピンを立てます
+                        const name = row['名称'] || row['トイレ名称'] || row['公衆トイレ名'] || '公衆トイレ';
+                        const lat = parseFloat(row['緯度'] || row['lat']);
+                        const lng = parseFloat(row['経度'] || row['lng'] || row['lon']);
+                        
+                        if (name && !isNaN(lat) && !isNaN(lng)) {
+                            validSpots++;
+                            L.marker([lat, lng], { icon: toiletIcon })
+                             .bindPopup(`<div class="text-[11px] font-bold text-[#004098] leading-tight mb-1">${escapeHtml(name)}</div><div class="text-[9px] text-gray-500">お出かけオアシススポット</div>`)
+                             .addTo(opendataMapInstance);
+                        }
+                    });
                     
-                    if (name && !isNaN(lat) && !isNaN(lng)) {
-                        validSpots++;
-                        L.marker([lat, lng], { icon: babyIcon })
-                         .bindPopup(`<div class="text-[11px] font-bold text-[#004098] leading-tight mb-1">${escapeHtml(name)}</div><div class="text-[9px] text-gray-500">授乳室・おむつ替えスペース</div>`)
-                         .addTo(opendataMapInstance);
-                    }
-                });
-                
-                if (validSpots === 0) throw new Error('No valid location data found');
-                
-                if (statusEl) statusEl.innerHTML = "※授乳やおむつ替えができる「赤ちゃんの駅」を表示しています";
-
+                    if (validSpots === 0) throw new Error('場所データが見つかりません');
+                    
+                    if (statusEl) statusEl.innerHTML = "※三原市内の公衆トイレ（お出かけオアシス）を表示しています";
+                }
             } catch (error) {
-                console.error("赤ちゃんの駅データの取得に失敗しました", error);
-                if (statusEl) statusEl.innerHTML = "<span class='text-red-500 font-bold'><i class='fa-solid fa-triangle-exclamation'></i> URLが変更されたためデータ取得中…</span>";
+                console.error("トイレデータの自動取得エラー:", error);
+                if (statusEl) statusEl.innerHTML = "<span class='text-red-500 font-bold'><i class='fa-solid fa-triangle-exclamation'></i> 市のサーバーが混雑中、またはデータ更新中です</span>";
             }
         }
+
+        // =========================================================================
 
         function initAnimations() {
             gsap.registerPlugin(ScrollTrigger);
@@ -717,7 +719,7 @@
             'event-empty': { normal: { jp: '現在、予定されているイベントはありません。', en: 'No upcoming events currently scheduled.' } },
             'event-detail-btn': { normal: { jp: '詳細を見る', en: 'Details' } },
 
-            'label-opendata': { normal: { jp: 'OPEN DATA', en: 'OPEN DATA' } },
+            'label-opendata': { normal: { jp: 'OPEN DATA API', en: 'OPEN DATA' } },
             'title-opendata': { normal: { jp: '三原お役立ちデータ', en: 'Useful Data' } },
             'desc-opendata': { normal: { jp: '三原市が公開している「オープンデータ」を活用し、<br>お出かけに役立つ情報や、市の現状を分かりやすくお伝えします。', en: 'Utilizing open data published by Mihara City to provide useful information for your outings and current city status.' } },
 
@@ -1041,6 +1043,7 @@
                     const displayTitle = escapeHtml(getLocalizedSpotField(spot, 'title'));
                     const slug = (spot.title || '').replace(/[\/\\]/g, '-');
                     
+                    // ▼ マップ上のポップアップからのリンクも個別ページに飛ぶように最適化しています ▼
                     const popupContent = `
                         <a href="/spot/${slug}/" style="display:block; text-decoration:none; color:inherit;">
                             <div class="popup-img-wrap"><img src="${imgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
@@ -1093,6 +1096,7 @@
                 const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                 const areaName = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                 
+                // ▼ ギャラリーの写真をクリックすると、個別ページ（/spot/スラグ）へリンク遷移します ▼
                 const slug = (spot.title || '').replace(/[\/\\]/g, '-');
                 const item = document.createElement('a');
                 item.href = `/spot/${slug}/`;
@@ -1239,6 +1243,7 @@
                 card.dataset.title = spot.title; 
                 card.ondragstart = () => false;
                 
+                // ▼ さんぽログのカード本体をクリックした時は「地図が動く」動きを維持し、詳細ボタンで「ページ遷移」します ▼
                 card.onclick = (e) => { 
                     if (window.isDragged) { e.preventDefault(); return; }
                     
@@ -1406,27 +1411,16 @@
                 const dateStr = (lang === 'en' && event.date_str_en) ? event.date_str_en : event.date_str;
 
                 const safeTitle = escapeHtml(title);
-                
-                let safeDesc = escapeHtml(desc).replace(/\n/g, '<br>');
-                const urlRegex = /(https?:\/\/[^\s<]+)/g;
-                safeDesc = safeDesc.replace(urlRegex, function(url) {
-                    return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline" onclick="event.stopPropagation()">${url}</a>`;
-                });
-
+                const safeDesc = escapeHtml(desc).replace(/\n/g, '<br>');
                 const safeDate = escapeHtml(dateStr || '開催日未定');
-                const linkUrl = event.url ? escapeHtml(event.url) : '#';
                 
-                const isLink = event.url && event.url.trim() !== '';
-                const cardTag = isLink ? 'a' : 'div';
-                const card = document.createElement(cardTag);
+                // ▼ イベントカード全体を個別ページ（/event/スラグ）へのリンクにしました ▼
+                const slug = (event.title || '').replace(/[\/\\]/g, '-');
+                const detailUrl = `/event/${slug}/`;
                 
-                if (isLink) {
-                    card.href = linkUrl;
-                    card.target = "_blank";
-                    card.rel = "noopener noreferrer";
-                }
-                
-                card.className = `event-card ${!isLink ? 'cursor-default hover:transform-none hover:shadow-[0_4px_15px_rgba(0,64,152,0.02)] hover:border-[var(--border-soft)]' : ''}`;
+                const card = document.createElement('a');
+                card.href = detailUrl;
+                card.className = 'event-card cursor-pointer block'; 
 
                 card.innerHTML = `
                     <div class="event-date-box">
@@ -1437,10 +1431,9 @@
                         <h4 class="font-bold text-blue-900 text-[15px] sm:text-[17px] mb-2 leading-snug">${safeTitle}</h4>
                         <p class="text-xs text-gray-500 leading-relaxed mb-3">${safeDesc}</p>
                         <div class="mt-auto flex justify-end">
-                            ${isLink 
-                                ? `<span class="text-[10px] font-bold text-blue-500 flex items-center gap-1 hover:text-blue-700 transition">${lang === 'en' ? 'Details' : '詳細を見る'} <i class="fa-solid fa-arrow-up-right-from-square text-[9px] ml-0.5"></i></span>`
-                                : `<span class="text-[10px] font-bold text-gray-300 flex items-center gap-1"><i class="fa-solid fa-link-slash text-[9px]"></i> ${lang === 'en' ? 'No Link' : 'リンクなし'}</span>`
-                            }
+                            <span class="text-[10px] font-bold text-blue-500 flex items-center gap-1 hover:text-blue-700 transition">
+                                ${lang === 'en' ? 'Details' : '詳細を見る'} <i class="fa-solid fa-chevron-right text-[8px] ml-0.5"></i>
+                            </span>
                         </div>
                     </div>
                 `;
