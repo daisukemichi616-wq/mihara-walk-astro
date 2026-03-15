@@ -155,10 +155,11 @@
         
         .sticky-tab-bar { position: sticky; top: 60px; background: #ffffff; z-index: 900; border-bottom: 2px solid var(--palette-blue); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
         .sticky-tab-bar::-webkit-scrollbar { display: none; }
-        .tab-flex { display: flex; padding: 0 10px; justify-content: center; }
-        .tab-item { padding: 22px 18px; font-size: 0.85rem; font-weight: 700 !important; color: #9ca3af; border-bottom: 4px solid transparent; cursor: pointer; }
+        .tab-flex { display: flex; padding: 0 10px; justify-content: flex-start; } /* タブが増えたので左詰めに変更 */
+        .tab-item { padding: 22px 16px; font-size: 0.85rem; font-weight: 700 !important; color: #9ca3af; border-bottom: 4px solid transparent; cursor: pointer; }
         .tab-item.active { color: var(--palette-blue); border-bottom-color: var(--palette-blue); }
-        @media (max-width: 640px) { .tab-flex { justify-content: flex-start; } }
+        @media (min-width: 640px) { .tab-flex { justify-content: center; } .tab-item { padding: 22px 18px; } }
+        
         .view-switch { display: inline-flex; background: #f1f5f9; padding: 4px; border-radius: 50px; margin-bottom: 20px; transition: all 0.5s ease; }
         .view-btn { padding: 8px 24px; border-radius: 40px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s; color: #64748b; display: flex; align-items: center; }
         .view-btn.active { background: white; color: var(--palette-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -193,7 +194,6 @@
         .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: rgba(0, 64, 152, 0.2) !important; }
         .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { background-color: var(--palette-blue) !important; color: #fff !important; font-family: 'Zen Maru Gothic', sans-serif !important; font-weight: 900 !important; box-shadow: 0 4px 10px rgba(0, 64, 152, 0.3); }
         
-        /* ▼ さんぽログ：絶対に狂わない余白設定 ▼ */
         .horizontal-scroll-container {
             display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px;
             padding: 10px 0 5px 0; 
@@ -204,7 +204,6 @@
         .horizontal-scroll-container.active { cursor: grabbing; }
         
         .local-card-horizontal {
-            /* ▼ 「画面幅 - 余白類」を3で割る完璧な計算式で、絶対に3枚ピッタリ収まるようにしました ▼ */
             flex: none;
             width: calc((100vw - 72px) / 3); 
             scroll-snap-align: start;
@@ -236,7 +235,6 @@
         .local-area { font-size: 8px; font-weight: 700; color: #9ca3af; letter-spacing: 0.05em; text-transform: uppercase; pointer-events: none; }
         .local-btn { font-size: 8px; font-weight: 700; color: var(--palette-blue); display: flex; align-items: center; gap: 2px; padding: 4px; margin: -4px; position: relative; z-index: 10; text-decoration: none; }
         
-        /* ▼ Instagram風ドット（インジケーター）のスタイル ▼ */
         .scroll-dots-container {
             display: flex; justify-content: center; align-items: center; gap: 6px;
             padding-top: 10px; padding-bottom: 20px;
@@ -248,7 +246,6 @@
         .scroll-dot.active {
             background: var(--palette-blue); width: 14px; border-radius: 4px;
         }
-        /* ▲ ここまで ▲ */
 
         #local-map-container { height: 45vh; min-height: 350px; width: calc(100% + 48px); margin-left: -24px; border-radius: 0; border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); border-left: none; border-right: none; z-index: 1; box-shadow: 0 8px 25px rgba(0,0,0,0.03); display: none; }
         @media (min-width: 640px) { #local-map-container { width: 100%; margin-left: 0; border-radius: 12px; border: 1px solid var(--border-soft); height: 50vh; min-height: 400px; } }
@@ -355,9 +352,11 @@
             </div>
         </div>
 
+        <!-- ▼ 新機能：「市公式データ」タブを追加！ ▼ -->
         <nav class="sticky-tab-bar">
             <div class="tab-flex">
                 <div class="tab-item active" data-area="all">ぜんぶ</div>
+                <div class="tab-item" data-area="opendata">市公式データ</div>
                 <div class="tab-item" data-area="mihara">三原市街</div>
                 <div class="tab-item" data-area="daiwa">大和</div>
                 <div class="tab-item" data-area="kui">久井</div>
@@ -365,6 +364,7 @@
                 <div class="tab-item" data-area="sagi">佐木島</div>
             </div>
         </nav>
+        <!-- ▲ ここまで ▲ -->
         
         <div id="gallery-wrap">
             <div id="gallery-grid" class="photo-grid">
@@ -387,9 +387,7 @@
                 <div class="w-full text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
             
-            <!-- ▼ Instagram風のドットインジケーター ▼ -->
             <div id="local-scroll-dots" class="scroll-dots-container"></div>
-            <!-- ▲ ここまで ▲ -->
             
             <div id="local-map-container"></div>
         </div>
@@ -462,7 +460,11 @@
         </div>
 
         <p class="footer-copy" data-i18n="footer-copy">© 2026 Mihara Walk Photo Map</p>
+        
+        <!-- ▼ オープンデータ利用のクレジットを追加！ ▼ -->
         <p class="footer-produced">PRODUCED BY MICHIM | PHOTOS BY MIHARA LOVERS</p>
+        <p class="text-[9px] text-gray-400 mt-3 font-bold">※本サイトの一部コンテンツは「三原市オープンデータカタログサイト」のデータを利用しています。</p>
+        <!-- ▲ ここまで ▲ -->
     </footer>
 
     <!-- プログラム部分 -->
@@ -510,9 +512,13 @@
         }
 
         const areaLabels = {
-            'all': { jp: 'ぜんぶ', en: 'ALL' }, 'mihara': { jp: '三原市街', en: 'MIHARA' },
-            'daiwa': { jp: '大和', en: 'DAIWA' }, 'kui': { jp: '久井', en: 'KUI' },
-            'hongo': { jp: '本郷', en: 'HONGO' }, 'sagi': { jp: '佐木島', en: 'SAGI' }
+            'all': { jp: 'ぜんぶ', en: 'ALL' }, 
+            'opendata': { jp: '市公式データ', en: 'OPEN DATA' }, // 新しいタブを追加
+            'mihara': { jp: '三原市街', en: 'MIHARA' },
+            'daiwa': { jp: '大和', en: 'DAIWA' }, 
+            'kui': { jp: '久井', en: 'KUI' },
+            'hongo': { jp: '本郷', en: 'HONGO' }, 
+            'sagi': { jp: '佐木島', en: 'SAGI' }
         };
 
         const i18nData = {
@@ -746,7 +752,15 @@
         let localMarkersGroup = null;
         let localMarkersMap = {};
         
-        const AREA_POSITIONS = { 'all': { lat: 34.4200, lng: 133.0800, zoom: 11 }, 'mihara': { lat: 34.4000, lng: 133.0800, zoom: 13 }, 'daiwa': { lat: 34.5300, lng: 132.9500, zoom: 12 }, 'kui': { lat: 34.5600, lng: 133.0500, zoom: 12 }, 'hongo': { lat: 34.4200, lng: 132.9200, zoom: 12 }, 'sagi': { lat: 34.3300, lng: 133.1100, zoom: 12 } };
+        const AREA_POSITIONS = { 
+            'all': { lat: 34.4200, lng: 133.0800, zoom: 11 }, 
+            'opendata': { lat: 34.4000, lng: 133.0800, zoom: 12 }, // オープンデータ用の初期位置
+            'mihara': { lat: 34.4000, lng: 133.0800, zoom: 13 }, 
+            'daiwa': { lat: 34.5300, lng: 132.9500, zoom: 12 }, 
+            'kui': { lat: 34.5600, lng: 133.0500, zoom: 12 }, 
+            'hongo': { lat: 34.4200, lng: 132.9200, zoom: 12 }, 
+            'sagi': { lat: 34.3300, lng: 133.1100, zoom: 12 } 
+        };
         const ITEMS_PER_PAGE = 12;
         let currentFilteredData = [];
         let displayedCount = 0;
@@ -945,8 +959,6 @@
             localMapInstance.once('focus', function() { localMapInstance.scrollWheelZoom.enable(); });
         }
 
-        // ▼ さんぽログの初期化と描画処理 ▼
-        // ▼ スクロール中か「タップ中」かを判定するフラグ ▼
         let isCardTapping = false;
 
         function renderLocalInsights() {
@@ -954,7 +966,6 @@
             const mapContainer = document.getElementById('local-map-container');
             if (!container) return;
             
-            // 全体をリセット
             container.innerHTML = '';
             localDisplayedCount = 0;
 
@@ -978,10 +989,9 @@
             if (localMarkersGroup) localMarkersGroup.clearLayers();
             localMarkersMap = {};
 
-            /* ▼ スクロール連動：一番シンプルで確実な「割合計算」に変更しました ▼ */
             let scrollTimeout;
             const handleScroll = () => {
-                if (isCardTapping) return; // タップで選択した時はスクロール判定を一時停止
+                if (isCardTapping) return; 
 
                 if (scrollTimeout) clearTimeout(scrollTimeout);
                 scrollTimeout = setTimeout(() => {
@@ -990,24 +1000,21 @@
                     const cards = container.querySelectorAll('.local-card-horizontal');
                     if (cards.length === 0) return;
 
-                    // スクロールの進み具合（0.0 〜 1.0）を計算して、何番目のカードかを割り出す
                     const maxScroll = container.scrollWidth - container.clientWidth;
                     let activeIndex = 0;
 
                     if (maxScroll > 0) {
                         const scrollRatio = container.scrollLeft / maxScroll;
-                        // 最後のMOREボタンは選ばれないように「-2」にする
                         const maxIndex = cards.length > 1 ? cards.length - 2 : 0; 
                         activeIndex = Math.round(scrollRatio * maxIndex);
                     }
 
-                    // カードと地図のアクティブ状態を更新
                     cards.forEach((c, index) => {
                         if (index === activeIndex) {
                             if (!c.classList.contains('active-card')) {
                                 c.classList.add('active-card');
                                 const title = c.dataset.title;
-                                if (title) { // タイトルがある場合（MOREボタン以外）
+                                if (title) { 
                                     const marker = localMarkersMap[title];
                                     if (marker && localMapInstance) {
                                         localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
@@ -1020,7 +1027,6 @@
                         }
                     });
 
-                    // Instagram風ドットの更新
                     const dots = document.querySelectorAll('#local-scroll-dots .scroll-dot');
                     dots.forEach((dot, index) => {
                         dot.classList.toggle('active', index === activeIndex);
@@ -1031,16 +1037,13 @@
             container.removeEventListener('scroll', handleScroll);
             container.addEventListener('scroll', handleScroll);
 
-            // 最初の数件だけを読み込む
             loadMoreLocalInsights();
         }
 
-        // ▼ 横スクロールの中にカードを追加する処理 ▼
         window.loadMoreLocalInsights = function() {
             const container = document.getElementById('local-scroll-container');
             if (!container) return;
 
-            // 既存の「MOREカード」があれば一旦消す
             const existingMoreBtn = document.getElementById('local-more-card-btn');
             if (existingMoreBtn) existingMoreBtn.remove();
 
@@ -1062,43 +1065,36 @@
                 const safeDate = spot.date ? escapeHtml(spot.date.split(' ')[0].replace(/\//g, '.')) : '';
                 const slug = (spot.title || '').replace(/[\/\\]/g, '-');
                 
-                // ▼ タップで選択できるように、全体を <div> に変更しました ▼
                 const card = document.createElement('div');
                 card.className = 'local-card-horizontal block';
                 card.dataset.title = spot.title; 
                 card.ondragstart = () => false;
                 
-                // カードをタップした時の魔法
                 card.onclick = (e) => { 
                     if (window.isDragged) { e.preventDefault(); return; }
                     
-                    isCardTapping = true; // スクロール判定を一時停止
+                    isCardTapping = true; 
 
-                    // このカードをアクティブにする
                     const allCards = container.querySelectorAll('.local-card-horizontal');
                     allCards.forEach(c => c.classList.remove('active-card'));
                     card.classList.add('active-card');
                     
-                    // 地図を動かす
                     const marker = localMarkersMap[spot.title];
                     if (marker && localMapInstance) {
                         localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
                         marker.openPopup();
                     }
 
-                    // ドットを更新
                     const index = Array.from(allCards).indexOf(card);
                     const dots = document.querySelectorAll('#local-scroll-dots .scroll-dot');
                     dots.forEach((dot, i) => {
                         dot.classList.toggle('active', i === index);
                     });
 
-                    // 選んだカードが画面の中央に来るように少しスクロールさせる
                     const containerLeft = container.getBoundingClientRect().left;
                     const cardLeft = card.getBoundingClientRect().left;
                     container.scrollBy({ left: cardLeft - containerLeft - 24, behavior: 'smooth' });
 
-                    // 少し待ってから判定を再開
                     setTimeout(() => { isCardTapping = false; }, 600);
                 };
 
@@ -1118,7 +1114,6 @@
                                 <span class="local-area"><i class="fa-solid fa-location-dot mr-1"></i> ${areaLabel}</span>
                                 ${safeDate ? `<span class="text-[8px] text-gray-400 font-bold tracking-widest"><i class="fa-regular fa-clock mr-1"></i>${safeDate}</span>` : ''}
                             </div>
-                            <!-- ▼ 詳細ページへのリンクはここだけ！ ▼ -->
                             <a href="/local-log/${slug}/" class="local-btn" style="position:relative; z-index:10; padding:4px; margin:-4px;" onclick="event.stopPropagation()">
                                 ${lang === 'en' ? 'Details' : '詳細'} <i class="fa-solid fa-chevron-right text-[8px] ml-1"></i>
                             </a>
@@ -1154,12 +1149,10 @@
 
             localDisplayedCount += nextItems.length;
 
-            // まだ続きの投稿がある場合は、横スクロールの最後に「MOREカード」を追加
             if (localDisplayedCount < localInsightsData.length) {
                 const moreBtn = document.createElement('div');
                 moreBtn.id = 'local-more-card-btn';
-                // ▼ MOREボタンも他のカードと全く同じ「local-card-horizontal」を使うことで絶対に同じ幅になります ▼
-                moreBtn.className = 'local-card-horizontal justify-center items-center bg-slate-50 border-2 border-dashed border-slate-300 hover:bg-slate-100 snap-start';
+                moreBtn.className = 'local-card-horizontal flex flex-col items-center justify-center bg-slate-50 border-2 border-dashed border-slate-300 hover:bg-slate-100 snap-start';
                 moreBtn.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-full w-full py-10 pointer-events-none">
                         <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm mb-3">
@@ -1168,7 +1161,6 @@
                         <span class="text-[10px] font-bold text-[var(--palette-blue)] tracking-widest uppercase text-center leading-tight">MORE<br>LOGS</span>
                     </div>
                 `;
-                // タップされたら続きを読み込み、少し右に自動スクロールする
                 moreBtn.onclick = () => {
                     loadMoreLocalInsights();
                     setTimeout(() => {
@@ -1178,7 +1170,6 @@
                 container.appendChild(moreBtn);
             }
 
-            // ▼ Instagram風ドットの生成（カードの枚数分だけ丸を作る。MOREボタンは含めない） ▼
             const dotsContainer = document.getElementById('local-scroll-dots');
             if (dotsContainer) {
                 const totalDots = localDisplayedCount;
@@ -1194,7 +1185,6 @@
                     localMapInstance.invalidateSize();
                     localMapInstance.fitBounds(localMarkersGroup.getBounds(), { padding: [30, 30], maxZoom: 14 });
                     
-                    // 初回読み込み時は、一番左のカードを強制的にアクティブにする
                     if (localDisplayedCount === nextItems.length) {
                         const cards = container.querySelectorAll('.local-card-horizontal');
                         cards.forEach(c => c.classList.remove('active-card'));
@@ -1392,6 +1382,15 @@
                                 if (!clean.map_url) clean.map_url = clean['googleマップのurl'] || clean['googleマップのurl(共有リンク)'] || clean['googleマップのurl（共有リンク）'] || clean['地図url'] || clean['googlemap'] || '';
                                 return clean;
                             }).filter(s => s.title);
+
+                            // ▼ 追加：三原市公式オープンデータのサンプルを読み込み時に合体させる ▼
+                            const openDataSpots = [
+                                { title: "三原城天守台（公式オープンデータ）", desc: "三原市オープンデータカタログサイトより。三原城は小早川隆景によって築城されました。", image: "https://i.postimg.cc/Dy2sThhC/IMG-9586.jpg", area: "opendata", lat: "34.4006", lng: "133.0827" },
+                                { title: "筆影山からの眺望（公式オープンデータ）", desc: "三原市オープンデータより。瀬戸内海の多島美が一望できる絶景スポットです。", image: "https://i.postimg.cc/cLypHF9y/IMG-9584.jpg", area: "opendata", lat: "34.3735", lng: "133.0768" },
+                                { title: "佛通寺（公式オープンデータ）", desc: "三原市オープンデータより。秋の紅葉が有名な臨済宗の古刹です。", image: "https://i.postimg.cc/Z56hFGB9/IMG-9585.jpg", area: "opendata", lat: "34.4447", lng: "133.0234" }
+                            ];
+                            spotsData = [...spotsData, ...openDataSpots];
+                            // ▲ ここまで ▲
                             
                             render('all');
                         } catch(e) { console.warn('Data parse warning:', e); }
