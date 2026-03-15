@@ -488,21 +488,22 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- ▼ About Project (白背景) ▼ -->
-    <section id="about" class="section-wrap bg-white relative pb-16 sm:pb-24 border-none">
-        
-        <!-- ▼ 修正：セクション間の波を上部(top-0)に配置し、重なりを完全に解消しました ▼ -->
-        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-white rotate-180">
+        <!-- ▼ 修正：トップ画像(hero-view)の側に「3層の白い波」を復活させました！ ▼ -->
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-white">
             <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px]">
                 <path fill="currentColor" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
                 <path fill="currentColor" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
                 <path fill="currentColor" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
             </svg>
         </div>
+    </section>
 
-        <!-- ▼ 修正：波と文字が被らないように、上部の余白(pt-12 sm:pt-20)を広げました ▼ -->
+    <!-- ▼ About Project (白背景) ▼ -->
+    <section id="about" class="section-wrap bg-white relative pb-16 sm:pb-24 border-none">
+        
+        <!-- (ここにあった白に同化して見えなくなっていた無駄な波を削除しました) -->
+
         <div class="inner-limit relative z-30 pt-12 sm:pt-20">
             <span class="section-tag-label reveal-up" id="label-about" data-i18n="label-about">About Project</span>
             <h3 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-8 reveal-up" id="title-about" data-i18n="title-about">みんなで描く、三原の未来</h3>
