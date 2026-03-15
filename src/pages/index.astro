@@ -394,7 +394,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         <!-- 文字を読みやすくするための暗いグラデーション -->
         <div class="hero-overlay" style="background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);"></div>
         
-        <div class="hero-content w-full relative z-10 pb-12 sm:pb-24">
+        <div class="hero-content w-full relative z-30 pb-16 sm:pb-32">
             <span class="hero-label" id="hero-label" data-i18n="hero-label">MIHARA REDISCOVER PROJECT</span>
             <h1 class="hero-title serif-custom" id="hero-title" data-i18n="hero-title">
                 まだ知らない三原の景色を、<br class="mobile-br">
@@ -402,14 +402,16 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </h1>
             
             <!-- ▼ 写真の上にドカンと表示されるオープンデータカウンター ▼ -->
-            <div class="mt-8 sm:mt-16 flex flex-row justify-center items-end gap-4 sm:gap-12 w-full px-2 reveal-on-load">
+            <div class="mt-10 sm:mt-16 flex flex-row justify-center items-end gap-6 sm:gap-14 w-full px-2 reveal-on-load">
                 <!-- 人口 -->
                 <div class="flex flex-col items-center">
+                    <!-- 画像に合わせて「人」を数字の奥までめり込ませる -->
                     <div class="flex flex-col items-center leading-none mb-3 sm:mb-4">
-                        <span class="text-[4.5rem] sm:text-[6.5rem] font-sans font-bold text-white drop-shadow-[0_4px_15px_rgba(0,0,0,0.5)] count-up tracking-tighter" data-val={popData.isError ? 0 : popData.population}>{popData.isError ? '---' : '0'}</span>
-                        <span class="text-base sm:text-2xl text-white font-bold drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp -mt-1 sm:-mt-2">人</span>
+                        <span class="text-[5rem] sm:text-[7.5rem] font-sans font-bold text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.4)] count-up tracking-tighter" data-val={popData.isError ? 0 : popData.population}>{popData.isError ? '---' : '0'}</span>
+                        <span class="text-xl sm:text-3xl text-white font-bold drop-shadow-[0_2px_10px_rgba(0,0,0,0.4)] lang-jp -mt-2 sm:-mt-4">人</span>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-md border border-white/40 text-white text-[9.5px] sm:text-sm font-bold px-5 sm:px-8 py-2 sm:py-3 rounded-full shadow-lg whitespace-nowrap">
+                    <!-- 絶対に改行させない(whitespace-nowrap)すりガラスバッジ -->
+                    <div class="bg-white/10 backdrop-blur-md border border-white/40 text-white text-[10px] sm:text-sm font-bold px-6 sm:px-8 py-2.5 sm:py-3 rounded-full shadow-lg whitespace-nowrap tracking-wider">
                         <span class="lang-jp">{popData.isError ? 'データ取得中...' : (formattedDate + ' 現在の人口')}</span>
                         <span class="lang-en hidden">{popData.isError ? 'Loading...' : 'Population as of ' + popData.latestDate}</span>
                     </div>
@@ -418,11 +420,12 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                 <!-- 世帯数 -->
                 <div class="flex flex-col items-center mb-1 sm:mb-2">
                     <div class="flex items-baseline leading-none mb-4 sm:mb-6">
-                        <span class="text-5xl sm:text-[4.5rem] font-sans font-bold text-white drop-shadow-[0_4px_15px_rgba(0,0,0,0.5)] count-up tracking-tighter" data-val={popData.isError ? 0 : popData.households}>{popData.isError ? '---' : '0'}</span>
-                        <span class="text-sm sm:text-xl text-white font-bold ml-1.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp">世帯</span>
-                        <span class="text-sm sm:text-xl text-white font-bold ml-1.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-en hidden">Households</span>
+                        <span class="text-[3.5rem] sm:text-[5.5rem] font-sans font-bold text-white drop-shadow-[0_2px_15px_rgba(0,0,0,0.4)] count-up tracking-tighter" data-val={popData.isError ? 0 : popData.households}>{popData.isError ? '---' : '0'}</span>
+                        <span class="text-base sm:text-2xl text-white font-bold ml-1.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.4)] lang-jp">世帯</span>
+                        <span class="text-base sm:text-2xl text-white font-bold ml-1.5 drop-shadow-[0_2px_10px_rgba(0,0,0,0.4)] lang-en hidden">Households</span>
                     </div>
-                    <div class="bg-white/10 backdrop-blur-md border border-white/40 text-white text-[9.5px] sm:text-sm font-bold px-5 sm:px-8 py-2 sm:py-3 rounded-full shadow-lg whitespace-nowrap">
+                    <!-- 絶対に改行させない(whitespace-nowrap)すりガラスバッジ -->
+                    <div class="bg-white/10 backdrop-blur-md border border-white/40 text-white text-[10px] sm:text-sm font-bold px-6 sm:px-8 py-2.5 sm:py-3 rounded-full shadow-lg whitespace-nowrap tracking-wider">
                         <span class="lang-jp">{popData.isError ? 'データ取得中...' : (formattedDate + ' 現在の世帯数')}</span>
                         <span class="lang-en hidden">{popData.isError ? 'Loading...' : 'Households as of ' + popData.latestDate}</span>
                     </div>
@@ -431,12 +434,12 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             <!-- ▲ ここまで ▲ -->
         </div>
 
-        <!-- ▼ 下部をおしゃれなウェーブ（波）にするSVG ▼ -->
+        <!-- ▼ 下部をおしゃれな3層ウェーブ（波）にするSVG ▼ -->
         <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px]">
-            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[60px] sm:h-[120px]">
-                <path fill="#ffffff" fill-opacity="0.3" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,272,576,250.7C672,229,768,160,864,138.7C960,117,1056,144,1152,160C1248,176,1344,181,1392,184L1440,186.7L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                <path fill="#ffffff" fill-opacity="0.6" d="M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,101.3C672,107,768,149,864,165.3C960,181,1056,165,1152,144C1248,123,1344,96,1392,82.7L1440,69.3L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                <path fill="#ffffff" d="M0,160L48,170.7C96,181,192,203,288,197.3C384,192,480,160,576,160C672,160,768,192,864,197.3C960,203,1056,181,1152,160C1248,139,1344,117,1392,106.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px]">
+                <path fill="#ffffff" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="#ffffff" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="#ffffff" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
             </svg>
         </div>
     </section>
