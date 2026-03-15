@@ -211,11 +211,45 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             .nav-simple-link { font-size: 11px; }
         }
         @media (max-width: 640px) {
-            .nav-simple-link { font-size: 8px; } 
             .nav-links-wrap { gap: 5px; } 
-            #lang-toggle-btn { padding: 4px 6px; font-size: 8px; }
-            @media (max-width: 380px) { .header-logo { display: none; } .fixed-nav { justify-content: center; } }
+            #lang-toggle-btn { padding: 4px 8px; font-size: 9px; }
+            @media (max-width: 380px) { .header-logo { display: none; } .fixed-nav { justify-content: flex-end; } }
         }
+        
+        /* ▼ メニューバー（ハンバーガー）用のCSS ▼ */
+        .desktop-nav-links { display: none; }
+        .mobile-menu-btn { display: block; background: transparent; border: none; color: var(--palette-blue); font-size: 1.4rem; cursor: pointer; margin-left: 10px; outline: none; }
+        
+        @media (min-width: 900px) {
+            .desktop-nav-links { display: flex; gap: 16px; align-items: center; }
+            .mobile-menu-btn { display: none; }
+        }
+
+        .mobile-menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 100000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(-10px);
+        }
+        .mobile-menu-overlay.active {
+            opacity: 1; pointer-events: auto;
+            transform: translateY(0);
+        }
+        .mobile-menu-close {
+            position: absolute; top: 15px; right: 20px;
+            font-size: 2rem; color: var(--palette-blue); cursor: pointer; background: transparent; border: none; outline: none;
+        }
+        .mobile-menu-link {
+            font-size: 1.1rem; font-weight: 700 !important; color: var(--text-main);
+            margin: 15px 0; text-decoration: none; cursor: pointer;
+            transition: color 0.3s;
+        }
+        .mobile-menu-link:hover, .mobile-menu-link:active { color: var(--palette-blue); }
         
         .hero-view { position: relative; width: 100%; height: 80vh; height: 80dvh; background-color: #000; overflow: hidden; }
         .slider-container { position: absolute; inset: -5%; width: 110%; height: 110%; z-index: 1; }
@@ -374,17 +408,40 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
 
     <nav class="fixed-nav">
         <div class="header-logo" id="header-logo" data-i18n="header-logo">MIHARA REDISCOVER</div>
-        <div class="nav-links-wrap">
-            <div class="nav-simple-link" onclick="scrollToId('gallery')" data-i18n="nav-map">マップ</div>
-            <div class="nav-simple-link" onclick="scrollToId('local-insights')" data-i18n="nav-local">さんぽログ</div>
-            <div class="nav-simple-link" onclick="scrollToId('events')" data-i18n="nav-event">イベント</div>
-            <div class="nav-simple-link" onclick="scrollToId('opendata')" data-i18n="nav-opendata">便利データ</div>
-            <div class="nav-simple-link" onclick="scrollToId('contact')" data-i18n="nav-submit">掲載募集</div>
+        <div class="nav-links-wrap flex items-center">
+            
+            <!-- ▼ PC用メニュー（900px以上で表示） ▼ -->
+            <div class="desktop-nav-links">
+                <div class="nav-simple-link" onclick="scrollToId('gallery')" data-i18n="nav-map">PHOTO MAP</div>
+                <div class="nav-simple-link" onclick="scrollToId('local-insights')" data-i18n="nav-local">みはらさんぽログ</div>
+                <div class="nav-simple-link" onclick="scrollToId('events')" data-i18n="nav-event">イベント</div>
+                <div class="nav-simple-link" onclick="scrollToId('opendata')" data-i18n="nav-opendata">オアシスマップ（公衆トイレ）</div>
+                <div class="nav-simple-link" onclick="scrollToId('contact')" data-i18n="nav-submit">掲載募集</div>
+            </div>
+            
             <button id="lang-toggle-btn" class="header-btn" onclick="toggleLanguage()">
                 <i class="fa-solid fa-globe"></i> <span id="lang-text">EN</span>
             </button>
+
+            <!-- ▼ スマホ用メニューボタン（ハンバーガー） ▼ -->
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
     </nav>
+
+    <!-- ▼ モバイルメニューオーバーレイ ▼ -->
+    <div id="mobile-menu" class="mobile-menu-overlay">
+        <button class="mobile-menu-close" onclick="toggleMobileMenu()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="header-logo mb-8 text-xl" data-i18n="header-logo">MIHARA REDISCOVER</div>
+        <div class="mobile-menu-link" onclick="closeMobileMenuAndScroll('gallery')" data-i18n="nav-map">PHOTO MAP</div>
+        <div class="mobile-menu-link" onclick="closeMobileMenuAndScroll('local-insights')" data-i18n="nav-local">みはらさんぽログ</div>
+        <div class="mobile-menu-link" onclick="closeMobileMenuAndScroll('events')" data-i18n="nav-event">イベント</div>
+        <div class="mobile-menu-link" onclick="closeMobileMenuAndScroll('opendata')" data-i18n="nav-opendata">オアシスマップ（公衆トイレ）</div>
+        <div class="mobile-menu-link mt-8 bg-[#004098] text-white px-10 py-3 rounded-full text-sm shadow-md" onclick="closeMobileMenuAndScroll('contact')" data-i18n="nav-submit">掲載募集</div>
+    </div>
 
     <!-- ▼ ヒーロービュー（トップ写真） ▼ -->
     <section class="hero-view">
@@ -842,11 +899,11 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
 
         const i18nData = {
             'header-logo': { normal: { jp: 'MIHARA REDISCOVER', en: 'MIHARA REDISCOVER' } },
-            'nav-map': { normal: { jp: 'マップ', en: 'MAP' } },
-            'nav-local': { normal: { jp: 'さんぽログ', en: 'WALK LOG' } },
+            'nav-map': { normal: { jp: 'PHOTO MAP', en: 'PHOTO MAP' } },
+            'nav-local': { normal: { jp: 'みはらさんぽログ', en: 'WALK LOG' } },
             'nav-event': { normal: { jp: 'イベント', en: 'EVENTS' } },
             'nav-submit': { normal: { jp: '掲載募集', en: 'SUBMIT' } },
-            'nav-opendata': { normal: { jp: '便利データ', en: 'DATA' } }, 
+            'nav-opendata': { normal: { jp: 'オアシスマップ（公衆トイレ）', en: 'OASIS MAP' } }, 
             'nav-guide': { normal: { jp: '掲載案内', en: 'GUIDES' } },
             'hero-label': { normal: { jp: 'MIHARA REDISCOVER PROJECT', en: 'MIHARA REDISCOVER PROJECT' } },
             'hero-title': { normal: { jp: 'まだ知らない三原の景色を、<br class="mobile-br">みんなで描くフォトマップ', en: 'Discovering the unseen Mihara,<br class="mobile-br">a community photo map.' } },
@@ -1887,6 +1944,26 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                 });
             });
         });
+
+        // ▼ モバイルメニューの開閉制御 ▼
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) {
+                menu.classList.toggle('active');
+                if (menu.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        }
+
+        function closeMobileMenuAndScroll(id) {
+            toggleMobileMenu();
+            setTimeout(() => {
+                scrollToId(id);
+            }, 300); // メニューが閉じるアニメーションを待つ
+        }
     </script>
 </body>
 </html>
