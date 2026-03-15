@@ -1,79 +1,8 @@
 ---
-// ▼ 1. Astroのビルド時（裏側のサーバー）で三原市のAPIからデータを取得 ▼
-// これにより、セキュリティ制限（CORS）を完全に回避してデータを取得できます！
-
-// 1-1. 人口データの取得と計算（最新月のみを抽出して正確に計算します）
-let popData = { population: 0, households: 0, isError: false };
-try {
-  const popApiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=8b68f856-ffe2-48ab-ab71-d011f7982816&limit=1000";
-  const popRes = await fetch(popApiUrl);
-  if (!popRes.ok) throw new Error('Network error');
-  const popJson = await popRes.json();
-  
-  if (popJson.success && popJson.result && popJson.result.records) {
-    const records = popJson.result.records;
-    
-    // ▼ 修正ポイント：過去数カ月分が混ざっているため、一番新しい「基準日」を探し出します
-    let latestDate = '';
-    records.forEach((row: any) => {
-      const d = row['基準日'];
-      if (d && d > latestDate) latestDate = d;
-    });
-
-    let totalPop = 0;
-    let totalHouse = 0;
-    
-    // ▼ 抽出した「一番新しい月」のデータだけを足し算します
-    records.forEach((row: any) => {
-      if (row['基準日'] === latestDate) {
-        let h = parseInt(row['世帯数'], 10) || 0;
-        let m = parseInt(row['男性[人]'], 10) || 0;
-        let f = parseInt(row['女性[人]'], 10) || 0;
-        totalHouse += h;
-        totalPop += (m + f);
-      }
-    });
-    
-    if (totalPop > 0) {
-      popData.population = totalPop;
-      popData.households = totalHouse;
-    } else {
-      popData.isError = true;
-    }
-  } else {
-    popData.isError = true;
-  }
-} catch (e) {
-  popData.isError = true;
-}
-
-// 1-2. 公衆トイレデータの取得
-let toiletData = { spots: [] as any[], isError: false };
-try {
-  const toiletApiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=c5f248f0-ab12-4cb6-af0a-fef54523ee00&limit=1000";
-  const toiletRes = await fetch(toiletApiUrl);
-  if (!toiletRes.ok) throw new Error('Network error');
-  const toiletJson = await toiletRes.json();
-  if (toiletJson.success && toiletJson.result && toiletJson.result.records) {
-    toiletJson.result.records.forEach((row: any) => {
-      const name = row['名称'] || row['トイレ名称'] || row['公衆トイレ名'] || '公衆トイレ';
-      const lat = parseFloat(row['緯度'] || row['lat']);
-      const lng = parseFloat(row['経度'] || row['lng'] || row['lon']);
-      if (name && !isNaN(lat) && !isNaN(lng)) {
-        toiletData.spots.push({ name, lat, lng });
-      }
-    });
-    if (toiletData.spots.length === 0) {
-      toiletData.isError = true;
-    }
-  } else {
-    toiletData.isError = true;
-  }
-} catch (e) {
-  toiletData.isError = true;
-}
+// 三原市オープンデータは、クライアントサイド（ブラウザ側）で自動取得するように変更しました。
+// 無料の中継プロキシ（allorigins）を使うことで、CORSエラーを回避しつつ、
+// 毎日・毎秒、自動的に最新のデータを取得する真の完全自動化を実現しています。
 ---
-
 <!DOCTYPE html>
 <html lang="ja" prefix="og: http://ogp.me/ns#">
 <head>
@@ -327,7 +256,6 @@ try {
         @media (min-width: 640px) { #local-map-container { width: 100%; margin-left: 0; border-radius: 12px; border: 1px solid var(--border-soft); height: 50vh; min-height: 400px; } }
         @media (min-width: 1024px) { #local-map-container { height: 60vh; min-height: 500px; } }
         
-        /* ▼ カウントアップの数字用フォント ▼ */
         .count-up { font-variant-numeric: tabular-nums; }
 
         .h2-one-line { font-size: 1.6rem; font-weight: 700 !important; margin-bottom: 50px; line-height: 1.2; text-align: center; white-space: nowrap; letter-spacing: -0.07em; color: var(--palette-blue); }
@@ -349,7 +277,7 @@ try {
         @media (min-width: 640px) { .event-date-box { width: 120px; } }
         .event-content-box { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
         
-        /* ▼ 言語切り替え用のCSS ▼ */
+        /* ▼ 言語切り替え用のCSSバグを修正しました ▼ */
         .lang-jp, .lang-en { display: none; }
         body.is-jp .lang-jp { display: inline; }
         body.is-jp div.lang-jp, body.is-jp p.lang-jp { display: block; }
@@ -389,7 +317,7 @@ try {
         </div>
     </section>
 
-    <!-- ▼ 大改修！「About Project」に人口データとメッセージを統合しました！ ▼ -->
+    <!-- ▼ About Project ▼ -->
     <section id="about" class="section-wrap bg-white">
         <div class="inner-limit">
             <span class="section-tag-label reveal-up" id="label-about" data-i18n="label-about">About Project</span>
@@ -404,34 +332,32 @@ try {
                     </p>
                     <div class="flex flex-wrap justify-center items-end gap-x-8 gap-y-4">
                         <div>
-                            <!-- ▼ サーバー側で計算した「正確な人口」を埋め込みます ▼ -->
-                            <span class="text-4xl sm:text-5xl font-black text-blue-700 count-up" data-val={popData.isError ? 0 : popData.population}>{popData.isError ? '---' : '0'}</span>
+                            <span class="text-4xl sm:text-5xl font-black text-blue-700 count-up" id="od-population">---</span>
                             <span class="text-sm text-blue-900 font-bold ml-1 lang-jp">人</span>
                         </div>
                         <div>
-                            <span class="text-2xl sm:text-3xl font-black text-blue-600 count-up" data-val={popData.isError ? 0 : popData.households}>{popData.isError ? '---' : '0'}</span>
+                            <span class="text-2xl sm:text-3xl font-black text-blue-600 count-up" id="od-households">---</span>
                             <span class="text-xs text-blue-900 font-bold ml-1 lang-jp">世帯</span>
                             <span class="text-xs text-blue-900 font-bold ml-1 lang-en">Households</span>
                         </div>
                     </div>
-                    <p class="text-[9px] text-gray-400 mt-3">
-                        <span class="lang-jp">※三原市オープンデータ APIより自動集計</span>
-                        <span class="lang-en">※Automatically aggregated from Mihara City Open Data API</span>
+                    <p class="text-[9px] text-gray-400 mt-3" id="od-date">
+                        <i class="fa-solid fa-spinner fa-spin mr-1"></i> 市のサーバーから最新データを取得中...
                     </p>
                 </div>
                 
-                <!-- ▼ 人数に合わせたエモーショナルなメッセージ ▼ -->
+                <!-- 人数に合わせたエモーショナルなメッセージ -->
                 <div class="lang-jp text-sm font-bold text-gray-600 leading-loose text-center">
-                    三原市には今、約<span class="text-blue-600">{Math.floor((popData.population||80000)/10000)}万人</span>の人たちが暮らしています。<br>
+                    三原市には今、約<span class="text-blue-600" id="msg-pop-short">---</span>の人たちが暮らしています。<br>
                     毎日見ているはずなのに見落としている素晴らしい景色や、<br class="hidden sm:block">
                     地元の人だからこそ知っている隠れたスポットがたくさんあります。<br>
-                    この<span class="text-blue-600">「{popData.population ? popData.population.toLocaleString() : '---'}人」</span>それぞれの視点から見た三原の美しさを集めて、<br class="hidden sm:block">
+                    この<span class="text-blue-600" id="msg-pop-full">---</span>それぞれの視点から見た三原の美しさを集めて、<br class="hidden sm:block">
                     みんなでひとつの大きな「フォトマップ」を作っていきませんか？
                 </div>
                 <div class="lang-en text-sm font-bold text-gray-600 leading-loose text-center">
-                    Currently, about <span class="text-blue-600">{Math.floor((popData.population||80000)/10000)}0,000</span> people live in Mihara City.<br>
+                    Currently, about <span class="text-blue-600" id="msg-pop-short-en">---</span> people live in Mihara City.<br>
                     There are many wonderful landscapes that we see every day but overlook, and hidden spots that only locals know.<br>
-                    Why don't we collect the beauty of Mihara from the perspective of each of these <span class="text-blue-600">{popData.population ? popData.population.toLocaleString() : '---'}</span> people, and create one big "Photo Map" together?
+                    Why don't we collect the beauty of Mihara from the perspective of each of these <span class="text-blue-600" id="msg-pop-full-en">---</span> people, and create one big "Photo Map" together?
                 </div>
                 
             </div>
@@ -531,7 +457,7 @@ try {
         </div>
     </section>
 
-    <!-- ▼ 大改修！「便利データ」はマップを巨大化して使いやすくしました！ ▼ -->
+    <!-- ▼ 便利データ（トイレマップ） ▼ -->
     <section id="opendata" class="section-wrap bg-slate-50 border-t border-slate-200">
         <div class="inner-limit max-w-5xl px-0 sm:px-6">
             <span class="section-tag-label reveal-up" data-i18n="label-opendata">OPEN DATA API</span>
@@ -543,16 +469,11 @@ try {
 
             <div class="px-6 sm:px-0 reveal-up">
                 <div class="bg-white p-2 sm:p-4 rounded-xl border border-gray-200 shadow-[0_4px_15px_rgba(0,64,152,0.03)]">
-                    <!-- ▼ 高さを 400px〜500px に広げました ▼ -->
-                    <div id="opendata-map" class="w-full h-[400px] sm:h-[500px] bg-gray-100 rounded-lg relative z-10" data-spots={JSON.stringify(toiletData.spots)} data-error={toiletData.isError ? "true" : "false"}></div>
                     
-                    <p class="text-[9px] text-gray-400 mt-3 text-right pr-2">
-                        {toiletData.isError ? (
-                            <span class="text-red-500 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> 市のサーバーが混雑中、またはデータ更新中です</span>
-                        ) : (
-                            <span class="lang-jp">※三原市内の公衆トイレを表示しています（三原市オープンデータ API利用）</span>
-                        )}
-                        <span class="lang-en hidden">{toiletData.isError ? '' : '※Public toilets in Mihara City (Open Data API)'}</span>
+                    <div id="opendata-map" class="w-full h-[400px] sm:h-[500px] bg-gray-100 rounded-lg relative z-10 border border-gray-200"></div>
+                    
+                    <p class="text-[9px] text-gray-400 mt-3 text-right pr-2" id="od-map-status">
+                        <i class="fa-solid fa-spinner fa-spin mr-1"></i> お出かけオアシス（トイレ）の場所を取得中...
                     </p>
                 </div>
             </div>
@@ -620,16 +541,97 @@ try {
         let currentLang = 'jp';
 
         // =========================================================================
-        // 🚀 CROS制限を回避したマップ初期化プログラム 🚀
+        // 🚀 完全自動化 APIフェッチプログラム（クライアントサイド版） 🚀
+        // 中継プロキシ（allorigins）を挟むことでCORSを突破し、常に最新のデータを取得します。
         // =========================================================================
 
+        async function fetchOpenDataStats() {
+            const popEl = document.getElementById('od-population');
+            const houEl = document.getElementById('od-households');
+            const dateEl = document.getElementById('od-date');
+            const msgPopShort = document.getElementById('msg-pop-short');
+            const msgPopFull = document.getElementById('msg-pop-full');
+            const msgPopShortEn = document.getElementById('msg-pop-short-en');
+            const msgPopFullEn = document.getElementById('msg-pop-full-en');
+
+            try {
+                // 三原市のAPIの前に、無料のプロキシ（https://api.allorigins.win/raw?url=）をつけるだけでCORSを突破できます！
+                const targetUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=8b68f856-ffe2-48ab-ab71-d011f7982816&limit=1000";
+                const apiUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(targetUrl);
+                
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('APIに接続できませんでした');
+                const json = await response.json();
+                
+                if (json.success) {
+                    const records = json.result.records;
+                    
+                    // 「基準日」の一番新しいものを探す
+                    let latestDate = '';
+                    records.forEach(row => {
+                      const d = String(row['基準日'] || '');
+                      if (d && d > latestDate) latestDate = d;
+                    });
+
+                    let totalPop = 0;
+                    let totalHouse = 0;
+
+                    // 最新の月（基準日）のデータだけを足し算する
+                    records.forEach(row => {
+                      const d = String(row['基準日'] || '');
+                      if (d === latestDate) {
+                        let h = parseInt(row['世帯数'], 10) || 0;
+                        let m = parseInt(row['男性[人]'], 10) || 0;
+                        let f = parseInt(row['女性[人]'], 10) || 0;
+                        totalHouse += h;
+                        totalPop += (m + f);
+                      }
+                    });
+
+                    if (totalPop > 0) {
+                        // アニメーションで数字をカウントアップ
+                        if (popEl) {
+                            const obj = { val: 0 };
+                            gsap.to(obj, {
+                                val: totalPop, duration: 3, ease: "power2.out",
+                                onUpdate: () => { popEl.innerHTML = Math.round(obj.val).toLocaleString(); }
+                            });
+                        }
+                        if (houEl) {
+                            const objH = { val: 0 };
+                            gsap.to(objH, {
+                                val: totalHouse, duration: 3, ease: "power2.out",
+                                onUpdate: () => { houEl.innerHTML = Math.round(objH.val).toLocaleString(); }
+                            });
+                        }
+                        
+                        // メッセージ内の数字も書き換え
+                        if(msgPopShort) msgPopShort.innerHTML = Math.floor(totalPop / 10000) + "万人";
+                        if(msgPopFull) msgPopFull.innerHTML = totalPop.toLocaleString() + "人";
+                        if(msgPopShortEn) msgPopShortEn.innerHTML = Math.floor(totalPop / 10000) + "0,000";
+                        if(msgPopFullEn) msgPopFullEn.innerHTML = totalPop.toLocaleString();
+
+                        if (dateEl) {
+                            dateEl.innerHTML = `<span class="lang-jp">※三原市オープンデータ APIより自動集計（基準日: ${latestDate}）</span><span class="lang-en hidden">※Automatically aggregated from Mihara City Open Data API</span>`;
+                        }
+                    } else {
+                        throw new Error('データの形式が変わっています');
+                    }
+                } else {
+                    throw new Error('市側のデータが一時的に非公開です');
+                }
+            } catch (error) {
+                console.error("人口データの自動取得エラー:", error);
+                if (dateEl) dateEl.innerHTML = `<span class="text-red-500 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> 市のサーバーが混雑中、またはデータ更新中です</span>`;
+            }
+        }
+
         let opendataMapInstance = null;
-        function initOpendataMap() {
+        async function initOpendataMap() {
             if (opendataMapInstance) return;
             const mapEl = document.getElementById('opendata-map');
             if(!mapEl) return;
             
-            // ▼ 全体が見渡せるようにズームを少し引きました (13 -> 12) ▼
             opendataMapInstance = L.map('opendata-map', { scrollWheelZoom: false }).setView([34.3980, 133.0800], 12);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OSM', subdomains: 'abcd' }).addTo(opendataMapInstance);
             opendataMapInstance.once('focus', function() { opendataMapInstance.scrollWheelZoom.enable(); });
@@ -641,21 +643,40 @@ try {
                 iconAnchor: [14, 14]
             });
 
+            const statusEl = document.getElementById('od-map-status');
+
             try {
-                const isError = mapEl.getAttribute('data-error') === "true";
-                if(!isError) {
-                    const spotsStr = mapEl.getAttribute('data-spots');
-                    if(spotsStr) {
-                        const spots = JSON.parse(spotsStr);
-                        spots.forEach(st => {
-                            L.marker([st.lat, st.lng], { icon: toiletIcon })
-                             .bindPopup(`<div class="text-[11px] font-bold text-[#004098] leading-tight mb-1">${escapeHtml(st.name)}</div><div class="text-[9px] text-gray-500">お出かけオアシススポット</div>`)
+                const targetUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=c5f248f0-ab12-4cb6-af0a-fef54523ee00&limit=1000";
+                const apiUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(targetUrl);
+                
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('APIに接続できませんでした');
+                const json = await response.json();
+                
+                if (json.success) {
+                    let validSpots = 0;
+                    json.result.records.forEach(row => {
+                        const name = row['名称'] || row['トイレ名称'] || row['公衆トイレ名'] || '公衆トイレ';
+                        const lat = parseFloat(row['緯度'] || row['lat']);
+                        const lng = parseFloat(row['経度'] || row['lng'] || row['lon']);
+                        
+                        if (name && !isNaN(lat) && !isNaN(lng)) {
+                            validSpots++;
+                            L.marker([lat, lng], { icon: toiletIcon })
+                             .bindPopup(`<div class="text-[11px] font-bold text-[#004098] leading-tight mb-1">${escapeHtml(name)}</div><div class="text-[9px] text-gray-500">お出かけオアシススポット</div>`)
                              .addTo(opendataMapInstance);
-                        });
+                        }
+                    });
+                    
+                    if (validSpots === 0) throw new Error('場所データが見つかりません');
+                    
+                    if (statusEl) {
+                        statusEl.innerHTML = `<span class="lang-jp">※三原市内の公衆トイレを表示しています（三原市オープンデータ API利用）</span><span class="lang-en hidden">※Public toilets in Mihara City (Open Data API)</span>`;
                     }
                 }
-            } catch(e) {
-                console.error("Map data parse error:", e);
+            } catch (error) {
+                console.error("トイレデータの自動取得エラー:", error);
+                if (statusEl) statusEl.innerHTML = `<span class="text-red-500 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> 市のサーバーが混雑中、またはデータ更新中です</span>`;
             }
         }
 
@@ -699,31 +720,6 @@ try {
                     }
                 });
             }
-
-            // ▼ 人口カウントアップをAboutセクションに入った時に発動させます ▼
-            let isCounted = false;
-            ScrollTrigger.create({
-                trigger: '#about',
-                start: 'top 80%', 
-                onEnter: () => {
-                    if(isCounted) return;
-                    isCounted = true;
-                    document.querySelectorAll('.count-up').forEach(el => {
-                        const endVal = parseInt(el.getAttribute('data-val'), 10) || 0;
-                        if (endVal === 0) return; 
-                        const obj = { val: 0 };
-                        
-                        gsap.to(obj, {
-                            val: endVal,
-                            duration: 3, // 少しゆっくり動かしてドラマチックに
-                            ease: "power2.out",
-                            onUpdate: () => {
-                                el.innerHTML = Math.round(obj.val).toLocaleString();
-                            }
-                        });
-                    });
-                }
-            });
 
             // オアシスマップはOpendataセクションに入った時に初期化
             ScrollTrigger.create({
@@ -916,12 +912,13 @@ try {
             const langTextEl = document.getElementById('lang-text');
             if (langTextEl) langTextEl.textContent = currentLang === 'jp' ? 'EN' : 'JP';
 
+            // ▼ 言語切り替えボタンのCSSバグを修正しました ▼
             if (currentLang === 'en') {
-                document.body.classList.add('lang-en');
-                document.body.classList.remove('lang-jp');
+                document.body.classList.add('is-en');
+                document.body.classList.remove('is-jp');
             } else {
-                document.body.classList.add('lang-jp');
-                document.body.classList.remove('lang-en');
+                document.body.classList.add('is-jp');
+                document.body.classList.remove('is-en');
             }
 
             updateWeatherUI();
@@ -1548,7 +1545,9 @@ try {
         });
 
         window.addEventListener('load', () => {
+            // ▼ ページを開いた瞬間にAPIのデータを取得しに行きます ▼
             fetchWeather();
+            fetchOpenDataStats(); 
             
             initAnimations();
             
