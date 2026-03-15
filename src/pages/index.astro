@@ -502,20 +502,18 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
     <!-- ▼ About Project (白背景) ▼ -->
     <section id="about" class="section-wrap bg-white relative pb-16 sm:pb-24 border-none">
         
-        <!-- (ここにあった白に同化して見えなくなっていた無駄な波を削除しました) -->
-
         <div class="inner-limit relative z-30 pt-12 sm:pt-20">
             <span class="section-tag-label reveal-up" id="label-about" data-i18n="label-about">About Project</span>
             <h3 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-8 reveal-up" id="title-about" data-i18n="title-about">みんなで描く、三原の未来</h3>
             
             <div class="bg-blue-50/50 rounded-2xl p-6 sm:p-10 mb-10 border border-blue-100 reveal-up">
                 <div class="lang-jp text-[14px] sm:text-base font-bold text-gray-600 leading-[2.2] sm:leading-loose text-center px-1 sm:px-4">
-                    三原に住む約<span class="text-blue-600 text-lg sm:text-xl">{popData.isError ? '---' : Math.floor(popData.population / 10000) + "万人"}</span>、<br class="sm:hidden">それぞれの視点をひとつの形に。<br>
+                    三原に住む<span class="text-blue-600 text-lg sm:text-xl">{popData.isError ? '---' : popData.population.toLocaleString() + "人"}</span>、<br class="sm:hidden">それぞれの視点をひとつの形に。<br>
                     地元の人しか知らない隠れた魅力を集めて、<br class="sm:hidden">
                     みんなで「フォトマップ」を作りませんか？
                 </div>
                 <div class="lang-en text-[13px] sm:text-sm font-bold text-gray-600 leading-[2.2] sm:leading-loose text-center px-1 sm:px-4">
-                    Bringing together the perspectives of about <span class="text-blue-600 text-base">{popData.isError ? '---' : Math.floor(popData.population / 10000) + "0,000"}</span> Mihara residents.<br>
+                    Bringing together the perspectives of <span class="text-blue-600 text-base">{popData.isError ? '---' : popData.population.toLocaleString()}</span> Mihara residents.<br>
                     Let's collect hidden charms known only to locals and create a "Photo Map" together!
                 </div>
             </div>
