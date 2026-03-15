@@ -271,7 +271,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .card-frame h4 { font-weight: 700 !important; color: var(--palette-blue); margin-bottom: 12px; font-size: 1rem; border-left: 5px solid var(--palette-blue); padding-left: 15px; }
         .card-frame p { font-size: 0.85rem; font-weight: 500 !important; line-height: 2.3; color: var(--text-sub); }
         
-        .sticky-tab-bar { position: sticky; top: 60px; background: #f0f7ff; z-index: 900; border-bottom: 1px solid rgba(0,64,152,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
+        /* ▼ 修正1：タブバーの影を少し濃く・青っぽくして、写真の上に浮いている立体感を強調 ▼ */
+        .sticky-tab-bar { position: sticky; top: 60px; background: #f0f7ff; z-index: 900; border-bottom: 1px solid rgba(0,64,152,0.15); box-shadow: 0 8px 20px rgba(0,64,152,0.12); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
         .sticky-tab-bar::-webkit-scrollbar { display: none; }
         .tab-flex { display: flex; padding: 0 10px; justify-content: flex-start; }
         .tab-item { padding: 22px 16px; font-size: 0.85rem; font-weight: 700 !important; color: #9ca3af; border-bottom: 4px solid transparent; cursor: pointer; }
@@ -577,7 +578,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </nav>
         
-        <div id="gallery-wrap" class="relative z-30 pt-2 sm:pt-4">
+        <!-- ▼ 修正2：写真上部の余白（pt-6 sm:pt-8）を広くして、息苦しさを解消 ▼ -->
+        <div id="gallery-wrap" class="relative z-30 pt-6 sm:pt-8">
             <div id="gallery-grid" class="photo-grid">
                 <div class="col-span-3 py-32 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
@@ -1951,14 +1953,15 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
 
-                    // ▼ タブを切り替えた時に、1行目の画像がタブバーの下に潜り込まないようにスクロール位置を自動調整 ▼
+                    // ▼ 修正3：タブを切り替えた時に、少し余裕を持たせてスクロール位置を自動調整 ▼
                     const tabContainer = document.querySelector('.sticky-tab-bar');
                     if(tabContainer) {
                         const tabRect = tabContainer.getBoundingClientRect();
                         if (tabRect.top <= 61) {
                             const galleryWrap = document.getElementById('gallery-wrap');
                             if(galleryWrap) {
-                                const offsetPosition = galleryWrap.getBoundingClientRect().top + window.pageYOffset - tabRect.height - 60;
+                                // 余白分（24px）を引いて、写真がタブバーの下にめり込まないように計算
+                                const offsetPosition = galleryWrap.getBoundingClientRect().top + window.pageYOffset - tabRect.height - 60 - 24;
                                 window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
                             }
                         }
