@@ -447,9 +447,9 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             
             <div class="bg-blue-50/50 rounded-2xl p-6 sm:p-10 mb-10 border border-blue-100 reveal-up">
                 
-                <!-- ▼ 人数に合わせたエモーショナルなメッセージ（短く洗練されたコピーに変更） ▼ -->
+                <!-- ▼ スマホで見たときに「それぞれの視点を…」から改行されるように調整しました ▼ -->
                 <div class="lang-jp text-[14px] sm:text-base font-bold text-gray-600 leading-[2.2] sm:leading-loose text-center px-1 sm:px-4">
-                    三原に住む約<span class="text-blue-600 text-lg sm:text-xl">{popData.isError ? '---' : Math.floor(popData.population / 10000) + "万人"}</span>、それぞれの視点をひとつの形に。<br>
+                    三原に住む約<span class="text-blue-600 text-lg sm:text-xl">{popData.isError ? '---' : Math.floor(popData.population / 10000) + "万人"}</span>、<br class="sm:hidden">それぞれの視点をひとつの形に。<br>
                     地元の人しか知らない隠れた魅力を集めて、<br class="sm:hidden">
                     みんなで「フォトマップ」を作りませんか？
                 </div>
@@ -460,8 +460,9 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                 
             </div>
             
+            <!-- ▼ スマホで見たときに「意味の切れ目」で綺麗に改行されるように細かく調整しました ▼ -->
             <div class="text-[13px] sm:text-sm font-bold text-gray-500 leading-[2.2] sm:leading-loose text-left sm:text-center px-4 sm:px-8 reveal-up">
-                <span class="lang-jp">広島県三原市（みはらし）は、瀬戸内海の穏やかな気候と豊かな自然に恵まれた、歴史と文化が息づく街です。<br class="sm:hidden">陸・海・空の交通の要衝として知られ、「広島空港」がある空の玄関口でもあります。<br><br>このプロジェクトは、そんな三原の日常にある「美しさ」を再発見するためのものです。<br class="sm:hidden">皆さまから寄せられた写真を通じて、三原の新しい魅力を発信していきます。</span>
+                <span class="lang-jp">広島県三原市は、瀬戸内海の穏やかな気候と<br class="sm:hidden">豊かな自然に恵まれた歴史と文化が息づく街です。<br class="sm:hidden">陸・海・空の交通の要衝として知られ、<br class="sm:hidden">「広島空港」がある空の玄関口でもあります。<br><br>このプロジェクトは、そんな三原の日常にある<br class="sm:hidden">「美しさ」を再発見するためのものです。<br class="sm:hidden">皆さまから寄せられた写真を通じて、<br class="sm:hidden">三原の新しい魅力を発信していきます。</span>
                 <span class="lang-en">Mihara City in Hiroshima Prefecture is a town full of history and culture, blessed with the mild climate and rich nature of the Seto Inland Sea.<br class="sm:hidden">It is known as a transportation hub for land, sea, and air, serving as the gateway to the sky with Hiroshima Airport.<br><br>This project aims to rediscover the everyday "beauty" of Mihara.<br class="sm:hidden">Through the photos submitted by everyone, we will share the new charm of Mihara.</span>
             </div>
             
