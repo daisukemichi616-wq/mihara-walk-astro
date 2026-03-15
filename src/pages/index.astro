@@ -622,13 +622,29 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         </div>
     </section>
 
-    <section class="bottom-view-container">
+    <section class="bottom-view-container relative border-none">
+        <!-- ▼ 写真上部の水色波（contactセクションからの繋がり） ▼ -->
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#f0f7ff] rotate-180">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+            </svg>
+        </div>
+
         <img src="https://i.postimg.cc/Df1DNrfM/IMG-9590.jpg" alt="三原港パノラマ" onerror="this.onerror=null; this.style.display='none'">
-        <div class="bottom-view-overlay">
+        <div class="bottom-view-overlay relative z-30 pb-16 sm:pb-32">
             <div class="floating-badge">
                 <p class="serif-custom italic text-2xl mb-1 text-white">Beautiful Mihara,</p>
                 <p class="text-white text-[9px] font-bold tracking-[0.4em] uppercase">REDISCOVER PROJECT</p>
             </div>
+        </div>
+
+        <!-- ▼ 写真下部の3層ウェーブ（波） ▼ -->
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px]">
+            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px]">
+                <path fill="#ffffff" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="#ffffff" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="#ffffff" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
         </div>
     </section>
 
