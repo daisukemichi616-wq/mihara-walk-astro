@@ -6,7 +6,7 @@
 // 1-1. 人口データの取得と計算（最新月のみを抽出して正確に計算します）
 let popData = { population: 0, households: 0, latestDate: '', isError: false };
 try {
-  const popApiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=8b68f856-ffe2-48ab-ab71-d011f7982816&limit=1000";
+  const popApiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=8b68f856-ffe2-48ab-ab71-d011f7982816&limit=3000&sort=" + encodeURIComponent("_id desc");
   const popRes = await fetch(popApiUrl);
   if (!popRes.ok) throw new Error('Network error');
   const popJson = await popRes.json();
@@ -38,7 +38,7 @@ try {
     if (totalPop > 0) {
       popData.population = totalPop;
       popData.households = totalHouse;
-      popData.latestDate = latestDate;
+      popData.latestDate = latestDate.split('T')[0].replace(/-/g, '/');
     } else {
       popData.isError = true;
     }
@@ -52,7 +52,7 @@ try {
 // 1-2. 公衆トイレデータの取得
 let toiletData = { spots: [] as any[], isError: false };
 try {
-  const toiletApiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=c5f248f0-ab12-4cb6-af0a-fef54523ee00&limit=1000";
+  const toiletApiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=c5f248f0-ab12-4cb6-af0a-fef54523ee00&limit=3000";
   const toiletRes = await fetch(toiletApiUrl);
   if (!toiletRes.ok) throw new Error('Network error');
   const toiletJson = await toiletRes.json();
