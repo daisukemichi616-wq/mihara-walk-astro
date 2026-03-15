@@ -271,7 +271,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .card-frame h4 { font-weight: 700 !important; color: var(--palette-blue); margin-bottom: 12px; font-size: 1rem; border-left: 5px solid var(--palette-blue); padding-left: 15px; }
         .card-frame p { font-size: 0.85rem; font-weight: 500 !important; line-height: 2.3; color: var(--text-sub); }
         
-        .sticky-tab-bar { position: sticky; top: 60px; background: #ffffff; z-index: 900; border-bottom: 2px solid var(--palette-blue); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
+        /* ▼ Galleryの背景色に合わせてタブバーも水色に馴染ませます ▼ */
+        .sticky-tab-bar { position: sticky; top: 60px; background: #f0f7ff; z-index: 900; border-bottom: 2px solid var(--palette-blue); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
         .sticky-tab-bar::-webkit-scrollbar { display: none; }
         .tab-flex { display: flex; padding: 0 10px; justify-content: flex-start; }
         .tab-item { padding: 22px 16px; font-size: 0.85rem; font-weight: 700 !important; color: #9ca3af; border-bottom: 4px solid transparent; cursor: pointer; }
@@ -375,7 +376,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .insta-cta-box { margin-top: 60px; padding: 40px 20px; background: #fff; border: 2px dashed var(--palette-blue-light); border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
         .insta-btn-final { display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white !important; padding: 18px 45px; border-radius: 100px; font-weight: 700 !important; text-decoration: none; font-size: 1rem; box-shadow: 0 10px 25px rgba(220, 39, 67, 0.25); white-space: nowrap; }
         
-        /* ▼ 修正：一番下の画像の枠線を消し、波が馴染むように修正 ▼ */
         .bottom-view-container { position: relative; width: 100%; height: auto; min-height: 450px; aspect-ratio: 4/5; overflow: hidden; border-top: none; background: #f3f4f6; }
         @media (min-width: 640px) { .bottom-view-container { aspect-ratio: 16/7; } }
         .bottom-view-container img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
@@ -462,22 +462,25 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             
             <!-- ▼ 写真の上にドカンと表示されるオープンデータカウンター ▼ -->
             <div class="mt-6 sm:mt-10 flex flex-col w-full max-w-2xl px-4 sm:px-6 reveal-on-load relative z-30">
-                <div class="flex flex-row justify-center items-baseline gap-6 sm:gap-12 w-full">
+                <!-- ▼ スマホでも世帯が横書きになるように、数字を少し小さくし、gapを調整しました ▼ -->
+                <div class="flex flex-row justify-center items-baseline gap-4 sm:gap-10 w-full">
                     <!-- 人口 -->
                     <div class="flex items-baseline leading-none">
-                        <span class="text-[3.5rem] sm:text-[5.5rem] font-normal text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom" data-val={popData.isError ? 0 : popData.population}>{popData.isError ? '---' : '0'}</span>
-                        <span class="text-sm sm:text-lg text-white ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp serif-custom tracking-widest">人</span>
+                        <span class="text-[3rem] sm:text-[4.5rem] font-normal text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom" data-val={popData.isError ? 0 : popData.population}>{popData.isError ? '---' : '0'}</span>
+                        <!-- ▼ whitespace-nowrapで絶対に改行させない ▼ -->
+                        <span class="text-xs sm:text-base text-white ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp serif-custom tracking-widest whitespace-nowrap">人</span>
                     </div>
                     
                     <!-- 世帯数 -->
                     <div class="flex items-baseline leading-none">
-                        <span class="text-[2rem] sm:text-[3.5rem] font-normal text-white/90 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom" data-val={popData.isError ? 0 : popData.households}>{popData.isError ? '---' : '0'}</span>
-                        <span class="text-[10px] sm:text-base text-white/90 ml-1.5 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp serif-custom tracking-widest">世帯</span>
-                        <span class="text-[10px] sm:text-base text-white/90 ml-1.5 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-en hidden serif-custom tracking-widest">Households</span>
+                        <span class="text-[1.8rem] sm:text-[3rem] font-normal text-white/90 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom" data-val={popData.isError ? 0 : popData.households}>{popData.isError ? '---' : '0'}</span>
+                        <!-- ▼ whitespace-nowrapで絶対に改行させない ▼ -->
+                        <span class="text-[10px] sm:text-sm text-white/90 ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp serif-custom tracking-widest whitespace-nowrap">世帯</span>
+                        <span class="text-[10px] sm:text-sm text-white/90 ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-en hidden serif-custom tracking-widest whitespace-nowrap">Households</span>
                     </div>
                 </div>
 
-                <div class="w-full text-right mt-2 sm:mt-3">
+                <div class="w-full text-right mt-1 sm:mt-2">
                     <p class="text-[9px] sm:text-[11px] text-white/80 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] tracking-widest">
                         <span class="lang-jp">{popData.isError ? '※データ取得中...' : ('※' + formattedDate + ' 現在')}</span>
                         <span class="lang-en hidden">{popData.isError ? 'Loading...' : '※As of ' + popData.latestDate}</span>
@@ -486,18 +489,18 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
 
-        <!-- ▼ 下部をおしゃれな3層ウェーブ（波）にするSVG ▼ -->
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px]">
+        <!-- ▼ 下部をおしゃれな3層ウェーブ（白）にするSVG ▼ -->
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-white">
             <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px]">
-                <path fill="#ffffff" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                <path fill="#ffffff" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                <path fill="#ffffff" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="currentColor" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="currentColor" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="currentColor" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
             </svg>
         </div>
     </section>
 
-    <!-- ▼ About Project ▼ -->
-    <section id="about" class="section-wrap bg-white border-none">
+    <!-- ▼ About Project (白背景) ▼ -->
+    <section id="about" class="section-wrap bg-white relative pb-16 sm:pb-24 border-none">
         <div class="inner-limit relative z-30">
             <span class="section-tag-label reveal-up" id="label-about" data-i18n="label-about">About Project</span>
             <h3 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-8 reveal-up" id="title-about" data-i18n="title-about">みんなで描く、三原の未来</h3>
@@ -519,10 +522,17 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                 <span class="lang-en">Mihara City in Hiroshima Prefecture is a town full of history and culture, blessed with the mild climate and rich nature of the Seto Inland Sea.<br class="sm:hidden">It is known as a transportation hub for land, sea, and air, serving as the gateway to the sky with Hiroshima Airport.<br><br>This project aims to rediscover the everyday "beauty" of Mihara.<br class="sm:hidden">Through the photos submitted by everyone, we will share the new charm of Mihara.</span>
             </div>
         </div>
+
+        <!-- ▼ セクション間の波（白から水色へ） ▼ -->
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-[#f0f7ff]">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+            </svg>
+        </div>
     </section>
 
-    <!-- ▼ Gallery（マップ）セクション。直線のborderを消し、波を追加 ▼ -->
-    <section id="gallery" class="bg-white relative pb-16 sm:pb-24 border-none" style="padding-top: 0;">
+    <!-- ▼ Gallery（マップ）セクション (水色背景) ▼ -->
+    <section id="gallery" class="bg-[#f0f7ff] relative pb-16 sm:pb-24 border-none" style="padding-top: 0;">
         <div class="pt-0 pb-8 px-6 text-center relative z-30">
             <h3 class="serif-custom text-blue-900 text-2xl mb-4" id="title-map" data-i18n="title-map">PHOTO MAP</h3>
             <p id="sub-map" class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6" data-i18n="sub-map">Find Your Favorite Spot</p>
@@ -580,16 +590,16 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         </div>
         <div id="map-container" class="relative z-30 mb-8 sm:mb-12"></div>
         
-        <!-- ▼ セクション間の波（白からグレーへ） ▼ -->
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-slate-50">
+        <!-- ▼ セクション間の波（水色から濃い水色へ） ▼ -->
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-[#e1f5fe]">
             <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
                 <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
             </svg>
         </div>
     </section>
 
-    <!-- ▼ Local Insights セクション。直線のborderを消し、波を追加 ▼ -->
-    <section id="local-insights" class="section-wrap bg-slate-50 relative pb-16 sm:pb-24 border-none">
+    <!-- ▼ Local Insights セクション (濃い水色背景) ▼ -->
+    <section id="local-insights" class="section-wrap bg-[#e1f5fe] relative pb-16 sm:pb-24 border-none">
         <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30">
             <span class="section-tag-label" id="label-local" data-i18n="label-local">MIHARA WALK LOG</span>
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-local" data-i18n="title-local">みはらさんぽログ</h2>
@@ -604,7 +614,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             <div id="local-map-container"></div>
         </div>
         
-        <!-- ▼ セクション間の波（グレーから白へ、反転） ▼ -->
+        <!-- ▼ セクション間の波（濃い水色から白へ、反転して動きをつける） ▼ -->
         <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-white scale-x-[-1]">
             <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
                 <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
@@ -612,7 +622,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         </div>
     </section>
 
-    <!-- ▼ Events セクション。直線のborderを消し、波を追加 ▼ -->
+    <!-- ▼ Events セクション (白背景) ▼ -->
     <section id="events" class="section-wrap bg-white relative pb-16 sm:pb-24 border-none">
         <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30">
             <span class="section-tag-label" id="label-event" data-i18n="label-event">UPCOMING EVENTS</span>
@@ -628,21 +638,20 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
         
-        <!-- ▼ セクション間の波（白からグレーへ） ▼ -->
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-slate-50">
+        <!-- ▼ セクション間の波（白から水色へ） ▼ -->
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-[#f0f7ff]">
             <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
                 <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
             </svg>
         </div>
     </section>
 
-    <!-- ▼ Opendata セクション。直線のborderを消し、波を追加 ▼ -->
-    <section id="opendata" class="section-wrap bg-slate-50 relative pb-16 sm:pb-24 border-none">
+    <!-- ▼ Opendata セクション (水色背景) ▼ -->
+    <section id="opendata" class="section-wrap bg-[#f0f7ff] relative pb-16 sm:pb-24 border-none">
         <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30">
             <span class="section-tag-label reveal-up" data-i18n="label-opendata">OPEN DATA API</span>
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4 reveal-up" data-i18n="title-opendata">お出かけオアシスマップ</h2>
             
-            <!-- ▼ スマホで見たときに「ご活用ください。」が最後の行にくるように修正しました ▼ -->
             <p class="text-xs sm:text-sm font-bold text-gray-500 mb-8 px-4 sm:px-6 leading-relaxed reveal-up" data-i18n="desc-opendata">
                 三原市が公開しているオープンデータを活用し、<br class="sm:hidden">市内の「公衆トイレ」をマップにまとめました。<br>
                 まち歩きや写真撮影の際の、<br class="sm:hidden">安心な休憩スポットとして<br class="sm:hidden">ご活用ください。
@@ -667,16 +676,16 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
         
-        <!-- ▼ セクション間の波（グレーから水色へ、反転） ▼ -->
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-[#f0f7ff] scale-x-[-1]">
+        <!-- ▼ セクション間の波（水色から濃い水色へ、反転して動きをつける） ▼ -->
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-[#e1f5fe] scale-x-[-1]">
             <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
                 <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
             </svg>
         </div>
     </section>
 
-    <!-- ▼ Contact セクション。直線のborderを消去 ▼ -->
-    <section id="contact" class="section-wrap relative border-none" style="background-color: var(--palette-sky);">
+    <!-- ▼ Contact セクション (濃い水色背景) ▼ -->
+    <section id="contact" class="section-wrap bg-[#e1f5fe] relative border-none">
         <div class="inner-limit relative z-30">
             <span class="section-tag-label" id="label-contact" data-i18n="label-contact">Photo Submission</span>
             <h2 class="h2-one-line serif-custom" id="title-contact" data-i18n="title-contact">三原の魅力を教えてください</h2>
@@ -710,8 +719,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
 
     <!-- ▼ Bottom Image セクション ▼ -->
     <section class="bottom-view-container relative border-none">
-        <!-- ▼ 写真上部の水色波（contactセクションからの繋がり） ▼ -->
-        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#f0f7ff] rotate-180">
+        <!-- ▼ 写真上部の波（Contactセクションの濃い水色に合わせて逆向きに配置） ▼ -->
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#e1f5fe] rotate-180">
             <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[30px] sm:h-[50px]">
                 <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
             </svg>
@@ -726,11 +735,11 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         </div>
 
         <!-- ▼ 写真下部の3層ウェーブ（波） ▼ -->
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px]">
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-white">
             <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px]">
-                <path fill="#ffffff" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                <path fill="#ffffff" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                <path fill="#ffffff" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="currentColor" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="currentColor" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="currentColor" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
             </svg>
         </div>
     </section>
