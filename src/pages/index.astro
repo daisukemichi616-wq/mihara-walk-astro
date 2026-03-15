@@ -1,4 +1,4 @@
----
+\---
 // ▼ 1. Astroのビルド時（裏側のサーバー）で三原市のAPIからデータを取得 ▼
 
 // 1-1. 人口データの取得と計算
@@ -441,8 +441,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             
             <div class="bg-blue-50/50 rounded-2xl p-6 sm:p-10 mb-10 border border-blue-100 reveal-up">
                 
-                <!-- 人数に合わせたエモーショナルなメッセージ -->
-                <div class="lang-jp text-sm font-bold text-gray-600 leading-loose text-center">
+                <div class="text-center mb-6">
+                    <p class="text-sm font-bold text-gray-500 mb-2">
                     三原市には今、約<span class="text-blue-600">{popData.isError ? '---' : Math.floor(popData.population / 10000) + "万人"}</span>の人たちが暮らしています。<br>
                     毎日見ているはずなのに見落としている素晴らしい景色や、<br class="hidden sm:block">
                     地元の人だからこそ知っている隠れたスポットがたくさんあります。<br>
@@ -455,11 +455,26 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                     Why don't we collect the beauty of Mihara from the perspective of each of these <span class="text-blue-600">{popData.isError ? '---' : popData.population.toLocaleString()}</span> people, and create one big "Photo Map" together?
                 </div>
                 
+                <!-- 人数に合わせたエモーショナルなメッセージ -->
+                <div class="lang-jp text-[13px] sm:text-sm font-bold text-gray-600 leading-[2.2] sm:leading-loose text-center px-1 sm:px-4">
+                    三原市には今、約<span class="text-blue-600 text-base">{popData.isError ? '---' : Math.floor(popData.population / 10000) + "万人"}</span>の人たちが暮らしています。<br class="hidden sm:block">
+                    毎日見ているはずなのに見落としている素晴らしい景色や、<br class="hidden sm:block">
+                    地元の人だからこそ知っている隠れたスポットがたくさんあります。<br><br class="sm:hidden">
+                    この<span class="text-blue-600 text-base">{popData.isError ? '---' : popData.population.toLocaleString() + "人"}</span>それぞれの視点から見た<br class="sm:hidden">三原の美しさを集めて、<br class="hidden sm:block">
+                    みんなでひとつの大きな<br class="sm:hidden">「フォトマップ」を作っていきませんか？
+                </div>
+                <div class="lang-en text-[13px] sm:text-sm font-bold text-gray-600 leading-[2.2] sm:leading-loose text-center px-1 sm:px-4">
+                    Currently, about <span class="text-blue-600 text-base">{popData.isError ? '---' : Math.floor(popData.population / 10000) + "0,000"}</span> people live in Mihara City.<br class="hidden sm:block">
+                    There are many wonderful landscapes that we see every day but overlook, and hidden spots that only locals know.<br><br class="sm:hidden">
+                    Why don't we collect the beauty of Mihara from the perspective of each of these <span class="text-blue-600 text-base">{popData.isError ? '---' : popData.population.toLocaleString()}</span> people,<br class="hidden sm:block">
+                    and create one big "Photo Map" together?
+                </div>
+                
             </div>
             
-            <div class="text-sm font-bold text-gray-500 leading-loose text-justify px-4 reveal-up">
-                <span class="lang-jp">広島県三原市（みはらし）は、瀬戸内海の穏やかな気候と豊かな自然に恵まれた、歴史と文化が息づく街です。陸・海・空の交通の要衝として知られ、「広島空港」がある空の玄関口でもあります。<br><br>このプロジェクトは、そんな三原の日常にある「美しさ」を再発見するためのものです。皆さまから寄せられた写真を通じて、三原の新しい魅力を発信していきます。</span>
-                <span class="lang-en">Mihara City in Hiroshima Prefecture is a town full of history and culture, blessed with the mild climate and rich nature of the Seto Inland Sea. It is known as a transportation hub for land, sea, and air, serving as the gateway to the sky with Hiroshima Airport.<br><br>This project aims to rediscover the everyday "beauty" of Mihara. Through the photos submitted by everyone, we will share the new charm of Mihara.</span>
+            <div class="text-[13px] sm:text-sm font-bold text-gray-500 leading-[2.2] sm:leading-loose text-left sm:text-center px-4 sm:px-8 reveal-up">
+                <span class="lang-jp">広島県三原市（みはらし）は、瀬戸内海の穏やかな気候と豊かな自然に恵まれた、歴史と文化が息づく街です。<br class="sm:hidden">陸・海・空の交通の要衝として知られ、「広島空港」がある空の玄関口でもあります。<br><br>このプロジェクトは、そんな三原の日常にある「美しさ」を再発見するためのものです。<br class="sm:hidden">皆さまから寄せられた写真を通じて、三原の新しい魅力を発信していきます。</span>
+                <span class="lang-en">Mihara City in Hiroshima Prefecture is a town full of history and culture, blessed with the mild climate and rich nature of the Seto Inland Sea.<br class="sm:hidden">It is known as a transportation hub for land, sea, and air, serving as the gateway to the sky with Hiroshima Airport.<br><br>This project aims to rediscover the everyday "beauty" of Mihara.<br class="sm:hidden">Through the photos submitted by everyone, we will share the new charm of Mihara.</span>
             </div>
             
         </div>
@@ -651,18 +666,35 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         // =========================================================================
 
         let opendataMapInstance = null;
+        let toiletMarkersGroup = null; // ▼ 追加：トイレをまとめるためのグループ
+
         function initOpendataMap() {
             if (opendataMapInstance) return;
             const mapEl = document.getElementById('opendata-map');
             if(!mapEl) return;
             
-            opendataMapInstance = L.map('opendata-map', { scrollWheelZoom: false }).setView([34.3980, 133.0800], 12);
+            // ▼ 修正：三原駅周辺にズームアップして初期表示 (座標: 三原駅, ズーム: 14) ▼
+            opendataMapInstance = L.map('opendata-map', { scrollWheelZoom: false }).setView([34.4005, 133.0830], 14);
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OSM', subdomains: 'abcd' }).addTo(opendataMapInstance);
             opendataMapInstance.once('focus', function() { opendataMapInstance.scrollWheelZoom.enable(); });
 
+            // ▼ 追加：トイレだらけにならないようにクラスター（まとめる機能）を追加 ▼
+            toiletMarkersGroup = L.markerClusterGroup({ 
+                showCoverageOnHover: false, 
+                maxClusterRadius: 40,
+                iconCreateFunction: function(cluster) {
+                    return L.divIcon({
+                        html: `<div style="background-color:rgba(59, 130, 246, 0.9); color:white; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.3); border: 2px solid white; font-size:12px;">${cluster.getChildCount()}</div>`,
+                        className: 'custom-toilet-cluster',
+                        iconSize: L.point(34, 34)
+                    });
+                }
+            });
+            opendataMapInstance.addLayer(toiletMarkersGroup);
+
             const toiletIcon = L.divIcon({
                 className: 'custom-toilet-icon',
-                html: '<div style="background-color:#3b82f6; color:white; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.2);"><i class="fa-solid fa-restroom text-[12px]"></i></div>',
+                html: '<div style="background-color:#3b82f6; color:white; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.2); border: 2px solid white;"><i class="fa-solid fa-restroom text-[12px]"></i></div>',
                 iconSize: [28, 28],
                 iconAnchor: [14, 14]
             });
@@ -677,9 +709,11 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                     if(spotsStr) {
                         const spots = JSON.parse(spotsStr);
                         spots.forEach(st => {
-                            L.marker([st.lat, st.lng], { icon: toiletIcon })
-                             .bindPopup(`<div class="text-[11px] font-bold text-[#004098] leading-tight mb-1">${escapeHtml(st.name)}</div><div class="text-[9px] text-gray-500">お出かけオアシススポット</div>`)
-                             .addTo(opendataMapInstance);
+                            const marker = L.marker([st.lat, st.lng], { icon: toiletIcon })
+                             .bindPopup(`<div class="text-[11px] font-bold text-[#004098] leading-tight mb-1">${escapeHtml(st.name)}</div><div class="text-[9px] text-gray-500">お出かけオアシススポット</div>`);
+                            
+                            // ▼ 修正：直接マップにではなく、クラスター（グループ）に追加する ▼
+                            toiletMarkersGroup.addLayer(marker);
                         });
                     }
                 }
