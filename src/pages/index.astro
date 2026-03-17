@@ -14,7 +14,6 @@ try {
   if (popJson.success && popJson.result && popJson.result.records) {
     const records = popJson.result.records;
     
-    // 過去数カ月分が混ざっているため、一番新しい「基準日」を探し出します
     let latestDate = '';
     records.forEach((row: any) => {
       const d = String(row['基準日'] || '');
@@ -24,7 +23,6 @@ try {
     let totalPop = 0;
     let totalHouse = 0;
     
-    // 抽出した「一番新しい月」のデータだけを足し算します
     records.forEach((row: any) => {
       if (String(row['基準日'] || '') === latestDate) {
         let h = parseInt(row['世帯数'], 10) || 0;
@@ -40,7 +38,6 @@ try {
       popData.households = totalHouse;
       popData.latestDate = latestDate.split('T')[0].replace(/-/g, '/'); // 例: 2026/02/28
       
-      // 日本語の綺麗な日付に変換
       const [y, m, d] = popData.latestDate.split('/');
       formattedDate = `${y}年${parseInt(m)}月${parseInt(d)}日`;
     } else {
@@ -131,7 +128,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-    <!-- 没入感アニメーション用のGSAP -->
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
@@ -281,13 +277,13 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .view-btn { padding: 8px 24px; border-radius: 40px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s; color: #64748b; display: flex; align-items: center; }
         .view-btn.active { background: white; color: var(--palette-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
-        /* ▼ 修正：画像間の隙間をゼロにし、横幅いっぱいにビッシリ敷き詰めます ▼ */
-        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; background: transparent; padding: 0; }
-        @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); gap: 0; } }
+        /* ▼ 修正：画像と画像の間に1.5pxの絶妙な隙間（白い線）を設けてInstagram風の枠を表現 ▼ */
+        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px; background: #ffffff; padding: 0; }
+        @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); gap: 2px; } }
         
-        /* ▼ 修正：角丸と枠線を無くし、画像上部が切れないように center top に設定しました ▼ */
-        .photo-item { position: relative; aspect-ratio: 4/5; background: #f3f4f6; overflow: hidden; cursor: pointer; display: block; text-decoration: none; border-radius: 0; box-shadow: none; }
-        .photo-item img { width: 100%; height: 100%; object-fit: cover; object-position: center top; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        /* ▼ 修正：画像の比率を4:5（縦長）にし、中心（center）で美しく切り抜かれるように戻しました ▼ */
+        .photo-item { position: relative; aspect-ratio: 4/5; background: #f3f4f6; overflow: hidden; cursor: pointer; display: block; text-decoration: none; }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
         
         .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 80%); opacity: 0; transition: opacity 0.6s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; pointer-events: none; }
         .photo-overlay span { transform: translateY(15px); opacity: 0; transition: transform 0.6s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.6s ease; }
@@ -303,7 +299,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             .photo-item.in-view .photo-overlay span:nth-child(2) { transition-delay: 0.4s; }
         }
         
-        #map-container { height: 60vh; min-height: 500px; width: 100%; z-index: 1; display: none; border-bottom: 1px solid var(--border-soft); margin-top: 10px; }
+        #map-container { height: 60vh; min-height: 500px; width: 100%; z-index: 1; display: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid var(--border-soft); margin-top: 10px; }
         #map-container.active { display: block; }
         
         .leaflet-popup-content-wrapper { border-radius: 8px; overflow: hidden; padding: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
@@ -572,8 +568,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </nav>
         
-        <!-- ▼ 画像の左右の隙間をなくし、画面幅いっぱいに表示します ▼ -->
-        <div id="gallery-wrap" class="relative z-30 pt-4 px-0">
+        <!-- ▼ 修正：ギャラリー外側の余白(px-0)をなくし、画面幅いっぱいに表示します ▼ -->
+        <div id="gallery-wrap" class="relative z-30 pt-0 px-0">
             <div id="gallery-grid" class="photo-grid">
                 <div class="col-span-3 py-32 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
@@ -582,7 +578,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
         
-        <div id="map-container" class="relative z-30 mx-2 sm:mx-4 mt-4 mb-8 sm:mb-12"></div>
+        <!-- ▼ マップは左右に少し余白を持たせて綺麗に見せます ▼ -->
+        <div id="map-container" class="relative z-30 mx-2 sm:mx-4 mt-6 mb-8 sm:mb-12"></div>
     </section>
 
     <!-- ▼ Local Insights セクション (濃い水色背景) ▼ -->
@@ -736,7 +733,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
 
-        <!-- ▼ 写真下部の3層ウェーブ ▼ -->
         <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-white">
             <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px]">
                 <path fill="currentColor" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
@@ -1967,19 +1963,24 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
 
-                    // ▼ 修正：確実に画像とマップがタブバーの裏に隠れないように、スクロール位置を調整 ▼
                     setTimeout(() => {
                         const tabContainer = document.querySelector('.sticky-tab-bar');
                         if(tabContainer) {
                             const tabRect = tabContainer.getBoundingClientRect();
+                            // タブが固定位置（ヘッダーのすぐ下）付近にあるかチェック
                             if (tabRect.top <= 65) {
                                 const galleryWrap = document.getElementById('gallery-wrap');
                                 const mapContainer = document.getElementById('map-container');
                                 const targetEl = currentViewMode === 'grid' ? galleryWrap : mapContainer;
+                                
                                 if(targetEl) {
-                                    // ヘッダーとタブバーの高さ＋ゆとりの余白を確保してスクロール
-                                    const offsetPosition = targetEl.getBoundingClientRect().top + window.pageYOffset - tabRect.height - 60;
-                                    window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                                    // ヘッダー(60px) + タブバーの高さを引いて、1px単位でスクロール位置を調整
+                                    const offsetPosition = targetEl.getBoundingClientRect().top + window.pageYOffset - 60 - tabContainer.offsetHeight - 2;
+                                    
+                                    // 通り過ぎている場合のみ自動で戻す（スクロールしすぎ防止）
+                                    if (window.pageYOffset > offsetPosition - 50) {
+                                        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                                    }
                                 }
                             }
                         }
