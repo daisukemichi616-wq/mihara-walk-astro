@@ -257,8 +257,13 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .slide.active img { transform: scale(1.05); }
         .hero-overlay { position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 100%); z-index: 3; }
         .hero-content { position: relative; z-index: 10; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: white; padding: 0 20px; text-align: center; }
-        .hero-label { font-size: 0.75rem; font-weight: 700 !important; letter-spacing: 0.4em; color: var(--palette-gold); margin-bottom: 25px; display: block; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
-        .hero-title { font-size: 1.65rem; line-height: 1.8; text-shadow: 0 0 20px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5); }
+        
+        /* ▼ 修正：opacity: 0; を追加して、最初から透明にしておきます ▼ */
+        .hero-label { font-size: 0.75rem; font-weight: 700 !important; letter-spacing: 0.4em; color: var(--palette-gold); margin-bottom: 25px; display: block; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); opacity: 0; }
+        .hero-title { font-size: 1.65rem; line-height: 1.8; text-shadow: 0 0 20px rgba(0,0,0,0.8), 0 2px 10px rgba(0,0,0,0.5); opacity: 0; }
+        .reveal-on-load { opacity: 0; }
+        /* ▲ ここまで ▲ */
+
         .mobile-br { display: block; }
         @media (min-width: 640px) { .hero-title { font-size: 2.8rem; line-height: 1.6; } .mobile-br { display: none; } }
 
