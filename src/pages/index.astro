@@ -2002,7 +2002,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                                 const galleryWrap = document.getElementById('gallery-wrap');
                                 if(galleryWrap) {
                                     // ヘッダーとタブバーの高さ＋ゆとりの余白を確保してスクロール
-                                    const offsetPosition = galleryWrap.getBoundingClientRect().top + window.pageYOffset - tabRect.height - 100;
+                                    const offsetPosition = galleryWrap.getBoundingClientRect().top + window.pageYOffset - tabRect.height - 80;
                                     window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
                                 }
                             }
