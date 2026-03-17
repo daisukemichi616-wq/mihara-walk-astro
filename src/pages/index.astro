@@ -321,18 +321,20 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large { background-color: rgba(0, 64, 152, 0.2) !important; }
         .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div { background-color: var(--palette-blue) !important; color: #fff !important; font-family: 'Zen Maru Gothic', sans-serif !important; font-weight: 900 !important; box-shadow: 0 4px 10px rgba(0, 64, 152, 0.3); }
         
+        /* ▼ 修正：隙間(gap)を狭く(8px)し、左右の余白を少し調整しました ▼ */
         .horizontal-scroll-container {
-            display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px;
+            display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 8px;
             padding: 10px 0 5px 0; 
-            margin-left: -24px; margin-right: -24px; padding-left: 24px; padding-right: 24px; 
+            margin-left: -24px; margin-right: -24px; padding-left: 20px; padding-right: 20px; 
             scrollbar-width: none; cursor: grab; scroll-behavior: smooth;
         }
         .horizontal-scroll-container::-webkit-scrollbar { display: none; }
         .horizontal-scroll-container.active { cursor: grabbing; }
         
+        /* ▼ 修正：画面幅(100vw)から余白と隙間を引いた数値を正確に3等分し、カードを大きく・ピッタリ3枚にしました ▼ */
         .local-card-horizontal {
             flex: none;
-            width: calc((100vw - 72px) / 3); 
+            width: calc((100vw - 56px) / 3); 
             scroll-snap-align: start;
             display: flex; flex-direction: column; background: #fff;
             border: 2px solid transparent; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
