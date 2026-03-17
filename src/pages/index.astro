@@ -568,7 +568,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         </div>
 
         <!-- ▼ 修正：元凶だった「relative」を削除し、純粋な固定バーにしました ▼ -->
-        <nav class="sticky-tab-bar">
+        <nav class="sticky-tab-bar relative z-40">
             <div class="tab-flex">
                 <div class="tab-item active" data-area="all">ぜんぶ</div>
                 <div class="tab-item" data-area="mihara">三原市街</div>
@@ -579,8 +579,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </nav>
         
-        <!-- ▼ 画像がタブバーの下にめり込まないように十分な余白(pt-6 sm:pt-8)を持たせています ▼ -->
-        <div id="gallery-wrap" class="relative z-30 pt-6 sm:pt-8 mt-2 px-2 sm:px-4">
+        <!-- ▼ 修正：スマホで見た時、左右の余白をなくして画面いっぱいに広げるため「px-0 sm:px-4」としました ▼ -->
+        <div id="gallery-wrap" class="relative z-30 pt-6 sm:pt-8 mt-2 px-0 sm:px-4">
             <div id="gallery-grid" class="photo-grid">
                 <div class="col-span-3 py-32 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
