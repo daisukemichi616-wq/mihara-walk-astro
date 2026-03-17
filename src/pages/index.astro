@@ -14,6 +14,7 @@ try {
   if (popJson.success && popJson.result && popJson.result.records) {
     const records = popJson.result.records;
     
+    // 過去数カ月分が混ざっているため、一番新しい「基準日」を探し出します
     let latestDate = '';
     records.forEach((row: any) => {
       const d = String(row['基準日'] || '');
@@ -23,6 +24,7 @@ try {
     let totalPop = 0;
     let totalHouse = 0;
     
+    // 抽出した「一番新しい月」のデータだけを足し算します
     records.forEach((row: any) => {
       if (String(row['基準日'] || '') === latestDate) {
         let h = parseInt(row['世帯数'], 10) || 0;
@@ -38,6 +40,7 @@ try {
       popData.households = totalHouse;
       popData.latestDate = latestDate.split('T')[0].replace(/-/g, '/'); // 例: 2026/02/28
       
+      // 日本語の綺麗な日付に変換
       const [y, m, d] = popData.latestDate.split('/');
       formattedDate = `${y}年${parseInt(m)}月${parseInt(d)}日`;
     } else {
@@ -266,6 +269,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .card-frame h4 { font-weight: 700 !important; color: var(--palette-blue); margin-bottom: 12px; font-size: 1rem; border-left: 5px solid var(--palette-blue); padding-left: 15px; }
         .card-frame p { font-size: 0.85rem; font-weight: 500 !important; line-height: 2.3; color: var(--text-sub); }
         
+        /* ▼ 修正：元凶だった relative を削除し、純粋に固定されるようにしました ▼ */
         .sticky-tab-bar { position: sticky; top: 60px; background: #f0f7ff; z-index: 40; border-bottom: 1px solid rgba(0,64,152,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
         .sticky-tab-bar::-webkit-scrollbar { display: none; }
         .tab-flex { display: flex; padding: 0 10px; justify-content: flex-start; }
@@ -277,13 +281,14 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .view-btn { padding: 8px 24px; border-radius: 40px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s; color: #64748b; display: flex; align-items: center; }
         .view-btn.active { background: white; color: var(--palette-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
-        /* ▼ 修正：Instagramと同じ「1pxの極細の隙間」で、左右の余白をなくして画面いっぱいに敷き詰めます ▼ */
-        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: #ffffff; padding: 0; }
-        @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); gap: 1px; } }
+        /* ▼ 修正：もともとの「正方形(1:1)で3列表示」に戻し、12枚が1画面にきれいに収まるようにしました！ ▼ */
+        /* ▼ 隙間(gap)と余白(padding)を1.5pxにし、外側と間に「細い白い枠」があるように見せます ▼ */
+        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px; background: #ffffff; padding: 1.5px; }
+        @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 2px; } }
         
-        /* ▼ 修正：画像上部（空や頭）が絶対に切れないように「center top」で切り抜きます ▼ */
-        .photo-item { position: relative; aspect-ratio: 4/5; background: #f3f4f6; overflow: hidden; cursor: pointer; display: block; text-decoration: none; border-radius: 0; box-shadow: none; }
-        .photo-item img { width: 100%; height: 100%; object-fit: cover; object-position: center top; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        /* ▼ アスペクト比を1:1に戻し、切れないように中心で美しく配置します ▼ */
+        .photo-item { position: relative; aspect-ratio: 1/1; background: #f3f4f6; overflow: hidden; cursor: pointer; display: block; text-decoration: none; border-radius: 0; box-shadow: none; }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
         
         .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 80%); opacity: 0; transition: opacity 0.6s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; pointer-events: none; }
         .photo-overlay span { transform: translateY(15px); opacity: 0; transition: transform 0.6s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.6s ease; }
@@ -299,7 +304,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             .photo-item.in-view .photo-overlay span:nth-child(2) { transition-delay: 0.4s; }
         }
         
-        #map-container { height: 60vh; min-height: 500px; width: 100%; z-index: 1; display: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid var(--border-soft); margin-top: 10px; }
+        #map-container { height: 60vh; min-height: 500px; width: 100%; z-index: 1; display: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid var(--border-soft); margin-top: 15px; }
         #map-container.active { display: block; }
         
         .leaflet-popup-content-wrapper { border-radius: 8px; overflow: hidden; padding: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
@@ -557,7 +562,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
 
-        <nav class="sticky-tab-bar relative z-40">
+        <!-- ▼ 修正：元凶だった「relative」を削除し、純粋な固定バー（z-40）にしました ▼ -->
+        <nav class="sticky-tab-bar z-40 bg-[#f0f7ff]">
             <div class="tab-flex">
                 <div class="tab-item active" data-area="all">ぜんぶ</div>
                 <div class="tab-item" data-area="mihara">三原市街</div>
@@ -568,8 +574,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </nav>
         
-        <!-- ▼ 画像やマップの上部がタブバーの裏に隠れないように、安全な隙間(mt-2)を持たせています ▼ -->
-        <div id="gallery-wrap" class="relative z-30 pt-0 mt-2 px-0">
+        <!-- ▼ 修正：タブバーの下にめり込まないよう十分な余白(mt-4)を作り、画像が絶対に切れないようにしました ▼ -->
+        <div id="gallery-wrap" class="relative z-30 pt-0 mt-4 px-0 max-w-5xl mx-auto">
             <div id="gallery-grid" class="photo-grid">
                 <div class="col-span-3 py-32 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
@@ -578,8 +584,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
         
-        <!-- ▼ マップも同様に上部が隠れないように余白(mt-4)を追加 ▼ -->
-        <div id="map-container" class="relative z-30 mx-2 sm:mx-4 mt-4 mb-8 sm:mb-12"></div>
+        <!-- ▼ マップも同様に上部切れを防ぐ余白を持たせています ▼ -->
+        <div id="map-container" class="relative z-30 mx-2 sm:mx-4 mt-6 mb-8 sm:mb-12"></div>
     </section>
 
     <!-- ▼ Local Insights セクション (濃い水色背景) ▼ -->
@@ -1153,7 +1159,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         let localMarkersMap = {};
         
         const AREA_POSITIONS = { 
-            'all': { lat: 34.4000, lng: 133.0800, zoom: 11 }, 
+            'all': { lat: 34.4200, lng: 133.0800, zoom: 11 }, 
             'mihara': { lat: 34.4000, lng: 133.0800, zoom: 13 }, 
             'daiwa': { lat: 34.5300, lng: 132.9500, zoom: 12 }, 
             'kui': { lat: 34.5600, lng: 133.0500, zoom: 12 }, 
@@ -1963,20 +1969,18 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
 
+                    // ▼ 修正：画像とマップがタブバーの裏に潜らないように、上部に十分な余白(20px)を持ってスクロールを止めます ▼
                     setTimeout(() => {
                         const tabContainer = document.querySelector('.sticky-tab-bar');
                         if(tabContainer) {
                             const tabRect = tabContainer.getBoundingClientRect();
-                            // タブが固定位置（ヘッダーのすぐ下）付近にあるかチェック
                             if (tabRect.top <= 65) {
                                 const galleryWrap = document.getElementById('gallery-wrap');
                                 const mapContainer = document.getElementById('map-container');
                                 const targetEl = currentViewMode === 'grid' ? galleryWrap : mapContainer;
                                 
                                 if(targetEl) {
-                                    // ヘッダー(60px) + タブバーの高さを引いて、さらに上に余裕(20px)を持たせてスクロール
                                     const offsetPosition = targetEl.getBoundingClientRect().top + window.pageYOffset - 60 - tabContainer.offsetHeight - 20;
-                                    
                                     window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
                                 }
                             }
