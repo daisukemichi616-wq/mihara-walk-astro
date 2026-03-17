@@ -282,11 +282,13 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .view-btn { padding: 8px 24px; border-radius: 40px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s; color: #64748b; display: flex; align-items: center; }
         .view-btn.active { background: white; color: var(--palette-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
+        /* ▼ 3列・4行（12枚）表示を維持しています ▼ */
         .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border-soft); }
         @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); } }
         
+        /* ▼ 修正：画像の上部（空や頭）が絶対に切れないように object-position: center top; にしました ▼ */
         .photo-item { position: relative; aspect-ratio: 1/1; background: #f3f4f6; overflow: hidden; cursor: pointer; display: block; text-decoration: none; }
-        .photo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; object-position: center top; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
         
         .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 80%); opacity: 0; transition: opacity 0.6s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; pointer-events: none; }
         .photo-overlay span { transform: translateY(15px); opacity: 0; transition: transform 0.6s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.6s ease; }
@@ -302,7 +304,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             .photo-item.in-view .photo-overlay span:nth-child(2) { transition-delay: 0.4s; }
         }
         
-        #map-container { height: 60vh; min-height: 500px; width: 100%; z-index: 1; display: none; border-bottom: 1px solid var(--border-soft); margin-top: 15px; }
+        #map-container { height: 60vh; min-height: 500px; width: 100%; z-index: 1; display: none; border-bottom: 1px solid var(--border-soft); }
         #map-container.active { display: block; }
         
         .leaflet-popup-content-wrapper { border-radius: 8px; overflow: hidden; padding: 0; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
@@ -379,10 +381,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .insta-cta-box { margin-top: 60px; padding: 40px 20px; background: #fff; border: 2px dashed var(--palette-blue-light); border-radius: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
         .insta-btn-final { display: flex; align-items: center; justify-content: center; gap: 10px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white !important; padding: 18px 45px; border-radius: 100px; font-weight: 700 !important; text-decoration: none; font-size: 1rem; box-shadow: 0 10px 25px rgba(220, 39, 67, 0.25); white-space: nowrap; }
         
-        /* ▼ パララックス（視差効果）のために画像とコンテナの高さを調整しました ▼ */
         .bottom-view-container { position: relative; width: 100%; height: auto; min-height: 450px; aspect-ratio: 4/5; overflow: hidden; border-top: none; background: #f3f4f6; }
         @media (min-width: 640px) { .bottom-view-container { aspect-ratio: 16/7; } }
-        /* top: -15% と height: 130% で上下に「のりしろ」を作り、スクロールで動かせるようにしています */
         .bottom-view-container img { position: absolute; top: -15%; left: 0; width: 100%; height: 130%; object-fit: cover; z-index: 1; transform-origin: center; }
         
         .bottom-view-overlay { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 50px; }
@@ -398,26 +398,19 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         @media (min-width: 640px) { .event-date-box { width: 120px; } }
         .event-content-box { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
         
-        /* 言語切り替え用のCSS */
         .lang-jp, .lang-en { display: none; }
         body.is-jp .lang-jp { display: inline; }
         body.is-jp div.lang-jp, body.is-jp p.lang-jp { display: block; }
         body.is-en .lang-en { display: inline; }
         body.is-en div.lang-en, body.is-en p.lang-en { display: block; }
 
-        /* ▼ 追加：波を横にゆらゆら動かすCSSアニメーション（ゆらぎエフェクト） ▼ */
-        .wave-svg { transform: scaleX(1.05); transform-origin: center; } /* 動かすための「のりしろ」 */
-        @keyframes wave-sway-1 { 0% { transform: translateX(0); } 50% { transform: translateX(-1%); } 100% { transform: translateX(0); } }
-        @keyframes wave-sway-2 { 0% { transform: translateX(0); } 50% { transform: translateX(1.5%); } 100% { transform: translateX(0); } }
-        @keyframes wave-sway-3 { 0% { transform: translateX(0); } 50% { transform: translateX(-2%); } 100% { transform: translateX(0); } }
-        .wave-path-1 { animation: wave-sway-1 8s ease-in-out infinite; }
-        .wave-path-2 { animation: wave-sway-2 10s ease-in-out infinite; }
-        .wave-path-3 { animation: wave-sway-3 12s ease-in-out infinite; }
+        /* ▼ 修正：波を確実にゆらゆら動かすCSSアニメーション（スマホのバグ回避版） ▼ */
+        .wave-wrap { width: 120%; margin-left: -10%; animation: wave-sway 12s ease-in-out infinite alternate; }
+        @keyframes wave-sway { 0% { transform: translateX(-2%); } 100% { transform: translateX(2%); } }
     </style>
 </head>
 <body id="top" class="is-jp">
 
-    <!-- ▼ ここにサーバーで取得したデータを安全にHTMLに埋め込みます ▼ -->
     <script type="application/json" id="toilet-data-json" set:html={safeToiletSpotsJson}></script>
     <script type="application/json" id="toilet-error-status" set:html={toiletData.isError ? "true" : "false"}></script>
 
@@ -425,7 +418,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         <div class="header-logo" id="header-logo" data-i18n="header-logo">MIHARA REDISCOVER</div>
         <div class="nav-links-wrap flex items-center">
             
-            <!-- ▼ PC用メニュー ▼ -->
             <div class="desktop-nav-links">
                 <div class="nav-simple-link" onclick="scrollToId('gallery')" data-i18n="nav-map">PHOTO MAP</div>
                 <div class="nav-simple-link" onclick="scrollToId('local-insights')" data-i18n="nav-local">みはらさんぽログ</div>
@@ -438,14 +430,12 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                 <i class="fa-solid fa-globe"></i> <span id="lang-text">EN</span>
             </button>
 
-            <!-- ▼ スマホ用メニューボタン ▼ -->
             <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
                 <i class="fa-solid fa-bars"></i>
             </button>
         </div>
     </nav>
 
-    <!-- ▼ モバイルメニューオーバーレイ ▼ -->
     <div id="mobile-menu" class="mobile-menu-overlay">
         <button class="mobile-menu-close" onclick="toggleMobileMenu()">
             <i class="fa-solid fa-xmark"></i>
@@ -465,7 +455,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             <div class="slide"><img src="https://i.postimg.cc/Z56hFGB9/IMG-9585.jpg" alt="旗"></div>
             <div class="slide"><img src="https://i.postimg.cc/cLypHF9y/IMG-9584.jpg" alt="海"></div>
         </div>
-        <!-- 文字を読みやすくするための暗いグラデーション -->
         <div class="hero-overlay" style="background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);"></div>
         
         <div class="hero-content w-full relative z-30 pb-16 sm:pb-32">
@@ -477,13 +466,11 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             
             <div class="mt-6 sm:mt-10 flex flex-col w-full max-w-2xl px-4 sm:px-6 reveal-on-load relative z-30">
                 <div class="flex flex-row justify-center items-baseline gap-4 sm:gap-10 w-full">
-                    <!-- 人口 -->
                     <div class="flex items-baseline leading-none">
                         <span class="text-[3rem] sm:text-[4.5rem] font-normal text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom" data-val={popData.isError ? 0 : popData.population}>{popData.isError ? '---' : '0'}</span>
                         <span class="text-xs sm:text-base text-white ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp serif-custom tracking-widest whitespace-nowrap">人</span>
                     </div>
                     
-                    <!-- 世帯数 -->
                     <div class="flex items-baseline leading-none">
                         <span class="text-[1.8rem] sm:text-[3rem] font-normal text-white/90 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom" data-val={popData.isError ? 0 : popData.households}>{popData.isError ? '---' : '0'}</span>
                         <span class="text-[10px] sm:text-sm text-white/90 ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp serif-custom tracking-widest whitespace-nowrap">世帯</span>
@@ -500,19 +487,20 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
 
-        <!-- ▼ トップ画像(hero-view)の側の波。ゆらぎクラス(wave-path)を追加 ▼ -->
+        <!-- ▼ 修正：確実に動く「wave-wrap」に切り替えました ▼ -->
         <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-white">
-            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px] wave-svg">
-                <path class="wave-path-1" fill="currentColor" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                <path class="wave-path-2" fill="currentColor" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                <path class="wave-path-3" fill="currentColor" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-            </svg>
+            <div class="wave-wrap">
+                <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px]">
+                    <path fill="currentColor" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                    <path fill="currentColor" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                    <path fill="currentColor" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                </svg>
+            </div>
         </div>
     </section>
 
     <!-- ▼ About Project (白背景) ▼ -->
     <section id="about" class="section-wrap bg-white relative pb-16 sm:pb-24 border-none">
-        
         <div class="inner-limit relative z-30 pt-12 sm:pt-20">
             <span class="section-tag-label reveal-up" id="label-about" data-i18n="label-about">About Project</span>
             <h3 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-8 reveal-up" id="title-about" data-i18n="title-about">みんなで描く、三原の未来</h3>
@@ -537,13 +525,15 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
     </section>
 
     <!-- ▼ Gallery（マップ）セクション (水色背景) ▼ -->
-    <section id="gallery" class="bg-[#f0f7ff] relative pb-16 sm:pb-24 border-none" style="padding-top: 0;">
+    <section id="gallery" class="bg-[#f0f7ff] relative pb-16 sm:pb-24 border-none" style="padding-top: 0; scroll-margin-top: 60px;">
         
-        <!-- ▼ 上のセクションの色(白)の波。ゆらぎクラス(wave-path)を追加 ▼ -->
+        <!-- ▼ 上のセクションの色(白)の波。確実に動くwave-wrapを使用 ▼ -->
         <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-white rotate-180">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px] wave-svg">
-                <path class="wave-path-1" d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
-            </svg>
+            <div class="wave-wrap">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+                </svg>
+            </div>
         </div>
 
         <div class="pt-16 sm:pt-24 pb-8 px-6 text-center relative z-30">
@@ -593,7 +583,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </nav>
         
-        <div id="gallery-wrap" class="relative z-30 pt-8 sm:pt-12 px-2 sm:px-4">
+        <!-- ▼ 修正：タブバーの下に物理的な隙間(pt-4 sm:pt-8)を作り、画像やマップがめり込むのを完全に防ぎます ▼ -->
+        <div id="gallery-wrap" class="relative z-30 pt-4 sm:pt-8 mt-4 px-2 sm:px-4">
             <div id="gallery-grid" class="photo-grid">
                 <div class="col-span-3 py-32 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
@@ -602,17 +593,20 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
         
-        <div id="map-container" class="relative z-30 mx-2 sm:mx-4 mt-4 sm:mt-6 mb-8 sm:mb-12"></div>
+        <!-- ▼ 修正：マップも同様に上部に隙間を作り、めり込みを防止 ▼ -->
+        <div id="map-container" class="relative z-30 mx-2 sm:mx-4 mt-8 mb-8 sm:mb-12"></div>
     </section>
 
     <!-- ▼ Local Insights セクション (濃い水色背景) ▼ -->
-    <section id="local-insights" class="section-wrap bg-[#e1f5fe] relative pb-16 sm:pb-24 border-none">
+    <section id="local-insights" class="section-wrap bg-[#e1f5fe] relative pb-16 sm:pb-24 border-none" style="scroll-margin-top: 60px;">
         
-        <!-- ▼ 上のセクションの色(水色)の波。ゆらぎを追加 ▼ -->
+        <!-- ▼ 上のセクションの色(水色)の波。確実に動くwave-wrapを使用 ▼ -->
         <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#f0f7ff] rotate-180">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px] wave-svg">
-                <path class="wave-path-1" d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
-            </svg>
+            <div class="wave-wrap">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+                </svg>
+            </div>
         </div>
 
         <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30 pt-12 sm:pt-20">
@@ -631,13 +625,15 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
     </section>
 
     <!-- ▼ Events セクション (白背景) ▼ -->
-    <section id="events" class="section-wrap bg-white relative pb-16 sm:pb-24 border-none">
+    <section id="events" class="section-wrap bg-white relative pb-16 sm:pb-24 border-none" style="scroll-margin-top: 60px;">
         
-        <!-- ▼ 上のセクションの色(濃い水色)の波。ゆらぎを追加 ▼ -->
+        <!-- ▼ 上のセクションの色(濃い水色)の波。確実に動くwave-wrapを使用 ▼ -->
         <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#e1f5fe] rotate-180">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px] wave-svg">
-                <path class="wave-path-1" d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
-            </svg>
+            <div class="wave-wrap">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+                </svg>
+            </div>
         </div>
 
         <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30 pt-12 sm:pt-20">
@@ -656,13 +652,15 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
     </section>
 
     <!-- ▼ Opendata セクション (水色背景) ▼ -->
-    <section id="opendata" class="section-wrap bg-[#f0f7ff] relative pb-16 sm:pb-24 border-none">
+    <section id="opendata" class="section-wrap bg-[#f0f7ff] relative pb-16 sm:pb-24 border-none" style="scroll-margin-top: 60px;">
         
-        <!-- ▼ 上のセクションの色(白)の波。ゆらぎを追加 ▼ -->
+        <!-- ▼ 上のセクションの色(白)の波。確実に動くwave-wrapを使用 ▼ -->
         <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-white rotate-180">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px] wave-svg">
-                <path class="wave-path-1" d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
-            </svg>
+            <div class="wave-wrap">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+                </svg>
+            </div>
         </div>
 
         <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30 pt-12 sm:pt-20">
@@ -702,13 +700,15 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
     </section>
 
     <!-- ▼ Contact セクション (濃い水色背景) ▼ -->
-    <section id="contact" class="section-wrap bg-[#e1f5fe] relative border-none">
+    <section id="contact" class="section-wrap bg-[#e1f5fe] relative border-none" style="scroll-margin-top: 60px;">
         
-        <!-- ▼ 上のセクションの色(水色)の波。ゆらぎを追加 ▼ -->
+        <!-- ▼ 上のセクションの色(水色)の波。確実に動くwave-wrapを使用 ▼ -->
         <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#f0f7ff] rotate-180">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px] wave-svg">
-                <path class="wave-path-1" d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
-            </svg>
+            <div class="wave-wrap">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+                </svg>
+            </div>
         </div>
 
         <div class="inner-limit relative z-30 pt-12 sm:pt-20">
@@ -745,14 +745,15 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
     <!-- ▼ Bottom Image セクション ▼ -->
     <section class="bottom-view-container relative border-none">
         
-        <!-- ▼ 上の波（Contactセクションの濃い水色に合わせて配置）。ゆらぎを追加 ▼ -->
+        <!-- ▼ 上の波（Contactセクションの濃い水色に合わせて配置）。確実に動くwave-wrapを使用 ▼ -->
         <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#e1f5fe] rotate-180">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px] wave-svg">
-                <path class="wave-path-1" d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
-            </svg>
+            <div class="wave-wrap">
+                <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                    <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
+                </svg>
+            </div>
         </div>
 
-        <!-- ▼ ここにパララックス（視差効果）がかかります！ ▼ -->
         <img src="https://i.postimg.cc/Df1DNrfM/IMG-9590.jpg" alt="三原港パノラマ" onerror="this.onerror=null; this.style.display='none'">
         
         <div class="bottom-view-overlay relative z-30 pb-16 sm:pb-32">
@@ -762,13 +763,15 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
 
-        <!-- ▼ 写真下部の3層ウェーブ（白）。ゆらぎクラス(wave-path)を追加 ▼ -->
+        <!-- ▼ 写真下部の3層ウェーブ（白）。確実に動くwave-wrapを使用 ▼ -->
         <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-white">
-            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px] wave-svg">
-                <path class="wave-path-1" fill="currentColor" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                <path class="wave-path-2" fill="currentColor" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                <path class="wave-path-3" fill="currentColor" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-            </svg>
+            <div class="wave-wrap">
+                <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px]">
+                    <path fill="currentColor" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                    <path fill="currentColor" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                    <path fill="currentColor" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                </svg>
+            </div>
         </div>
     </section>
 
@@ -915,7 +918,6 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                 });
             }
 
-            // ▼ ボトム画像のパララックス（視差効果）アニメーションを追加 ▼
             const bottomImg = document.querySelector('.bottom-view-container img');
             if(bottomImg) {
                 gsap.fromTo(bottomImg, 
@@ -925,9 +927,9 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                         ease: "none", 
                         scrollTrigger: {
                             trigger: '.bottom-view-container',
-                            start: "top bottom", // 画像が画面の下から現れたらスタート
-                            end: "bottom top",   // 画像が画面の上に消えるまで
-                            scrub: true          // スクロールにピッタリ連動
+                            start: "top bottom", 
+                            end: "bottom top",   
+                            scrub: true          
                         }
                     }
                 );
@@ -1991,6 +1993,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
 
+                    // ▼ タブを切り替えた時の自動スクロールを、上に潜らないように確実に調整しました ▼
                     setTimeout(() => {
                         const tabContainer = document.querySelector('.sticky-tab-bar');
                         if(tabContainer) {
@@ -1998,7 +2001,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                             if (tabRect.top <= 65) {
                                 const galleryWrap = document.getElementById('gallery-wrap');
                                 if(galleryWrap) {
-                                    const offsetPosition = galleryWrap.getBoundingClientRect().top + window.pageYOffset - tabRect.height - 80;
+                                    // ヘッダーとタブバーの高さ＋ゆとりの余白を確保してスクロール
+                                    const offsetPosition = galleryWrap.getBoundingClientRect().top + window.pageYOffset - tabRect.height - 100;
                                     window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
                                 }
                             }
