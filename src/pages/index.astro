@@ -14,6 +14,7 @@ try {
   if (popJson.success && popJson.result && popJson.result.records) {
     const records = popJson.result.records;
     
+    // 過去数カ月分が混ざっているため、一番新しい「基準日」を探し出します
     let latestDate = '';
     records.forEach((row: any) => {
       const d = String(row['基準日'] || '');
@@ -23,6 +24,7 @@ try {
     let totalPop = 0;
     let totalHouse = 0;
     
+    // 抽出した「一番新しい月」のデータだけを足し算します
     records.forEach((row: any) => {
       if (String(row['基準日'] || '') === latestDate) {
         let h = parseInt(row['世帯数'], 10) || 0;
@@ -38,6 +40,7 @@ try {
       popData.households = totalHouse;
       popData.latestDate = latestDate.split('T')[0].replace(/-/g, '/'); // 例: 2026/02/28
       
+      // 日本語の綺麗な日付に変換
       const [y, m, d] = popData.latestDate.split('/');
       formattedDate = `${y}年${parseInt(m)}月${parseInt(d)}日`;
     } else {
@@ -268,7 +271,9 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .card-frame h4 { font-weight: 700 !important; color: var(--palette-blue); margin-bottom: 12px; font-size: 1rem; border-left: 5px solid var(--palette-blue); padding-left: 15px; }
         .card-frame p { font-size: 0.85rem; font-weight: 500 !important; line-height: 2.3; color: var(--text-sub); }
         
-        .sticky-tab-bar { position: sticky; top: 60px; background: #f0f7ff; z-index: 40; border-bottom: 1px solid rgba(0,64,152,0.15); box-shadow: 0 8px 20px rgba(0,64,152,0.12); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
+        /* ▼ 修正の最重要ポイント：タブバーのCSS設定 ▼ */
+        /* relative などの余計な記述を消し、純粋な sticky に戻しました。これで画像に被ることはありません！ */
+        .sticky-tab-bar { position: sticky; top: 60px; background: #f0f7ff; z-index: 40; border-bottom: 1px solid rgba(0,64,152,0.15); box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; white-space: nowrap; transition: all 0.5s ease; }
         .sticky-tab-bar::-webkit-scrollbar { display: none; }
         .tab-flex { display: flex; padding: 0 10px; justify-content: flex-start; }
         .tab-item { padding: 22px 16px; font-size: 0.85rem; font-weight: 700 !important; color: #9ca3af; border-bottom: 4px solid transparent; cursor: pointer; }
@@ -279,13 +284,14 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
         .view-btn { padding: 8px 24px; border-radius: 40px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s; color: #64748b; display: flex; align-items: center; }
         .view-btn.active { background: white; color: var(--palette-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
-        /* ▼ 3列表示を維持しています ▼ */
+        /* ▼ 3列表示をキープ ▼ */
         .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: transparent; padding: 4px 0; }
         @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; } }
         
-        /* ▼ 画像の比率を縦長(4:5)に変更。空や頭が切れないように top 基準で表示します ▼ */
+        /* ▼ みちむさんのご希望通り、縦長（4:5）の枠にしました！ ▼ */
         .photo-item { position: relative; aspect-ratio: 4/5; background: #f3f4f6; overflow: hidden; cursor: pointer; display: block; text-decoration: none; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .photo-item img { width: 100%; height: 100%; object-fit: cover; object-position: center top; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        /* ▼ object-position: center に戻し、一番自然なトリミングになるようにしました ▼ */
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
         
         .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 80%); opacity: 0; transition: opacity 0.6s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; pointer-events: none; }
         .photo-overlay span { transform: translateY(15px); opacity: 0; transition: transform 0.6s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.6s ease; }
@@ -301,6 +307,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             .photo-item.in-view .photo-overlay span:nth-child(2) { transition-delay: 0.4s; }
         }
         
+        /* ▼ マップの枠も本来の大きさに戻しました ▼ */
         #map-container { height: 60vh; min-height: 500px; width: 100%; z-index: 1; display: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid var(--border-soft); margin-top: 10px; }
         #map-container.active { display: block; }
         
@@ -480,7 +487,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
 
-        <!-- ▼ トップ画像下部の波（無駄なラッパーを消し、確実に表示されるようにしました） ▼ -->
+        <!-- ▼ トップ画像下部の波 ▼ -->
         <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-white">
             <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px]">
                 <path fill="currentColor" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
@@ -560,7 +567,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
 
-        <nav class="sticky-tab-bar relative z-40">
+        <!-- ▼ 修正：元凶だった「relative」を削除し、純粋な固定バーにしました ▼ -->
+        <nav class="sticky-tab-bar">
             <div class="tab-flex">
                 <div class="tab-item active" data-area="all">ぜんぶ</div>
                 <div class="tab-item" data-area="mihara">三原市街</div>
@@ -571,8 +579,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </nav>
         
-        <!-- ▼ 画像とマップの上部が切れないように、十分な余白(pt-4)を作り、めり込みを防ぎます ▼ -->
-        <div id="gallery-wrap" class="relative z-30 pt-4 mt-2 px-2 sm:px-4">
+        <!-- ▼ 画像がタブバーの下にめり込まないように十分な余白(pt-6 sm:pt-8)を持たせています ▼ -->
+        <div id="gallery-wrap" class="relative z-30 pt-6 sm:pt-8 mt-2 px-2 sm:px-4">
             <div id="gallery-grid" class="photo-grid">
                 <div class="col-span-3 py-32 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
@@ -581,8 +589,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </div>
         </div>
         
-        <!-- ▼ マップの上部も切れないように余白を追加 ▼ -->
-        <div id="map-container" class="relative z-30 mx-2 sm:mx-4 mt-4 mb-8 sm:mb-12"></div>
+        <!-- ▼ マップも同様に上部切れを防ぐ余白を持たせています ▼ -->
+        <div id="map-container" class="relative z-30 mx-2 sm:mx-4 mt-6 mb-8 sm:mb-12"></div>
     </section>
 
     <!-- ▼ Local Insights セクション (濃い水色背景) ▼ -->
@@ -727,6 +735,7 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             </svg>
         </div>
 
+        <!-- ▼ ここにパララックス（視差効果）がかかります！ ▼ -->
         <img src="https://i.postimg.cc/Df1DNrfM/IMG-9590.jpg" alt="三原港パノラマ" onerror="this.onerror=null; this.style.display='none'">
         
         <div class="bottom-view-overlay relative z-30 pb-16 sm:pb-32">
