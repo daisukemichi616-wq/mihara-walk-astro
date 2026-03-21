@@ -456,7 +456,8 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
             <div class="slide"><img src="https://i.postimg.cc/Z56hFGB9/IMG-9585.jpg" alt="旗"></div>
             <div class="slide"><img src="https://i.postimg.cc/cLypHF9y/IMG-9584.jpg" alt="海"></div>
         </div>
-        <div class="hero-overlay" style="background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);"></div>
+        <!-- ▼ 修正：写真をできる限り明るく見せるため、暗いフィルターを極限まで薄くしました ▼ -->
+        <div class="hero-overlay" style="background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 100%); pointer-events: none;"></div>
         
         <div class="hero-content w-full relative z-30 pb-16 sm:pb-32">
             <span class="hero-label" id="hero-label" data-i18n="hero-label">MIHARA REDISCOVER PROJECT</span>
