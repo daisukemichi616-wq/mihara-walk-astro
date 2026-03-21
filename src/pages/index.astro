@@ -1522,14 +1522,15 @@ const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u0
                         <h4 class="local-card-title">${safeAlt}</h4>
                         <p class="local-card-desc">${safeDesc}</p>
                         
-                        <!-- ▼ 修正：詳細ボタンを大きく押しやすいブロックに変更 ▼ -->
+                        <!-- ▼ 洗練されたデザインのアニメーション付きボタン ▼ -->
                         <div class="mt-auto border-t border-dashed border-gray-200 pt-2 pointer-events-auto">
-                            <div class="flex justify-between items-center mb-1 pointer-events-none">
+                            <div class="flex justify-between items-center pointer-events-none">
                                 <span class="local-area"><i class="fa-solid fa-location-dot mr-1"></i> ${areaLabel}</span>
                                 ${safeDate ? `<span class="text-[8px] text-gray-400 font-bold tracking-widest"><i class="fa-regular fa-clock mr-1"></i>${safeDate}</span>` : ''}
                             </div>
-                            <a href="/local-log/${slug}/" class="local-read-btn" onclick="event.stopPropagation()">
-                                ${lang === 'en' ? 'Read More' : 'さんぽログを読む'} <i class="fa-solid fa-arrow-right ml-1 text-[9px]"></i>
+                            <a href="/local-log/${slug}/" class="local-read-link" onclick="event.stopPropagation()">
+                                <span class="read-text">${lang === 'en' ? 'READ MORE' : 'さんぽログを読む'}</span>
+                                <span class="read-icon"><i class="fa-solid fa-arrow-right"></i></span>
                             </a>
                         </div>
                     </div>
