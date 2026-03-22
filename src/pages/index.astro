@@ -573,24 +573,28 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         body.is-en div.lang-en, body.is-en p.lang-en { display: block; }
 
         /* ▼ 追加：視覚的魅力を高めるCSSアニメーション ▼ */
-        @keyframes wave-move {
-            0% { transform: translateX(0) scaleY(1); }
-            50% { transform: translateX(-2%) scaleY(1.05); }
-            100% { transform: translateX(0) scaleY(1); }
+        /* 波の動きを確実に視認できるようにピクセルで指定し、上下の揺れも追加 */
+        @keyframes wave-sway-1 {
+            0%, 100% { transform: translate3d(0px, 0px, 0); }
+            50% { transform: translate3d(-40px, 10px, 0); }
         }
-        @keyframes wave-move-reverse {
-            0% { transform: translateX(0) scaleY(1.05); }
-            50% { transform: translateX(2%) scaleY(1); }
-            100% { transform: translateX(0) scaleY(1.05); }
+        @keyframes wave-sway-2 {
+            0%, 100% { transform: translate3d(0px, 0px, 0); }
+            50% { transform: translate3d(40px, -5px, 0); }
+        }
+        @keyframes wave-sway-3 {
+            0%, 100% { transform: translate3d(0px, 0px, 0); }
+            50% { transform: translate3d(-20px, -8px, 0); }
         }
         
-        /* SVGの横幅を広げて動かした時の「端の隙間」を防ぐ */
-        svg.wave-animated { width: 110% !important; margin-left: -5%; }
+        /* SVGの横幅を大きく広げ、横に動かしても端が見えないようにする */
+        svg.wave-animated { width: 115% !important; max-width: 115% !important; margin-left: -7.5%; }
         
-        .wave-animated path { animation: wave-move 12s ease-in-out infinite; transform-origin: bottom center; }
-        .wave-animated path:nth-child(1) { animation: wave-move 15s ease-in-out infinite; opacity: 0.6; }
-        .wave-animated path:nth-child(2) { animation: wave-move-reverse 18s ease-in-out infinite; opacity: 0.8; }
-        .wave-animated path:nth-child(3) { animation: wave-move 20s ease-in-out infinite; opacity: 1; }
+        /* それぞれの波（3つのパス）を独立して違うスピードで揺らす */
+        .wave-animated path { will-change: transform; transform-origin: center; }
+        .wave-animated path:nth-child(1) { animation: wave-sway-1 6s ease-in-out infinite; opacity: 0.5; }
+        .wave-animated path:nth-child(2) { animation: wave-sway-2 8s ease-in-out infinite; opacity: 0.7; }
+        .wave-animated path:nth-child(3) { animation: wave-sway-3 10s ease-in-out infinite; opacity: 1; }
 
         .btn-shine { position: relative; overflow: hidden; }
         .btn-shine::before {
