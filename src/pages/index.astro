@@ -428,16 +428,17 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         
         .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 80%); opacity: 0; transition: opacity 0.6s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; pointer-events: none; }
         .photo-overlay span { transform: translateY(15px); opacity: 0; transition: transform 0.6s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.6s ease; }
-        @media (hover: hover) {
-            .photo-item:hover img { transform: scale(1.08) rotate(1.5deg); filter: brightness(1.05); }
-            .photo-item:hover .photo-overlay { opacity: 1; }
-            .photo-item:hover .photo-overlay span { transform: translateY(0); opacity: 1; }
-            .photo-item:hover .photo-overlay span:nth-child(2) { transition-delay: 0.05s; }
-        }
+        
+        /* PCのホバー時とスマホのタップ時の両方でアニメーションを発動 */
+        .photo-item:hover img, .photo-item:active img { transform: scale(1.08) rotate(1.5deg); filter: brightness(1.05); }
+        .photo-item:hover .photo-overlay, .photo-item:active .photo-overlay { opacity: 1; }
+        .photo-item:hover .photo-overlay span, .photo-item:active .photo-overlay span { transform: translateY(0); opacity: 1; }
+        .photo-item:hover .photo-overlay span:nth-child(2), .photo-item:active .photo-overlay span:nth-child(2) { transition-delay: 0.05s; }
+
         @media (hover: none) {
-            .photo-item.in-view .photo-overlay { opacity: 1; transition-delay: 0.1s; }
-            .photo-item.in-view .photo-overlay span { transform: translateY(0); opacity: 1; transition-delay: 0.3s; }
-            .photo-item.in-view .photo-overlay span:nth-child(2) { transition-delay: 0.4s; }
+            .photo-item.in-view:not(:active) .photo-overlay { opacity: 1; transition-delay: 0.1s; }
+            .photo-item.in-view:not(:active) .photo-overlay span { transform: translateY(0); opacity: 1; transition-delay: 0.3s; }
+            .photo-item.in-view:not(:active) .photo-overlay span:nth-child(2) { transition-delay: 0.4s; }
         }
         
         #map-container { height: 60vh; min-height: 500px; width: 100%; z-index: 1; display: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid var(--border-soft); margin-top: 15px; }
@@ -573,19 +574,29 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
         /* ▼ 追加：視覚的魅力を高めるCSSアニメーション ▼ */
         @keyframes wave-move {
-            0% { transform: translateX(0); }
-            50% { transform: translateX(-15%); }
-            100% { transform: translateX(0); }
+            0% { transform: translateX(0) scaleY(1); }
+            50% { transform: translateX(-2%) scaleY(1.05); }
+            100% { transform: translateX(0) scaleY(1); }
         }
-        .wave-animated path { animation: wave-move 20s ease-in-out infinite; transform-origin: center; }
-        .wave-animated path:nth-child(2) { animation: wave-move 25s ease-in-out infinite reverse; }
-        .wave-animated path:nth-child(3) { animation: wave-move 30s ease-in-out infinite; }
+        @keyframes wave-move-reverse {
+            0% { transform: translateX(0) scaleY(1.05); }
+            50% { transform: translateX(2%) scaleY(1); }
+            100% { transform: translateX(0) scaleY(1.05); }
+        }
+        
+        /* SVGの横幅を広げて動かした時の「端の隙間」を防ぐ */
+        svg.wave-animated { width: 110% !important; margin-left: -5%; }
+        
+        .wave-animated path { animation: wave-move 12s ease-in-out infinite; transform-origin: bottom center; }
+        .wave-animated path:nth-child(1) { animation: wave-move 15s ease-in-out infinite; opacity: 0.6; }
+        .wave-animated path:nth-child(2) { animation: wave-move-reverse 18s ease-in-out infinite; opacity: 0.8; }
+        .wave-animated path:nth-child(3) { animation: wave-move 20s ease-in-out infinite; opacity: 1; }
 
         .btn-shine { position: relative; overflow: hidden; }
         .btn-shine::before {
             content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
             background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg); animation: shine 4s infinite; z-index: 1;
+            transform: skewX(-25deg); animation: shine 3s infinite; z-index: 1; /* 秒数を早めて分かりやすく */
         }
         @keyframes shine {
             0% { left: -100%; }
@@ -593,7 +604,7 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             100% { left: 200%; }
         }
 
-        .floating-element { animation: float 6s ease-in-out infinite; }
+        .floating-element { animation: float 4s ease-in-out infinite; } /* こちらも少し早める */
         @keyframes float {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-12px); }
