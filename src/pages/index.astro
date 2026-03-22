@@ -573,25 +573,29 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         body.is-en div.lang-en, body.is-en p.lang-en { display: block; }
 
         /* ▼ 追加：視覚的魅力を高めるCSSアニメーション ▼ */
-        /* 波の動きを確実に視認できるようにピクセルで指定し、上下の揺れも追加 */
+        /* SVGのパス自体を1.3倍に横に広げておき、端が切れない状態でゆったり動かす */
         @keyframes wave-sway-1 {
-            0%, 100% { transform: translate3d(0px, 0px, 0); }
-            50% { transform: translate3d(-40px, 10px, 0); }
+            0%, 100% { transform: scaleX(1.3) translate(-2%, 2px); }
+            50% { transform: scaleX(1.3) translate(2%, -2px); }
         }
         @keyframes wave-sway-2 {
-            0%, 100% { transform: translate3d(0px, 0px, 0); }
-            50% { transform: translate3d(40px, -5px, 0); }
+            0%, 100% { transform: scaleX(1.3) translate(2%, -2px); }
+            50% { transform: scaleX(1.3) translate(-2%, 2px); }
         }
         @keyframes wave-sway-3 {
-            0%, 100% { transform: translate3d(0px, 0px, 0); }
-            50% { transform: translate3d(-20px, -8px, 0); }
+            0%, 100% { transform: scaleX(1.3) translate(-1%, 0px); }
+            50% { transform: scaleX(1.3) translate(1%, 3px); }
         }
         
-        /* SVGの横幅を大きく広げ、横に動かしても端が見えないようにする */
-        svg.wave-animated { width: 115% !important; max-width: 115% !important; margin-left: -7.5%; }
+        svg.wave-animated { 
+            overflow: visible; /* パスがはみ出ても表示させる */
+        }
         
-        /* それぞれの波（3つのパス）を独立して違うスピードで揺らす */
-        .wave-animated path { will-change: transform; transform-origin: center; }
+        .wave-animated path { 
+            will-change: transform; 
+            transform-origin: center bottom; 
+            transform-box: fill-box; /* ★ これが重要：SVGパスのボックスを基準に変形させる */
+        }
         .wave-animated path:nth-child(1) { animation: wave-sway-1 6s ease-in-out infinite; opacity: 0.5; }
         .wave-animated path:nth-child(2) { animation: wave-sway-2 8s ease-in-out infinite; opacity: 0.7; }
         .wave-animated path:nth-child(3) { animation: wave-sway-3 10s ease-in-out infinite; opacity: 1; }
