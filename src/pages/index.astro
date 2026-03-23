@@ -572,60 +572,41 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         body.is-en .lang-en { display: inline; }
         body.is-en div.lang-en, body.is-en p.lang-en { display: block; }
 
-        /* ▼ 追加：視覚的魅力を高めるCSSアニメーション ▼ */
-        .btn-shine { position: relative; overflow: hidden; }
-        .btn-shine::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg); animation: shine 3s infinite; z-index: 1; 
+        /* ▼ 完全に修正した視覚的CSSアニメーション ▼ */
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
         }
-        @keyframes shine {
-            0% { left: -100%; }
+        /* 光の筋をボタンの一番手前（z-index: 50）に出して確実に見えるように修正 */
+        .btn-shine::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            animation: shine-anim 3s infinite linear;
+            z-index: 50; 
+            pointer-events: none; 
+        }
+        @keyframes shine-anim {
+            0% { left: -150%; }
             20% { left: 200%; }
             100% { left: 200%; }
         }
 
-        .floating-element { animation: float 4s ease-in-out infinite; } 
-        @keyframes float {
+        /* アニメーション名を予約語「float」から「floating-anim」に変更しエラーを解消 */
+        .floating-element {
+            animation: floating-anim 4s ease-in-out infinite;
+            will-change: transform;
+            display: block; 
+        } 
+        @keyframes floating-anim {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-12px); }
             100% { transform: translateY(0px); }
-        }
-
-        /* ▼ トップ専用 波打ちアニメーション (Simple CSS Waves オリジナル版) ▼ */
-        .hero-waves {
-            position: relative;
-            width: 100%;
-            height: 15vh;
-            margin-bottom: -7px;
-            min-height: 100px;
-            max-height: 150px;
-        }
-        .static-waves {
-            position: relative;
-            width: 100%;
-            height: 40px;
-            margin-bottom: -7px;
-        }
-        @media (min-width: 768px) {
-            .static-waves { height: 70px; }
-        }
-
-        .parallax > use {
-            animation: move-forever 25s cubic-bezier(.55,.5,.45,.5) infinite;
-        }
-        .parallax > use:nth-child(1) { animation-delay: -2s; animation-duration: 7s; }
-        .parallax > use:nth-child(2) { animation-delay: -3s; animation-duration: 10s; }
-        .parallax > use:nth-child(3) { animation-delay: -4s; animation-duration: 13s; }
-        .parallax > use:nth-child(4) { animation-delay: -5s; animation-duration: 20s; }
-
-        @keyframes move-forever {
-            0% { transform: translate3d(-90px, 0, 0); }
-            100% { transform: translate3d(85px, 0, 0); }
-        }
-        
-        @media (max-width: 768px) {
-            .hero-waves { height: 40px; min-height: 40px; }
         }
         /* ▲ ここまで ▲ */
     </style>
@@ -710,17 +691,11 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             </div>
         </div>
 
-        <div class="hero-waves-wrapper">
-            <svg class="hero-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-                <defs>
-                    <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-                </defs>
-                <g class="parallax">
-                    <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,255,255,0.7)" />
-                    <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,255,255,0.5)" />
-                    <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,255,255,0.3)" />
-                    <use xlink:href="#gentle-wave" x="48" y="7" fill="#ffffff" />
-                </g>
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-white">
+            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px]">
+                <path fill="currentColor" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="currentColor" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="currentColor" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
             </svg>
         </div>
     </section>
@@ -751,17 +726,9 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
     <!-- ▼ Gallery（マップ）セクション (水色背景) ▼ -->
     <section id="gallery" class="bg-[#f0f7ff] relative pb-16 sm:pb-24 border-none" style="padding-top: 0; scroll-margin-top: 60px;">
-        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] rotate-180">
-            <svg class="static-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-                <defs>
-                    <path id="wave-gallery" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-                </defs>
-                <g>
-                    <use xlink:href="#wave-gallery" x="48" y="0" fill="rgba(255,255,255,0.7)" />
-                    <use xlink:href="#wave-gallery" x="48" y="3" fill="rgba(255,255,255,0.5)" />
-                    <use xlink:href="#wave-gallery" x="48" y="5" fill="rgba(255,255,255,0.3)" />
-                    <use xlink:href="#wave-gallery" x="48" y="7" fill="#ffffff" />
-                </g>
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-white rotate-180">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
             </svg>
         </div>
 
@@ -826,17 +793,9 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
     <!-- ▼ Local Insights セクション (濃い水色背景) ▼ -->
     <section id="local-insights" class="section-wrap bg-[#e1f5fe] relative pb-16 sm:pb-24 border-none" style="scroll-margin-top: 60px;">
-        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] rotate-180">
-            <svg class="static-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-                <defs>
-                    <path id="wave-local" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-                </defs>
-                <g>
-                    <use xlink:href="#wave-local" x="48" y="0" fill="rgba(240,247,255,0.7)" />
-                    <use xlink:href="#wave-local" x="48" y="3" fill="rgba(240,247,255,0.5)" />
-                    <use xlink:href="#wave-local" x="48" y="5" fill="rgba(240,247,255,0.3)" />
-                    <use xlink:href="#wave-local" x="48" y="7" fill="#f0f7ff" />
-                </g>
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#f0f7ff] rotate-180">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
             </svg>
         </div>
 
@@ -857,17 +816,9 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
     <!-- ▼ Events セクション (白背景) ▼ -->
     <section id="events" class="section-wrap bg-white relative pb-16 sm:pb-24 border-none" style="scroll-margin-top: 60px;">
-        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] rotate-180">
-            <svg class="static-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-                <defs>
-                    <path id="wave-events" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-                </defs>
-                <g>
-                    <use xlink:href="#wave-events" x="48" y="0" fill="rgba(225,245,254,0.7)" />
-                    <use xlink:href="#wave-events" x="48" y="3" fill="rgba(225,245,254,0.5)" />
-                    <use xlink:href="#wave-events" x="48" y="5" fill="rgba(225,245,254,0.3)" />
-                    <use xlink:href="#wave-events" x="48" y="7" fill="#e1f5fe" />
-                </g>
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#e1f5fe] rotate-180">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
             </svg>
         </div>
 
@@ -888,17 +839,9 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
     <!-- ▼ Opendata セクション (水色背景) ▼ -->
     <section id="opendata" class="section-wrap bg-[#f0f7ff] relative pb-16 sm:pb-24 border-none" style="scroll-margin-top: 60px;">
-        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] rotate-180">
-            <svg class="static-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-                <defs>
-                    <path id="wave-opendata" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-                </defs>
-                <g>
-                    <use xlink:href="#wave-opendata" x="48" y="0" fill="rgba(255,255,255,0.7)" />
-                    <use xlink:href="#wave-opendata" x="48" y="3" fill="rgba(255,255,255,0.5)" />
-                    <use xlink:href="#wave-opendata" x="48" y="5" fill="rgba(255,255,255,0.3)" />
-                    <use xlink:href="#wave-opendata" x="48" y="7" fill="#ffffff" />
-                </g>
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-white rotate-180">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
             </svg>
         </div>
 
@@ -938,17 +881,9 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
     <!-- ▼ Contact セクション (濃い水色背景) ▼ -->
     <section id="contact" class="section-wrap bg-[#e1f5fe] relative border-none" style="scroll-margin-top: 60px;">
-        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] rotate-180">
-            <svg class="static-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-                <defs>
-                    <path id="wave-contact" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-                </defs>
-                <g>
-                    <use xlink:href="#wave-contact" x="48" y="0" fill="rgba(240,247,255,0.7)" />
-                    <use xlink:href="#wave-contact" x="48" y="3" fill="rgba(240,247,255,0.5)" />
-                    <use xlink:href="#wave-contact" x="48" y="5" fill="rgba(240,247,255,0.3)" />
-                    <use xlink:href="#wave-contact" x="48" y="7" fill="#f0f7ff" />
-                </g>
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#f0f7ff] rotate-180">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
             </svg>
         </div>
 
@@ -985,17 +920,9 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
     <!-- ▼ Bottom Image セクション ▼ -->
     <section class="bottom-view-container relative border-none">
-        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] rotate-180">
-            <svg class="static-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-                <defs>
-                    <path id="wave-bottom" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-                </defs>
-                <g>
-                    <use xlink:href="#wave-bottom" x="48" y="0" fill="rgba(225,245,254,0.7)" />
-                    <use xlink:href="#wave-bottom" x="48" y="3" fill="rgba(225,245,254,0.5)" />
-                    <use xlink:href="#wave-bottom" x="48" y="5" fill="rgba(225,245,254,0.3)" />
-                    <use xlink:href="#wave-bottom" x="48" y="7" fill="#e1f5fe" />
-                </g>
+        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#e1f5fe] rotate-180">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
             </svg>
         </div>
 
@@ -1008,17 +935,11 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             </div>
         </div>
 
-        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px]">
-            <svg class="static-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-                <defs>
-                    <path id="wave-footer" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-                </defs>
-                <g>
-                    <use xlink:href="#wave-footer" x="48" y="0" fill="rgba(255,255,255,0.7)" />
-                    <use xlink:href="#wave-footer" x="48" y="3" fill="rgba(255,255,255,0.5)" />
-                    <use xlink:href="#wave-footer" x="48" y="5" fill="rgba(255,255,255,0.3)" />
-                    <use xlink:href="#wave-footer" x="48" y="7" fill="#ffffff" />
-                </g>
+        <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-white">
+            <svg viewBox="0 0 1440 320" preserveAspectRatio="none" class="relative block w-full h-[90px] sm:h-[160px]">
+                <path fill="currentColor" fill-opacity="0.3" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,128C1248,139,1344,181,1392,202.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="currentColor" fill-opacity="0.5" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,149.3C960,128,1056,128,1152,138.7C1248,149,1344,171,1392,181.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                <path fill="currentColor" d="M0,256L48,229.3C96,203,192,149,288,154.7C384,160,480,224,576,250.7C672,277,768,267,864,240C960,213,1056,171,1152,165.3C1248,160,1344,192,1392,208.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
             </svg>
         </div>
     </section>
