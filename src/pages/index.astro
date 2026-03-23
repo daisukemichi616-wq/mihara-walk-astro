@@ -592,7 +592,7 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             100% { transform: translateY(0px); }
         }
 
-        /* ▼ トップ専用 波打ちアニメーション (Simple CSS Waves) ▼ */
+        /* ▼ トップ専用 波打ちアニメーション (Simple CSS Waves 改良版) ▼ */
         .hero-waves {
             position: relative;
             width: 100%;
@@ -610,17 +610,18 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         @media (min-width: 768px) {
             .static-waves { height: 70px; }
         }
-        .parallax > use {
-            animation: move-forever 25s cubic-bezier(.55,.5,.45,.5) infinite;
-        }
-        .parallax > use:nth-child(1) { animation-delay: -2s; animation-duration: 7s; }
-        .parallax > use:nth-child(2) { animation-delay: -3s; animation-duration: 10s; }
-        .parallax > use:nth-child(3) { animation-delay: -4s; animation-duration: 13s; }
-        .parallax > use:nth-child(4) { animation-delay: -5s; animation-duration: 20s; }
+
+        /* SVGの仕様上、<use>タグだと動かない環境があるため、<g>タグをアニメーションさせます */
+        .wave-animation-1 { animation: move-forever 7s cubic-bezier(.55,.5,.45,.5) infinite; animation-delay: -2s; }
+        .wave-animation-2 { animation: move-forever 10s cubic-bezier(.55,.5,.45,.5) infinite; animation-delay: -3s; }
+        .wave-animation-3 { animation: move-forever 13s cubic-bezier(.55,.5,.45,.5) infinite; animation-delay: -4s; }
+        .wave-animation-4 { animation: move-forever 20s cubic-bezier(.55,.5,.45,.5) infinite; animation-delay: -5s; }
+
         @keyframes move-forever {
-            0% { transform: translate3d(-90px, 0, 0); }
-            100% { transform: translate3d(85px, 0, 0); }
+            0% { transform: translateX(-90px); }
+            100% { transform: translateX(85px); }
         }
+        
         @media (max-width: 768px) {
             .hero-waves { height: 40px; min-height: 40px; }
         }
@@ -629,8 +630,7 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 </head>
 <body id="top" class="is-jp">
 
-    <!-- ▼ データ受け渡し用スクリプトタグ ▼ -->
-    <script type="application/json" id="toilet-data-json" set:html={safeToiletSpotsJson}></script>
+    <!-- ▼ 共通の波の形（ページ内で1回だけ定義して隠しておく） ▼ -->
     <script type="application/json" id="toilet-error-status" set:html={toiletData.isError ? "true" : "false"}></script>
     <script type="application/json" id="spots-data-json" set:html={safeSpotsJson}></script>
     <script type="application/json" id="local-data-json" set:html={safeLocalJson}></script>
@@ -708,15 +708,18 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         </div>
 
         <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px]">
-            <svg class="hero-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-                <defs>
-                    <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-                </defs>
-                <g class="parallax">
-                    <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(255,255,255,0.7)" />
-                    <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,255,255,0.5)" />
-                    <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,255,255,0.3)" />
-                    <use xlink:href="#gentle-wave" x="48" y="7" fill="#ffffff" />
+            <svg class="hero-waves" xmlns="http://www.w3.org/2000/svg" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+                <g class="wave-animation-1">
+                    <path d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" fill="rgba(255,255,255,0.7)" transform="translate(48, 0)" />
+                </g>
+                <g class="wave-animation-2">
+                    <path d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" fill="rgba(255,255,255,0.5)" transform="translate(48, 3)" />
+                </g>
+                <g class="wave-animation-3">
+                    <path d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" fill="rgba(255,255,255,0.3)" transform="translate(48, 5)" />
+                </g>
+                <g class="wave-animation-4">
+                    <path d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" fill="#ffffff" transform="translate(48, 7)" />
                 </g>
             </svg>
         </div>
