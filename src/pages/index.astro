@@ -62,20 +62,20 @@ try {
       const lng = parseFloat(row['経度'] || row['lng'] || row['lon']);
       if (name && !isNaN(lat) && !isNaN(lng)) {
         toiletData.spots.push({ name, lat, lng });
-      }
-    });
-    if (toiletData.spots.length === 0) toiletData.isError = true;
+      // 日本語の綺麗な日付に変換
+      const [y, m, d] = popData.latestDate.split('/');
+      formattedDate = `${y}年${parseInt(m)}月${parseInt(d)}日`;
+    } else {
+      popData.isError = true;
+    }
   } else {
-    toiletData.isError = true;
+    popData.isError = true;
   }
 } catch (e) {
-  toiletData.isError = true;
+  popData.isError = true;
 }
 
-const safeToiletSpotsJson = JSON.stringify(toiletData.spots).replace(/</g, '\\u003c');
-
-
-// ▼ 2. CSVデータをビルド時に取得し、HTMLとして直接埋め込むための処理 ▼
+// ▼▼▼ 2. 追加：CSVデータをビルド時に取得し、サーバー側でデータを整形する ▼▼▼
 
 const areaLabels: any = {
   'all': { jp: 'ぜんぶ', en: 'ALL' }, 
@@ -625,8 +625,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 <body id="top" class="is-jp">
 
     <!-- ▼ マップ描画用のJSONデータ渡し ▼ -->
-    <script type="application/json" id="toilet-data-json" set:html={safeToiletSpotsJson}></script>
-    <script type="application/json" id="toilet-error-status" set:html={toiletData.isError ? "true" : "false"}></script>
     <script type="application/json" id="spots-data-json" set:html={safeSpotsJson}></script>
     <script type="application/json" id="local-data-json" set:html={safeLocalJson}></script>
     <script type="application/json" id="events-data-json" set:html={safeEventsJson}></script>
@@ -638,7 +636,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
                 <div class="nav-simple-link" onclick="scrollToId('gallery')" data-i18n="nav-map">PHOTO MAP</div>
                 <div class="nav-simple-link" onclick="scrollToId('local-insights')" data-i18n="nav-local">みはらさんぽログ</div>
                 <div class="nav-simple-link" onclick="scrollToId('events')" data-i18n="nav-event">イベント</div>
-                <div class="nav-simple-link" onclick="scrollToId('opendata')" data-i18n="nav-opendata">オアシスマップ</div>
                 <div class="nav-simple-link" onclick="scrollToId('contact')" data-i18n="nav-submit">掲載募集</div>
             </div>
             
@@ -660,7 +657,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         <div class="mobile-menu-link" onclick="closeMobileMenuAndScroll('gallery')" data-i18n="nav-map">PHOTO MAP</div>
         <div class="mobile-menu-link" onclick="closeMobileMenuAndScroll('local-insights')" data-i18n="nav-local">みはらさんぽログ</div>
         <div class="mobile-menu-link" onclick="closeMobileMenuAndScroll('events')" data-i18n="nav-event">イベント</div>
-        <div class="mobile-menu-link" onclick="closeMobileMenuAndScroll('opendata')" data-i18n="nav-opendata">オアシスマップ</div>
         <div class="mobile-menu-link mt-8 bg-[#004098] text-white px-10 py-3 rounded-full text-sm shadow-md" onclick="closeMobileMenuAndScroll('contact')" data-i18n="nav-submit">掲載募集</div>
     </div>
 
@@ -965,48 +961,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         </div>
     </section>
 
-    <!-- ▼ Opendata セクション (水色背景) ▼ -->
-    <section id="opendata" class="section-wrap bg-[#f0f7ff] relative pb-16 sm:pb-24 border-none" style="scroll-margin-top: 60px;">
-        <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-white rotate-180">
-            <svg viewBox="0 0 1200 120" preserveAspectRatio="none" class="relative block w-full h-[40px] sm:h-[70px]">
-                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V0C50.62,18.46,104.91,37.33,161.7,46.16,215.35,54.49,270.83,59.39,321.39,56.44Z" fill="currentColor"></path>
-            </svg>
-        </div>
-
-        <div class="inner-limit max-w-5xl px-0 sm:px-6 relative z-30 pt-12 sm:pt-20">
-            <span class="section-tag-label reveal-up" data-i18n="label-opendata">OPEN DATA API</span>
-            <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4 reveal-up" data-i18n="title-opendata">お出かけオアシスマップ</h2>
-            
-            <p class="text-xs sm:text-sm font-bold text-gray-500 mb-8 px-4 sm:px-6 leading-relaxed reveal-up">
-                <span class="lang-jp">
-                    三原市が公開しているオープンデータを活用し、<br class="sm:hidden">市内の「公衆トイレ」をマップにまとめました。<br>
-                    まち歩きや写真撮影の際の、安心な休憩スポットとして<br class="sm:hidden">
-                    ご活用ください。
-                </span>
-                <span class="lang-en hidden">
-                    Utilizing open data published by Mihara City, we have mapped "public toilets" in the city.<br>
-                    Please use it as a safe rest spot during your walk or photo shoot.
-                </span>
-            </p>
-
-            <div class="px-6 sm:px-0 reveal-up">
-                <div class="bg-white p-2 sm:p-4 rounded-xl border border-gray-200 shadow-[0_4px_15px_rgba(0,64,152,0.03)]">
-                    <div id="opendata-map" class="w-full h-[400px] sm:h-[500px] bg-gray-100 rounded-lg relative z-10 border border-gray-200"></div>
-                    <p class="text-[9px] text-gray-400 mt-3 text-right pr-2">
-                        {toiletData.isError ? (
-                            <span class="text-red-500 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> 市のサーバーが一時的に混雑しています</span>
-                        ) : (
-                            <>
-                                <span class="lang-jp">※三原市内の公衆トイレを表示しています（三原市オープンデータ API利用）</span>
-                                <span class="lang-en hidden">※Public toilets in Mihara City (Open Data API)</span>
-                            </>
-                        )}
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- ▼ Contact セクション (濃い水色背景) ▼ -->
     <section id="contact" class="section-wrap bg-[#e1f5fe] relative border-none" style="scroll-margin-top: 60px;">
         <div class="absolute top-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none -translate-y-[1px] text-[#f0f7ff] rotate-180">
@@ -1097,59 +1051,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         // 🚀 グローバル変数と初期化関数群 🚀
         // =========================================================================
 
-        let opendataMapInstance = null;
-        let toiletMarkersGroup = null; 
-
-        function initOpendataMap() {
-            if (opendataMapInstance) return;
-            const mapEl = document.getElementById('opendata-map');
-            if(!mapEl) return;
-            
-            opendataMapInstance = L.map('opendata-map', { scrollWheelZoom: false }).setView([34.4005, 133.0830], 14);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '© OSM', subdomains: 'abcd' }).addTo(opendataMapInstance);
-            opendataMapInstance.once('focus', function() { opendataMapInstance.scrollWheelZoom.enable(); });
-
-            toiletMarkersGroup = L.markerClusterGroup({ 
-                showCoverageOnHover: false, 
-                maxClusterRadius: 40,
-                iconCreateFunction: function(cluster) {
-                    return L.divIcon({
-                        html: `<div style="background-color:rgba(59, 130, 246, 0.9); color:white; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.3); border: 2px solid white; font-size:12px;">${cluster.getChildCount()}</div>`,
-                        className: 'custom-toilet-cluster',
-                        iconSize: L.point(34, 34)
-                    });
-                }
-            });
-            opendataMapInstance.addLayer(toiletMarkersGroup);
-
-            const toiletIcon = L.divIcon({
-                className: 'custom-toilet-icon',
-                html: '<div style="background-color:#3b82f6; color:white; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.2); border: 2px solid white;"><i class="fa-solid fa-restroom text-[12px]"></i></div>',
-                iconSize: [28, 28],
-                iconAnchor: [14, 14]
-            });
-
-            try {
-                const errorStatusStr = document.getElementById('toilet-error-status')?.textContent;
-                const isError = errorStatusStr === "true";
-                
-                if(!isError) {
-                    const spotsStr = document.getElementById('toilet-data-json')?.textContent;
-                    if(spotsStr) {
-                        const spots = JSON.parse(spotsStr);
-                        spots.forEach(st => {
-                            const marker = L.marker([st.lat, st.lng], { icon: toiletIcon })
-                             .bindPopup(`<div class="text-[11px] font-bold text-[#004098] leading-tight mb-1">${escapeHtml(st.name)}</div><div class="text-[9px] text-gray-500">お出かけオアシススポット</div>`);
-                            
-                            toiletMarkersGroup.addLayer(marker);
-                        });
-                    }
-                }
-            } catch(e) {
-                console.error("Map data parse error:", e);
-            }
-        }
-
         function initAnimations() {
             gsap.registerPlugin(ScrollTrigger);
 
@@ -1227,13 +1128,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
                     }
                 );
             }
-
-            ScrollTrigger.create({
-                trigger: '#opendata',
-                start: 'top 80%', 
-                onEnter: () => { initOpendataMap(); },
-                once: true 
-            });
         }
 
         const areaLabels = {
@@ -1251,7 +1145,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             'nav-local': { normal: { jp: 'みはらさんぽログ', en: 'WALK LOG' } },
             'nav-event': { normal: { jp: 'イベント', en: 'EVENTS' } },
             'nav-submit': { normal: { jp: '掲載募集', en: 'SUBMIT' } },
-            'nav-opendata': { normal: { jp: 'オアシスマップ（公衆トイレ）', en: 'OASIS MAP' } }, 
             'hero-label': { normal: { jp: 'MIHARA REDISCOVER PROJECT', en: 'MIHARA REDISCOVER PROJECT' } },
             'hero-title': { normal: { jp: 'まだ知らない三原の景色を、<br class="mobile-br">みんなで描くフォトマップ', en: 'Discovering the unseen Mihara,<br class="mobile-br">a community photo map.' } },
             'label-about': { normal: { jp: 'About Project', en: 'About Project' } },
@@ -1270,8 +1163,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             'title-event': { normal: { jp: '三原のイベント情報', en: 'Mihara Events' } },
             'desc-event': { normal: { jp: '週末のお出かけにぴったりな、<br>三原市内のイベントや催し物をお届けします。', en: 'Upcoming events and activities<br>perfect for your weekend outing in Mihara.' } },
             'event-empty': { normal: { jp: '現在、予定されているイベントはありません。', en: 'No upcoming events currently scheduled.' } },
-            'label-opendata': { normal: { jp: 'OPEN DATA API', en: 'OPEN DATA' } },
-            'title-opendata': { normal: { jp: 'お出かけオアシスマップ', en: 'Oasis Map (Public Toilets)' } },
             'label-contact': { normal: { jp: 'Photo Submission', en: 'Photo Submission' } },
             'title-contact': { normal: { jp: '三原の魅力を教えてください', en: 'Share the Charm of Mihara' } },
             'desc-contact': { normal: { jp: '隠れた名所、美味しいグルメ、四季折々の風景、まちのイベント、あるいは何気ない日常のひとコマなど、三原の魅力が伝わる写真を幅広く募集しています。', en: 'We are looking for a wide range of photos that convey the charm of Mihara, such as hidden spots, delicious food, seasonal scenery, local events, or just casual everyday moments.' } },
