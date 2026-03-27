@@ -49,31 +49,7 @@ try {
   popData.isError = true;
 }
 
-let toiletData = { spots: [] as any[], isError: false };
-try {
-  const toiletApiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=c5f248f0-ab12-4cb6-af0a-fef54523ee00&limit=3000";
-  const toiletRes = await fetch(toiletApiUrl);
-  if (!toiletRes.ok) throw new Error('Network error');
-  const toiletJson = await toiletRes.json();
-  if (toiletJson.success && toiletJson.result && toiletJson.result.records) {
-    toiletJson.result.records.forEach((row: any) => {
-      const name = row['名称'] || row['トイレ名称'] || row['公衆トイレ名'] || '公衆トイレ';
-      const lat = parseFloat(row['緯度'] || row['lat']);
-      const lng = parseFloat(row['経度'] || row['lng'] || row['lon']);
-      if (name && !isNaN(lat) && !isNaN(lng)) {
-        toiletData.spots.push({ name, lat, lng });
-      // 日本語の綺麗な日付に変換
-      const [y, m, d] = popData.latestDate.split('/');
-      formattedDate = `${y}年${parseInt(m)}月${parseInt(d)}日`;
-    } else {
-      popData.isError = true;
-    }
-  } else {
-    popData.isError = true;
-  }
-} catch (e) {
-  popData.isError = true;
-}
+// オアシスマップ（公衆トイレ）のデータ取得処理は完全に削除しました。
 
 // ▼▼▼ 2. 追加：CSVデータをビルド時に取得し、サーバー側でデータを整形する ▼▼▼
 
@@ -619,7 +595,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             50% { transform: translateY(-12px); }
             100% { transform: translateY(0px); }
         }
-        /* ▲ ここまで ▲ */
     </style>
 </head>
 <body id="top" class="is-jp">
@@ -1037,11 +1012,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
         <p class="footer-copy" data-i18n="footer-copy">© 2026 Mihara Walk Photo Map</p>
         <p class="footer-produced">PRODUCED BY MICHIM | PHOTOS BY MIHARA LOVERS</p>
-        <p class="text-[9px] text-gray-400 mt-3 font-bold leading-relaxed text-center">
-            ※本サイトの一部コンテンツは、<br class="sm:hidden">
-            「三原市オープンデータカタログサイト」の<br class="sm:hidden">
-            APIを活用して作成しています。
-        </p>
     </footer>
 
     <script is:inline>
