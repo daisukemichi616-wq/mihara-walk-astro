@@ -38,6 +38,8 @@ try {
       popData.households = totalHouse;
       popData.latestDate = latestDate.split('T')[0].replace(/-/g, '/');
       const [y, m, d] = popData.latestDate.split('/');
+      // 日本語の綺麗な日付に変換
+      const [y, m, d] = popData.latestDate.split('/');
       formattedDate = `${y}年${parseInt(m)}月${parseInt(d)}日`;
     } else {
       popData.isError = true;
@@ -48,8 +50,6 @@ try {
 } catch (e) {
   popData.isError = true;
 }
-
-// オアシスマップ（公衆トイレ）のデータ取得処理は完全に削除しました。
 
 // ▼▼▼ 2. 追加：CSVデータをビルド時に取得し、サーバー側でデータを整形する ▼▼▼
 
