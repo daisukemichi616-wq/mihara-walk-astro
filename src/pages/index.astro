@@ -39,7 +39,6 @@ try {
       popData.latestDate = latestDate.split('T')[0].replace(/-/g, '/');
       const [y, m, d] = popData.latestDate.split('/');
       // 日本語の綺麗な日付に変換
-      const [y, m, d] = popData.latestDate.split('/');
       formattedDate = `${y}年${parseInt(m)}月${parseInt(d)}日`;
     } else {
       popData.isError = true;
@@ -1012,6 +1011,11 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
         <p class="footer-copy" data-i18n="footer-copy">© 2026 Mihara Walk Photo Map</p>
         <p class="footer-produced">PRODUCED BY MICHIM | PHOTOS BY MIHARA LOVERS</p>
+        <p class="text-[9px] text-gray-400 mt-3 font-bold leading-relaxed text-center">
+            ※本サイトの一部コンテンツは、<br class="sm:hidden">
+            「三原市オープンデータカタログサイト」の<br class="sm:hidden">
+            APIを活用して作成しています。
+        </p>
     </footer>
 
     <script is:inline>
