@@ -1,11 +1,11 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
-import tailwind from "@astrojs/tailwind";
 
 // https://astro.build/config
 export default defineConfig({
-  // ▼ これが絶対に必要です ▼
+  // ▼ 自分のサイトのURL（これがないとサイトマップが作れません） ▼
   site: 'https://photomap-mihara-walk.pages.dev',
   
-  integrations: [tailwind(), sitemap()],
+  // ▼ エラーの原因だった tailwind() を削除し、sitemap() だけにしました ▼
+  integrations: [sitemap()],
 });
