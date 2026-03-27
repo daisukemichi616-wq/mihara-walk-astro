@@ -1,5 +1,5 @@
 ---
-import Papa from 'papaparse';
+// ！！注意：1行目にあった import Papa from 'papaparse'; はエラー原因になるため完全に削除しました！！
 
 // ▼ 1. Astroのビルド時（裏側のサーバー）でデータを取得 ▼
 
@@ -82,11 +82,15 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33p
 const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
 const EVENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqAv0S9Shfo2bXUlTuP4jtkZ75D-wt4qCl-P_GOFYMu53peSOEwy7EhbUSUEeBi_T0jehNRIbgp91M/pub?output=csv";
 
+// ▼ papaparseを使わず、BOM（目に見えない特殊文字）を確実に除去する強力な自前CSVパーサー ▼
 async function fetchAndParseCSV(url: string) {
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    const text = await res.text();
+    
+    // Googleスプレッドシート特有のBOMを綺麗に削除する
+    let text = await res.text();
+    text = text.replace(/^\uFEFF/, '');
     
     function parseCSV(text: string) {
       const result = [];
@@ -112,13 +116,14 @@ async function fetchAndParseCSV(url: string) {
     const rows = parseCSV(text);
     if (rows.length < 2) return [];
 
-    const headers = rows[0];
+    // ヘッダーの空白やBOMも念のためトリミング
+    const headers = rows[0].map(h => h.trim().replace(/^\uFEFF/, ''));
     const data = [];
     for (let i = 1; i < rows.length; i++) {
       const rowData: any = {};
       for (let j = 0; j < headers.length; j++) {
         if (headers[j]) {
-          rowData[headers[j]] = rows[i][j] || '';
+          rowData[headers[j]] = rows[i][j] ? rows[i][j].trim() : '';
         }
       }
       data.push(rowData);
@@ -237,7 +242,7 @@ const processedEvents = rawEvents.map((row: any) => {
   return clean;
 }).filter((e: any) => e.title);
 
-// JS側でのマップ生成用にJSONとしても渡す
+// JS側でのマップ・カード生成用にJSONとして渡す
 const safeSpotsJson = JSON.stringify(processedSpots).replace(/</g, '\\u003c');
 const safeLocalJson = JSON.stringify(processedLocal).replace(/</g, '\\u003c');
 const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
@@ -634,7 +639,7 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 </head>
 <body id="top" class="is-jp">
 
-    <!-- ▼ マップ描画用のJSONデータ渡し ▼ -->
+    <!-- ▼ マップ・カード描画用のJSONデータ渡し ▼ -->
     <script type="application/json" id="spots-data-json" set:html={safeSpotsJson}></script>
     <script type="application/json" id="local-data-json" set:html={safeLocalJson}></script>
     <script type="application/json" id="events-data-json" set:html={safeEventsJson}></script>
@@ -797,7 +802,7 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         </nav>
         
         <div id="gallery-wrap" class="relative z-30 pt-0 mt-2 px-0 max-w-5xl mx-auto">
-            <!-- ▼ 以前の正常に動いていた「空のコンテナ」に戻しました ▼ -->
+            <!-- ▼ 初期状態は空のコンテナ（JSで写真を後から生成） ▼ -->
             <div id="gallery-grid" class="photo-grid">
                 <div class="col-span-3 py-32 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
@@ -822,7 +827,7 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-local" data-i18n="title-local">みはらさんぽログ</h2>
             <p class="text-xs sm:text-sm font-bold text-gray-500 mb-6 px-4 sm:px-6 leading-relaxed" id="desc-local" data-i18n="desc-local">ガイドブックには載らない、三原の何気ない日常と<br>新しい発見。歩いて見つける三原の魅力ログ。</p>
             
-            <!-- ▼ 以前の正常に動いていた「空のコンテナ」に戻しました ▼ -->
+            <!-- ▼ 初期状態は空のコンテナ（JSでカードを後から生成） ▼ -->
             <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-0">
                 <div class="w-full text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
@@ -845,7 +850,7 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-event" data-i18n="title-event">三原のイベント情報</h2>
             <p class="text-xs sm:text-sm font-bold text-gray-500 mb-8 px-4 sm:px-6 leading-relaxed" id="desc-event" data-i18n="desc-event">週末のお出かけにぴったりな、<br>三原市内のイベントや催し物をお届けします。</p>
             
-            <!-- ▼ 以前の正常に動いていた「空のコンテナ」に戻しました ▼ -->
+            <!-- ▼ 初期状態は空のコンテナ（JSでイベントを後から生成） ▼ -->
             <div id="events-container" class="px-6 sm:px-0 grid gap-4 md:grid-cols-1 max-w-3xl mx-auto text-left">
                 <div class="w-full py-10 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
@@ -934,7 +939,7 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         <p class="footer-produced">PRODUCED BY MICHIM | PHOTOS BY MIHARA LOVERS</p>
     </footer>
 
-    <!-- ▼ 元の「JavaScriptでカードを動的生成する」方式に戻しました ▼ -->
+    <!-- ▼ JavaScriptの処理部分（変更なし・元通り） ▼ -->
     <script is:inline>
         let currentLang = 'jp';
 
