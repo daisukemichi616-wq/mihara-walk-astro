@@ -1,6 +1,6 @@
 ---
 // ▼ Astroのビルド時（裏側のサーバー）でデータを取得 ▼
-// 注意: エラー原因だった papaparse や自作のCSV読み込み処理は完全に削除しました。
+// CORSエラー（セキュリティ制限）を回避するため、サーバー側でCSVを取得します。
 
 let popData = { population: 0, households: 0, latestDate: '', isError: false };
 let formattedDate = '';
@@ -48,6 +48,177 @@ try {
 } catch (e) {
   popData.isError = true;
 }
+
+// ▼▼▼ CSVデータをサーバー側で取得し、整形する処理（復活） ▼▼▼
+
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33pmO60BCd0hIr_v5xh34cJ_IWAHkF0pTaj855pzicmNoVx6W8CPK3MEhlp-irodPSE/pub?gid=1232979489&single=true&output=csv";
+const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
+const EVENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqAv0S9Shfo2bXUlTuP4jtkZ75D-wt4qCl-P_GOFYMu53peSOEwy7EhbUSUEeBi_T0jehNRIbgp91M/pub?output=csv";
+
+// BOM（見えない文字）にも対応した強力なCSVパーサー
+async function fetchAndParseCSV(url: string) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    
+    let text = await res.text();
+    text = text.replace(/^\uFEFF/, ''); // BOM削除
+    
+    function parseCSV(text: string) {
+      const result = [];
+      let row = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === '"') {
+          if (inQuotes && text[i + 1] === '"') { current += '"'; i++; }
+          else { inQuotes = !inQuotes; }
+        } else if (char === ',' && !inQuotes) {
+          row.push(current); current = '';
+        } else if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (char === '\r' && text[i + 1] === '\n') { i++; }
+          row.push(current); result.push(row); row = []; current = '';
+        } else { current += char; }
+      }
+      if (current !== '' || row.length > 0) { row.push(current); result.push(row); }
+      return result;
+    }
+
+    const rows = parseCSV(text);
+    if (rows.length < 2) return [];
+
+    const headers = rows[0].map(h => h.trim().replace(/^\uFEFF/, ''));
+    const data = [];
+    for (let i = 1; i < rows.length; i++) {
+      const rowData: any = {};
+      for (let j = 0; j < headers.length; j++) {
+        if (headers[j]) {
+          rowData[headers[j]] = rows[i][j] ? rows[i][j].trim() : '';
+        }
+      }
+      data.push(rowData);
+    }
+    return data;
+
+  } catch (e) {
+    console.error(`CSV fetch error for ${url}:`, e);
+    return [];
+  }
+}
+
+const rawSpots = await fetchAndParseCSV(CSV_URL);
+const rawLocal = await fetchAndParseCSV(LOCAL_CSV_URL);
+const rawEvents = await fetchAndParseCSV(EVENT_CSV_URL);
+
+// --- データの整形 ---
+const processedSpots = rawSpots.map((row: any) => {
+  const clean: any = {};
+  Object.keys(row).forEach(k => {
+    if (!k) return; 
+    let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
+    clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
+  });
+  clean.title = clean['スポット名'] || clean['タイトル'] || '';
+  clean.desc = clean['紹介文'] || clean['説明'] || '';
+  clean.image = clean['写真'] || clean['画像'] || '';
+  clean.area = clean['エリア'] || '';
+  if (clean.lat_lng_raw) {
+    const parts = String(clean.lat_lng_raw).split(',');
+    if (parts.length >= 2) {
+      clean.lat = parts[0].trim();
+      clean.lng = parts[1].trim();
+    }
+  }
+  clean.title_en = clean['title_en'] || '';
+  return clean;
+}).filter((s: any) => s.title).reverse();
+
+const processedLocal = rawLocal.map((row: any) => {
+  const clean: any = {};
+  Object.keys(row).forEach(k => {
+    if (!k) return;
+    let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
+    clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
+  });
+  clean.title = clean['スポット名'] || clean['タイトル'] || '';
+  clean.desc = clean['紹介文（パパママ目線）'] || clean['紹介文'] || clean['説明'] || '';
+  clean.image = clean['写真'] || clean['画像'] || '';
+  clean.area = clean['エリア'] || '';
+  clean.tag = clean['タグ'] || '';
+  clean.date = clean['タイムスタンプ'] || clean['日付'] || clean['date'] || '';
+  if (clean.lat_lng_raw) {
+    const parts = String(clean.lat_lng_raw).split(',');
+    if (parts.length >= 2) {
+      clean.lat = parts[0].trim();
+      clean.lng = parts[1].trim();
+    }
+  }
+  clean.title_en = clean['title_en'] || '';
+  clean.desc_en = clean['desc_en'] || '';
+  clean.tag_en = clean['tag_en'] || '';
+  return clean;
+}).filter((s: any) => s.title).reverse();
+
+const currentYear = new Date().getFullYear();
+const processedEvents = rawEvents.map((row: any) => {
+  const clean: any = {};
+  Object.keys(row).forEach(k => {
+    if (!k) return; 
+    let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
+    clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
+  });
+  clean.title = clean['イベント名'] || clean['タイトル'] || '';
+  clean.desc = clean['説明'] || clean['紹介文'] || '';
+  clean.title_en = clean['title_en'] || '';
+  clean.desc_en = clean['desc_en'] || '';
+  clean.start_date = clean['開始日'] || '';
+  clean.end_date = clean['終了日'] || '';
+
+  let autoDateStrJp = '';
+  let autoDateStrEn = '';
+  if (clean.start_date || clean.end_date) {
+    const parseD = (str: string) => {
+      if(!str) return null;
+      const d = new Date(str.replace(/-/g, '/'));
+      return isNaN(d.getTime()) ? null : d;
+    };
+    const sD = parseD(clean.start_date);
+    const eD = parseD(clean.end_date);
+    
+    const fmtFullJp = (d: Date) => `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日(${['日', '月', '火', '水', '木', '金', '土'][d.getDay()]})`;
+    const fmtJp = (d: Date) => `${d.getMonth() + 1}月${d.getDate()}日(${['日', '月', '火', '水', '木', '金', '土'][d.getDay()]})`;
+    const fmtFullEn = (d: Date) => `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()]} ${d.getDate()} ${d.getFullYear()} (${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]})`;
+    const fmtEn = (d: Date) => `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()]} ${d.getDate()} (${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]})`;
+    
+    if (sD && eD) {
+      if (sD.getTime() === eD.getTime()) {
+        autoDateStrJp = sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD);
+        autoDateStrEn = sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD);
+      } else if (sD.getFullYear() === eD.getFullYear()) {
+        autoDateStrJp = `${sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD)}〜${fmtJp(eD)}`;
+        autoDateStrEn = `${sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD)} - ${fmtEn(eD)}`;
+      } else {
+        autoDateStrJp = `${fmtFullJp(sD)}〜${fmtFullJp(eD)}`;
+        autoDateStrEn = `${fmtFullEn(sD)} - ${fmtFullEn(eD)}`;
+      }
+    } else if (sD) {
+      autoDateStrJp = sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD);
+      autoDateStrEn = sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD);
+    } else if (eD) {
+      autoDateStrJp = `〜${eD.getFullYear() === currentYear ? fmtJp(eD) : fmtFullJp(eD)}`;
+      autoDateStrEn = `Until ${eD.getFullYear() === currentYear ? fmtEn(eD) : fmtFullEn(eD)}`;
+    }
+  }
+  clean.date_str = clean['表示用日付'] || clean['日付'] || autoDateStrJp || '';
+  clean.date_str_en = clean['date_str_en'] || autoDateStrEn || '';
+  return clean;
+}).filter((e: any) => e.title);
+
+// ブラウザ側のJSに渡すためJSON文字列にする
+const safeSpotsJson = JSON.stringify(processedSpots).replace(/</g, '\\u003c');
+const safeLocalJson = JSON.stringify(processedLocal).replace(/</g, '\\u003c');
+const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 ---
 
 <!DOCTYPE html>
@@ -96,9 +267,6 @@ try {
     
     <script is:inline src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <!-- ▼ ブラウザ側で確実にCSVをパースするための最強ライブラリを読み込み（ビルドエラーを100%回避） ▼ -->
-    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -443,6 +611,11 @@ try {
     </style>
 </head>
 <body id="top" class="is-jp">
+
+    <!-- ▼ マップ描画用のJSONデータ渡し ▼ -->
+    <script type="application/json" id="spots-data-json" set:html={safeSpotsJson}></script>
+    <script type="application/json" id="local-data-json" set:html={safeLocalJson}></script>
+    <script type="application/json" id="events-data-json" set:html={safeEventsJson}></script>
 
     <nav class="fixed-nav">
         <div class="header-logo" id="header-logo" data-i18n="header-logo">MIHARA REDISCOVER</div>
@@ -1562,7 +1735,7 @@ try {
         };
 
         // =========================================================================
-        // 🚀 完全無欠のクライアントサイドCSVフェッチ処理 🚀
+        // 🚀 完全なクライアントサイドCSVフェッチ処理（PapaParse使用） 🚀
         // =========================================================================
 
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33pmO60BCd0hIr_v5xh34cJ_IWAHkF0pTaj855pzicmNoVx6W8CPK3MEhlp-irodPSE/pub?gid=1232979489&single=true&output=csv";
@@ -1771,7 +1944,81 @@ try {
                     if (Math.abs(walk) > 5) window.isDragged = true; 
                     scrollContainer.scrollLeft = window.scrollLeft - walk;
                 });
+
+                // さんぽログのスクロール処理
+                let scrollTimeout;
+                scrollContainer.addEventListener('scroll', () => {
+                    if (isCardTapping) return; 
+                    if (scrollTimeout) clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        if (isCardTapping) return;
+                        const cards = scrollContainer.querySelectorAll('.local-spot-card:not(.hidden)');
+                        if (cards.length === 0) return;
+
+                        const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+                        let activeIndex = 0;
+                        if (maxScroll > 0) {
+                            const scrollRatio = scrollContainer.scrollLeft / maxScroll;
+                            const maxIndex = cards.length > 1 ? cards.length - 2 : 0; 
+                            activeIndex = Math.round(scrollRatio * maxIndex);
+                        }
+
+                        cards.forEach((c, index) => {
+                            if (index === activeIndex) {
+                                if (!c.classList.contains('active-card')) {
+                                    c.classList.add('active-card');
+                                    const title = c.dataset.title;
+                                    if (title) { 
+                                        const marker = localMarkersMap[title];
+                                        if (marker && localMapInstance) {
+                                            localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
+                                            marker.openPopup();
+                                        }
+                                    }
+                                }
+                            } else {
+                                c.classList.remove('active-card');
+                            }
+                        });
+
+                        const dots = document.querySelectorAll('#local-scroll-dots .scroll-dot');
+                        dots.forEach((dot, index) => {
+                            dot.classList.toggle('active', index === activeIndex);
+                        });
+                    }, 50); 
+                });
             }
+
+            // Local Insights カードへのクリックイベント付与
+            document.querySelectorAll('.local-spot-card').forEach((card) => {
+                card.onclick = (e) => {
+                    if (window.isDragged) { e.preventDefault(); return; }
+                    isCardTapping = true; 
+                    const container = document.getElementById('local-scroll-container');
+                    const allCards = container.querySelectorAll('.local-spot-card:not(.hidden)');
+                    allCards.forEach(c => c.classList.remove('active-card'));
+                    card.classList.add('active-card');
+                    
+                    const title = card.getAttribute('data-title');
+                    const marker = localMarkersMap[title];
+                    if (marker && typeof localMapInstance !== 'undefined') {
+                        localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
+                        marker.openPopup();
+                    }
+
+                    const index = Array.from(allCards).indexOf(card);
+                    const dots = document.querySelectorAll('#local-scroll-dots .scroll-dot');
+                    dots.forEach((dot, i) => {
+                        dot.classList.toggle('active', i === index);
+                    });
+
+                    const containerLeft = container.getBoundingClientRect().left;
+                    const cardLeft = card.getBoundingClientRect().left;
+                    container.scrollBy({ left: cardLeft - containerLeft - 24, behavior: 'smooth' });
+
+                    setTimeout(() => { isCardTapping = false; }, 600);
+                };
+            });
         });
 
         window.addEventListener('load', () => {
