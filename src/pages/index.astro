@@ -1,7 +1,5 @@
 ---
-import Papa from 'papaparse';
-
-// ▼ 1. Astroのビルド時（裏側のサーバー）でデータを取得 ▼
+// ▼ Astroのビルド時（裏側のサーバー）でデータを取得 ▼
 
 let popData = { population: 0, households: 0, latestDate: '', isError: false };
 let formattedDate = '';
@@ -82,13 +80,50 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33p
 const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
 const EVENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqAv0S9Shfo2bXUlTuP4jtkZ75D-wt4qCl-P_GOFYMu53peSOEwy7EhbUSUEeBi_T0jehNRIbgp91M/pub?output=csv";
 
+// ▼ エラーの原因だった「papaparse」を使わずに自前でCSVを読み込む関数 ▼
 async function fetchAndParseCSV(url: string) {
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const text = await res.text();
-    const result = Papa.parse(text, { header: true, skipEmptyLines: true });
-    return result.data;
+    
+    function parseCSV(text: string) {
+      const result = [];
+      let row = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === '"') {
+          if (inQuotes && text[i + 1] === '"') { current += '"'; i++; }
+          else { inQuotes = !inQuotes; }
+        } else if (char === ',' && !inQuotes) {
+          row.push(current); current = '';
+        } else if ((char === '\n' || char === '\r') && !inQuotes) {
+          if (char === '\r' && text[i + 1] === '\n') { i++; }
+          row.push(current); result.push(row); row = []; current = '';
+        } else { current += char; }
+      }
+      if (current !== '' || row.length > 0) { row.push(current); result.push(row); }
+      return result;
+    }
+
+    const rows = parseCSV(text);
+    if (rows.length < 2) return [];
+
+    const headers = rows[0];
+    const data = [];
+    for (let i = 1; i < rows.length; i++) {
+      const rowData: any = {};
+      for (let j = 0; j < headers.length; j++) {
+        if (headers[j]) {
+          rowData[headers[j]] = rows[i][j] || '';
+        }
+      }
+      data.push(rowData);
+    }
+    return data;
+
   } catch (e) {
     console.error(`CSV fetch error for ${url}:`, e);
     return [];
@@ -761,7 +796,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         </nav>
         
         <div id="gallery-wrap" class="relative z-30 pt-0 mt-2 px-0 max-w-5xl mx-auto">
-            <!-- ▼ SEO/AdSense対策: Astroのビルド時に全てのスポットHTMLを生成して出力 ▼ -->
             <div id="gallery-grid" class="photo-grid">
                 {processedSpots.length === 0 ? (
                     <div class="col-span-3 py-32 text-center text-[10px] font-bold text-gray-300 uppercase tracking-widest lang-jp">データがありません</div>
@@ -810,7 +844,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             <p class="text-xs sm:text-sm font-bold text-gray-500 mb-6 px-4 sm:px-6 leading-relaxed" id="desc-local" data-i18n="desc-local">ガイドブックには載らない、三原の何気ない日常と<br>新しい発見。歩いて見つける三原の魅力ログ。</p>
             
             <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-0">
-                <!-- ▼ SEO/AdSense対策: Astroのビルド時に全てのログHTMLを生成 ▼ -->
                 {processedLocal.length === 0 ? (
                     <div class="w-full py-20 text-center bg-white rounded-xl border border-dashed border-gray-300 mx-6 sm:mx-0 flex flex-col items-center justify-center">
                         <i class="fa-solid fa-person-walking text-4xl text-gray-200 mb-4"></i>
@@ -897,7 +930,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             </div>
 
             <div id="events-container" class="px-6 sm:px-0 grid gap-4 md:grid-cols-1 max-w-3xl mx-auto text-left">
-                <!-- ▼ SEO/AdSense対策: Astroのビルド時に全てのイベントHTMLを生成 ▼ -->
                 {processedEvents.map((event: any, index: number) => {
                     const safeDate = event.date_str || '開催日未定';
                     const safeDateEn = event.date_str_en || safeDate;
@@ -1011,11 +1043,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
         <p class="footer-copy" data-i18n="footer-copy">© 2026 Mihara Walk Photo Map</p>
         <p class="footer-produced">PRODUCED BY MICHIM | PHOTOS BY MIHARA LOVERS</p>
-        <p class="text-[9px] text-gray-400 mt-3 font-bold leading-relaxed text-center">
-            ※本サイトの一部コンテンツは、<br class="sm:hidden">
-            「三原市オープンデータカタログサイト」の<br class="sm:hidden">
-            APIを活用して作成しています。
-        </p>
     </footer>
 
     <script is:inline>
