@@ -1,7 +1,6 @@
 ---
-// ！！注意：1行目にあった import Papa from 'papaparse'; はエラー原因になるため完全に削除しました！！
-
-// ▼ 1. Astroのビルド時（裏側のサーバー）でデータを取得 ▼
+// ▼ Astroのビルド時（裏側のサーバー）でデータを取得 ▼
+// 注意: エラー原因だった papaparse や自作のCSV読み込み処理は完全に削除しました。
 
 let popData = { population: 0, households: 0, latestDate: '', isError: false };
 let formattedDate = '';
@@ -49,203 +48,6 @@ try {
 } catch (e) {
   popData.isError = true;
 }
-
-// ▼▼▼ 2. 追加：CSVデータをビルド時に取得し、サーバー側でデータを整形する ▼▼▼
-
-const areaLabels: any = {
-  'all': { jp: 'ぜんぶ', en: 'ALL' }, 
-  'mihara': { jp: '三原市街', en: 'MIHARA' },
-  'daiwa': { jp: '大和', en: 'DAIWA' }, 
-  'kui': { jp: '久井', en: 'KUI' },
-  'hongo': { jp: '本郷', en: 'HONGO' }, 
-  'sagi': { jp: '佐木島', en: 'SAGI' }
-};
-
-function getDriveId(urlOrId: string) {
-  if (!urlOrId) return '';
-  const match = urlOrId.toString().match(/[-\w]{25,}/);
-  return match ? match[0] : '';
-}
-
-function getPrimaryImgUrl(driveId: string, urlOrId: string, size = 'w1000') {
-  if (driveId) return `https://lh3.googleusercontent.com/d/${driveId}=${size}`;
-  if (urlOrId && urlOrId.toString().startsWith('http')) return urlOrId.toString().replace('http://', 'https://');
-  return '';
-}
-
-function stripHtml(html: string) {
-  if(!html) return '';
-  return html.toString().replace(/<[^>]*>?/gm, '');
-}
-
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33pmO60BCd0hIr_v5xh34cJ_IWAHkF0pTaj855pzicmNoVx6W8CPK3MEhlp-irodPSE/pub?gid=1232979489&single=true&output=csv";
-const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
-const EVENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqAv0S9Shfo2bXUlTuP4jtkZ75D-wt4qCl-P_GOFYMu53peSOEwy7EhbUSUEeBi_T0jehNRIbgp91M/pub?output=csv";
-
-// ▼ papaparseを使わず、BOM（目に見えない特殊文字）を確実に除去する強力な自前CSVパーサー ▼
-async function fetchAndParseCSV(url: string) {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    
-    // Googleスプレッドシート特有のBOMを綺麗に削除する
-    let text = await res.text();
-    text = text.replace(/^\uFEFF/, '');
-    
-    function parseCSV(text: string) {
-      const result = [];
-      let row = [];
-      let current = '';
-      let inQuotes = false;
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        if (char === '"') {
-          if (inQuotes && text[i + 1] === '"') { current += '"'; i++; }
-          else { inQuotes = !inQuotes; }
-        } else if (char === ',' && !inQuotes) {
-          row.push(current); current = '';
-        } else if ((char === '\n' || char === '\r') && !inQuotes) {
-          if (char === '\r' && text[i + 1] === '\n') { i++; }
-          row.push(current); result.push(row); row = []; current = '';
-        } else { current += char; }
-      }
-      if (current !== '' || row.length > 0) { row.push(current); result.push(row); }
-      return result;
-    }
-
-    const rows = parseCSV(text);
-    if (rows.length < 2) return [];
-
-    // ヘッダーの空白やBOMも念のためトリミング
-    const headers = rows[0].map(h => h.trim().replace(/^\uFEFF/, ''));
-    const data = [];
-    for (let i = 1; i < rows.length; i++) {
-      const rowData: any = {};
-      for (let j = 0; j < headers.length; j++) {
-        if (headers[j]) {
-          rowData[headers[j]] = rows[i][j] ? rows[i][j].trim() : '';
-        }
-      }
-      data.push(rowData);
-    }
-    return data;
-
-  } catch (e) {
-    console.error(`CSV fetch error for ${url}:`, e);
-    return [];
-  }
-}
-
-const rawSpots = await fetchAndParseCSV(CSV_URL);
-const rawLocal = await fetchAndParseCSV(LOCAL_CSV_URL);
-const rawEvents = await fetchAndParseCSV(EVENT_CSV_URL);
-
-const processedSpots = rawSpots.map((row: any) => {
-  const clean: any = {};
-  Object.keys(row).forEach(k => {
-    if (!k) return; 
-    let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
-    clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
-  });
-  clean.title = clean['スポット名'] || clean['タイトル'] || '';
-  clean.desc = clean['紹介文'] || clean['説明'] || '';
-  clean.image = clean['写真'] || clean['画像'] || '';
-  clean.area = clean['エリア'] || '';
-  if (clean.lat_lng_raw) {
-    const parts = String(clean.lat_lng_raw).split(',');
-    if (parts.length >= 2) {
-      clean.lat = parts[0].trim();
-      clean.lng = parts[1].trim();
-    }
-  }
-  clean.map_url = clean['googleマップのurl'] || clean['googleマップのurl(共有リンク)'] || clean['地図url'] || '';
-  return clean;
-}).filter((s: any) => s.title).reverse();
-
-const processedLocal = rawLocal.map((row: any) => {
-  const clean: any = {};
-  Object.keys(row).forEach(k => {
-    if (!k) return;
-    let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
-    clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
-  });
-  clean.title = clean['スポット名'] || clean['タイトル'] || '';
-  clean.desc = clean['紹介文（パパママ目線）'] || clean['紹介文'] || clean['説明'] || '';
-  clean.image = clean['写真'] || clean['画像'] || '';
-  clean.area = clean['エリア'] || '';
-  clean.tag = clean['タグ'] || '';
-  clean.date = clean['タイムスタンプ'] || clean['日付'] || clean['date'] || '';
-  if (clean.lat_lng_raw) {
-    const parts = String(clean.lat_lng_raw).split(',');
-    if (parts.length >= 2) {
-      clean.lat = parts[0].trim();
-      clean.lng = parts[1].trim();
-    }
-  }
-  return clean;
-}).filter((s: any) => s.title).reverse();
-
-const currentYear = new Date().getFullYear();
-const processedEvents = rawEvents.map((row: any) => {
-  const clean: any = {};
-  Object.keys(row).forEach(k => {
-    if (!k) return; 
-    let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
-    clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
-  });
-  clean.title = clean['イベント名'] || clean['タイトル'] || '';
-  clean.desc = clean['説明'] || clean['紹介文'] || '';
-  clean.title_en = clean['title_en'] || '';
-  clean.desc_en = clean['desc_en'] || '';
-  clean.start_date = clean['開始日'] || '';
-  clean.end_date = clean['終了日'] || '';
-
-  let autoDateStrJp = '';
-  let autoDateStrEn = '';
-  
-  if (clean.start_date || clean.end_date) {
-    const parseD = (str: string) => {
-      if(!str) return null;
-      const d = new Date(str.replace(/-/g, '/'));
-      return isNaN(d.getTime()) ? null : d;
-    };
-    const sD = parseD(clean.start_date);
-    const eD = parseD(clean.end_date);
-    
-    const fmtFullJp = (d: Date) => `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日(${['日', '月', '火', '水', '木', '金', '土'][d.getDay()]})`;
-    const fmtJp = (d: Date) => `${d.getMonth() + 1}月${d.getDate()}日(${['日', '月', '火', '水', '木', '金', '土'][d.getDay()]})`;
-    const fmtFullEn = (d: Date) => `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()]} ${d.getDate()} ${d.getFullYear()} (${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]})`;
-    const fmtEn = (d: Date) => `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()]} ${d.getDate()} (${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]})`;
-    
-    if (sD && eD) {
-      if (sD.getTime() === eD.getTime()) {
-        autoDateStrJp = sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD);
-        autoDateStrEn = sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD);
-      } else if (sD.getFullYear() === eD.getFullYear()) {
-        autoDateStrJp = `${sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD)}〜${fmtJp(eD)}`;
-        autoDateStrEn = `${sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD)} - ${fmtEn(eD)}`;
-      } else {
-        autoDateStrJp = `${fmtFullJp(sD)}〜${fmtFullJp(eD)}`;
-        autoDateStrEn = `${fmtFullEn(sD)} - ${fmtFullEn(eD)}`;
-      }
-    } else if (sD) {
-      autoDateStrJp = sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD);
-      autoDateStrEn = sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD);
-    } else if (eD) {
-      autoDateStrJp = `〜${eD.getFullYear() === currentYear ? fmtJp(eD) : fmtFullJp(eD)}`;
-      autoDateStrEn = `Until ${eD.getFullYear() === currentYear ? fmtEn(eD) : fmtFullEn(eD)}`;
-    }
-  }
-  clean.date_str = clean['表示用日付'] || clean['日付'] || autoDateStrJp || '';
-  clean.date_str_en = clean['date_str_en'] || autoDateStrEn || '';
-  clean.url = clean['リンク'] || clean['公式サイト'] || clean['url'] || '';
-  return clean;
-}).filter((e: any) => e.title);
-
-// JS側でのマップ・カード生成用にJSONとして渡す
-const safeSpotsJson = JSON.stringify(processedSpots).replace(/</g, '\\u003c');
-const safeLocalJson = JSON.stringify(processedLocal).replace(/</g, '\\u003c');
-const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 ---
 
 <!DOCTYPE html>
@@ -294,6 +96,9 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
     
     <script is:inline src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- ▼ ブラウザ側で確実にCSVをパースするための最強ライブラリを読み込み（ビルドエラーを100%回避） ▼ -->
+    <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -639,11 +444,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 </head>
 <body id="top" class="is-jp">
 
-    <!-- ▼ マップ・カード描画用のJSONデータ渡し ▼ -->
-    <script type="application/json" id="spots-data-json" set:html={safeSpotsJson}></script>
-    <script type="application/json" id="local-data-json" set:html={safeLocalJson}></script>
-    <script type="application/json" id="events-data-json" set:html={safeEventsJson}></script>
-
     <nav class="fixed-nav">
         <div class="header-logo" id="header-logo" data-i18n="header-logo">MIHARA REDISCOVER</div>
         <div class="nav-links-wrap flex items-center">
@@ -802,8 +602,8 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         </nav>
         
         <div id="gallery-wrap" class="relative z-30 pt-0 mt-2 px-0 max-w-5xl mx-auto">
-            <!-- ▼ 初期状態は空のコンテナ（JSで写真を後から生成） ▼ -->
             <div id="gallery-grid" class="photo-grid">
+                <!-- Javascriptで写真が自動生成されます -->
                 <div class="col-span-3 py-32 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
             <div id="load-more-area" class="text-center py-10 hidden">
@@ -827,8 +627,8 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-local" data-i18n="title-local">みはらさんぽログ</h2>
             <p class="text-xs sm:text-sm font-bold text-gray-500 mb-6 px-4 sm:px-6 leading-relaxed" id="desc-local" data-i18n="desc-local">ガイドブックには載らない、三原の何気ない日常と<br>新しい発見。歩いて見つける三原の魅力ログ。</p>
             
-            <!-- ▼ 初期状態は空のコンテナ（JSでカードを後から生成） ▼ -->
             <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-0">
+                <!-- Javascriptでカードが自動生成されます -->
                 <div class="w-full text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
             
@@ -850,8 +650,8 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-event" data-i18n="title-event">三原のイベント情報</h2>
             <p class="text-xs sm:text-sm font-bold text-gray-500 mb-8 px-4 sm:px-6 leading-relaxed" id="desc-event" data-i18n="desc-event">週末のお出かけにぴったりな、<br>三原市内のイベントや催し物をお届けします。</p>
             
-            <!-- ▼ 初期状態は空のコンテナ（JSでイベントを後から生成） ▼ -->
             <div id="events-container" class="px-6 sm:px-0 grid gap-4 md:grid-cols-1 max-w-3xl mx-auto text-left">
+                <!-- Javascriptでイベントが自動生成されます -->
                 <div class="w-full py-10 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
 
@@ -939,7 +739,7 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         <p class="footer-produced">PRODUCED BY MICHIM | PHOTOS BY MIHARA LOVERS</p>
     </footer>
 
-    <!-- ▼ JavaScriptの処理部分（変更なし・元通り） ▼ -->
+    <!-- ▼ JavaScriptの処理部分 ▼ -->
     <script is:inline>
         let currentLang = 'jp';
 
@@ -1221,10 +1021,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             }, 6000);
         }
 
-        // =========================================================================
-        // 🚀 マップ・カードの動的生成ロジック（元の方式） 🚀
-        // =========================================================================
-
         let localMapInstance = null;
         let localMarkersGroup = null;
         let localMarkersMap = {};
@@ -1252,7 +1048,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         const LOCAL_ITEMS_PER_PAGE = 8;
         let localDisplayedCount = 0;
         
-        // ▼ マップ描画用のデータをJSONからパース ▼
         let spotsData = [];
         let localInsightsData = [];
         let eventsData = [];
@@ -1375,7 +1170,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in-view'); obs.unobserve(e.target); }});
         }, { threshold: 0.25 });
 
-        // ▼ PHOTO MAP の描画 ▼
         function render(filter) {
             currentActiveArea = filter; 
             const grid = document.getElementById('gallery-grid');
@@ -1446,7 +1240,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
         let isCardTapping = false;
 
-        // ▼ みはらさんぽログ の描画 ▼
         function renderLocalInsights() {
             const container = document.getElementById('local-scroll-container');
             const mapContainer = document.getElementById('local-map-container');
@@ -1691,7 +1484,6 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             }
         };
 
-        // ▼ イベント情報 の描画 ▼
         function renderEvents(append = false) {
             const container = document.getElementById('events-container');
             const loadMoreArea = document.getElementById('event-load-more-area');
@@ -1770,14 +1562,182 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         };
 
         // =========================================================================
-        // 🚀 DOM読み込み完了時の初期化ロジック 🚀
+        // 🚀 完全無欠のクライアントサイドCSVフェッチ処理 🚀
         // =========================================================================
 
-        window.isDown = false;
-        window.startX = 0;
-        window.scrollLeft = 0;
-        window.isDragged = false;
-        
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33pmO60BCd0hIr_v5xh34cJ_IWAHkF0pTaj855pzicmNoVx6W8CPK3MEhlp-irodPSE/pub?gid=1232979489&single=true&output=csv";
+        const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
+        const EVENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqAv0S9Shfo2bXUlTuP4jtkZ75D-wt4qCl-P_GOFYMu53peSOEwy7EhbUSUEeBi_T0jehNRIbgp91M/pub?output=csv";
+
+        function fetchCSV(url) {
+            return new Promise((resolve, reject) => {
+                Papa.parse(url, {
+                    download: true,
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        resolve(results.data);
+                    },
+                    error: function(error) {
+                        console.error("CSV parse error:", error);
+                        resolve([]);
+                    }
+                });
+            });
+        }
+
+        async function loadAllData() {
+            try {
+                const rawSpots = await fetchCSV(CSV_URL);
+                const rawLocal = await fetchCSV(LOCAL_CSV_URL);
+                const rawEvents = await fetchCSV(EVENT_CSV_URL);
+                
+                const currentYear = new Date().getFullYear();
+
+                spotsData = rawSpots.map(row => {
+                    const clean = {};
+                    Object.keys(row).forEach(k => {
+                        if(!k) return;
+                        let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
+                        clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
+                    });
+                    clean.title = clean['スポット名'] || clean['タイトル'] || '';
+                    clean.desc = clean['紹介文'] || clean['説明'] || '';
+                    clean.image = clean['写真'] || clean['画像'] || '';
+                    clean.area = clean['エリア'] || '';
+                    if (clean.lat_lng_raw) {
+                        const parts = String(clean.lat_lng_raw).split(',');
+                        if (parts.length >= 2) {
+                            clean.lat = parts[0].trim();
+                            clean.lng = parts[1].trim();
+                        }
+                    }
+                    clean.title_en = clean['title_en'] || '';
+                    return clean;
+                }).filter(s => s.title).reverse();
+
+                localInsightsData = rawLocal.map(row => {
+                    const clean = {};
+                    Object.keys(row).forEach(k => {
+                        if(!k) return;
+                        let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
+                        clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
+                    });
+                    clean.title = clean['スポット名'] || clean['タイトル'] || '';
+                    clean.desc = clean['紹介文（パパママ目線）'] || clean['紹介文'] || clean['説明'] || '';
+                    clean.image = clean['写真'] || clean['画像'] || '';
+                    clean.area = clean['エリア'] || '';
+                    clean.tag = clean['タグ'] || '';
+                    clean.date = clean['タイムスタンプ'] || clean['日付'] || clean['date'] || '';
+                    if (clean.lat_lng_raw) {
+                        const parts = String(clean.lat_lng_raw).split(',');
+                        if (parts.length >= 2) {
+                            clean.lat = parts[0].trim();
+                            clean.lng = parts[1].trim();
+                        }
+                    }
+                    clean.title_en = clean['title_en'] || '';
+                    clean.desc_en = clean['desc_en'] || '';
+                    clean.tag_en = clean['tag_en'] || '';
+                    return clean;
+                }).filter(s => s.title).reverse();
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); 
+                
+                let allEvents = rawEvents.map(row => {
+                    const clean = {};
+                    Object.keys(row).forEach(k => {
+                        if(!k) return;
+                        let cleanKey = k.replace(/^[\s\u3000]+|[\s\u3000]+$/g, '').toLowerCase(); 
+                        clean[cleanKey] = (typeof row[k] === 'string') ? row[k].trim() : row[k];
+                    });
+                    clean.title = clean['イベント名'] || clean['タイトル'] || '';
+                    clean.desc = clean['説明'] || clean['紹介文'] || '';
+                    clean.title_en = clean['title_en'] || '';
+                    clean.desc_en = clean['desc_en'] || '';
+                    clean.start_date = clean['開始日'] || '';
+                    clean.end_date = clean['終了日'] || '';
+
+                    let autoDateStrJp = '';
+                    let autoDateStrEn = '';
+                    if (clean.start_date || clean.end_date) {
+                        const parseD = (str) => {
+                            if(!str) return null;
+                            const d = new Date(str.replace(/-/g, '/'));
+                            return isNaN(d.getTime()) ? null : d;
+                        };
+                        const sD = parseD(clean.start_date);
+                        const eD = parseD(clean.end_date);
+                        
+                        const fmtFullJp = (d) => `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日(${['日', '月', '火', '水', '木', '金', '土'][d.getDay()]})`;
+                        const fmtJp = (d) => `${d.getMonth() + 1}月${d.getDate()}日(${['日', '月', '火', '水', '木', '金', '土'][d.getDay()]})`;
+                        const fmtFullEn = (d) => `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()]} ${d.getDate()} ${d.getFullYear()} (${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]})`;
+                        const fmtEn = (d) => `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()]} ${d.getDate()} (${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()]})`;
+                        
+                        if (sD && eD) {
+                            if (sD.getTime() === eD.getTime()) {
+                                autoDateStrJp = sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD);
+                                autoDateStrEn = sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD);
+                            } else if (sD.getFullYear() === eD.getFullYear()) {
+                                autoDateStrJp = `${sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD)}〜${fmtJp(eD)}`;
+                                autoDateStrEn = `${sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD)} - ${fmtEn(eD)}`;
+                            } else {
+                                autoDateStrJp = `${fmtFullJp(sD)}〜${fmtFullJp(eD)}`;
+                                autoDateStrEn = `${fmtFullEn(sD)} - ${fmtFullEn(eD)}`;
+                            }
+                        } else if (sD) {
+                            autoDateStrJp = sD.getFullYear() === currentYear ? fmtJp(sD) : fmtFullJp(sD);
+                            autoDateStrEn = sD.getFullYear() === currentYear ? fmtEn(sD) : fmtFullEn(sD);
+                        } else if (eD) {
+                            autoDateStrJp = `〜${eD.getFullYear() === currentYear ? fmtJp(eD) : fmtFullJp(eD)}`;
+                            autoDateStrEn = `Until ${eD.getFullYear() === currentYear ? fmtEn(eD) : fmtFullEn(eD)}`;
+                        }
+                    }
+                    clean.date_str = clean['表示用日付'] || clean['日付'] || autoDateStrJp || '';
+                    clean.date_str_en = clean['date_str_en'] || autoDateStrEn || '';
+                    
+                    return clean;
+                }).filter(e => e.title);
+
+                eventsData = allEvents.filter(e => {
+                    if (!e.end_date) return true; 
+                    const endDate = new Date(e.end_date.replace(/-/g, '/')); 
+                    if (isNaN(endDate.getTime())) return true; 
+                    return endDate >= today; 
+                });
+                
+                eventsData.sort((a, b) => {
+                    const todayTime = today.getTime();
+                    let startA = a.start_date ? new Date(a.start_date.replace(/-/g, '/')).getTime() : Infinity;
+                    let startB = b.start_date ? new Date(b.start_date.replace(/-/g, '/')).getTime() : Infinity;
+                    if (isNaN(startA)) startA = Infinity;
+                    if (isNaN(startB)) startB = Infinity;
+
+                    let sortKeyA = startA < todayTime ? todayTime : startA;
+                    let sortKeyB = startB < todayTime ? todayTime : startB;
+
+                    if (sortKeyA === sortKeyB) {
+                        let endA = a.end_date ? new Date(a.end_date.replace(/-/g, '/')).getTime() : Infinity;
+                        let endB = b.end_date ? new Date(b.end_date.replace(/-/g, '/')).getTime() : Infinity;
+                        if (isNaN(endA)) endA = Infinity;
+                        if (isNaN(endB)) endB = Infinity;
+                        return endA - endB;
+                    }
+                    return sortKeyA - sortKeyB;
+                });
+
+                render('all'); 
+                renderLocalInsights();
+                renderEvents();
+
+            } catch (error) {
+                console.error('Data load error:', error);
+                const grid = document.getElementById('gallery-grid');
+                if (grid) grid.innerHTML = '<div class="col-span-3 py-10 text-center text-xs text-red-400">データの読み込みに失敗しました。</div>';
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             const scrollContainer = document.getElementById('local-scroll-container');
             if (scrollContainer) {
@@ -1831,64 +1791,8 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             
             updateUI();
             rotateSlides();
-            
-            // ▼ HTMLに埋め込んだJSONデータを読み込んでJSの変数にセット ▼
-            try {
-                const spotsText = document.getElementById('spots-data-json')?.textContent;
-                spotsData = JSON.parse(spotsText || '[]');
-                render('all'); 
-            } catch(e) { 
-                console.error('Spots parse error', e); 
-                const grid = document.getElementById('gallery-grid');
-                if (grid) grid.innerHTML = '<div class="col-span-3 py-10 text-center text-xs text-red-400">データの読み込みに失敗しました。</div>';
-            }
 
-            try {
-                const localText = document.getElementById('local-data-json')?.textContent;
-                localInsightsData = JSON.parse(localText || '[]');
-                renderLocalInsights();
-            } catch(e) { console.error('Local parse error', e); }
-
-            try {
-                const eventsText = document.getElementById('events-data-json')?.textContent;
-                let rawEventsData = JSON.parse(eventsText || '[]');
-                
-                const today = new Date();
-                today.setHours(0, 0, 0, 0); 
-
-                // 過去のイベントを除外
-                eventsData = rawEventsData.filter(e => {
-                    if (!e.end_date) return true; 
-                    const endDate = new Date(e.end_date.replace(/-/g, '/')); 
-                    if (isNaN(endDate.getTime())) return true; 
-                    return endDate >= today; 
-                });
-                
-                // 開催日が近い順にソート
-                eventsData.sort((a, b) => {
-                    const todayTime = today.getTime();
-                    let startA = a.start_date ? new Date(a.start_date.replace(/-/g, '/')).getTime() : Infinity;
-                    let startB = b.start_date ? new Date(b.start_date.replace(/-/g, '/')).getTime() : Infinity;
-                    if (isNaN(startA)) startA = Infinity;
-                    if (isNaN(startB)) startB = Infinity;
-
-                    let sortKeyA = startA < todayTime ? todayTime : startA;
-                    let sortKeyB = startB < todayTime ? todayTime : startB;
-
-                    if (sortKeyA === sortKeyB) {
-                        let endA = a.end_date ? new Date(a.end_date.replace(/-/g, '/')).getTime() : Infinity;
-                        let endB = b.end_date ? new Date(b.end_date.replace(/-/g, '/')).getTime() : Infinity;
-                        if (isNaN(endA)) endA = Infinity;
-                        if (isNaN(endB)) endB = Infinity;
-                        return endA - endB;
-                    }
-                    return sortKeyA - sortKeyB;
-                });
-
-                renderEvents();
-            } catch(e) { console.error('Events parse error', e); }
-
-            // ▼ タブのクリックイベント ▼
+            // タブのクリックイベント
             document.querySelectorAll('.tab-item').forEach(tab => {
                 tab.addEventListener('click', () => {
                     const targetArea = tab.getAttribute('data-area');
@@ -1906,6 +1810,9 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
                     render(targetArea);
                 });
             });
+
+            // ▼ データ読み込みと描画の実行 ▼
+            loadAllData();
         });
 
         function toggleMobileMenu() {
