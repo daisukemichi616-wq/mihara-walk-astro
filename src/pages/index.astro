@@ -1,5 +1,7 @@
 ---
-// ▼ Astroのビルド時（裏側のサーバー）でデータを取得 ▼
+import Papa from 'papaparse';
+
+// ▼ 1. Astroのビルド時（裏側のサーバー）でデータを取得 ▼
 
 let popData = { population: 0, households: 0, latestDate: '', isError: false };
 let formattedDate = '';
@@ -80,7 +82,6 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR0jkQnLXsIL33p
 const LOCAL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTia8V00j15toSprtd2bQV4JWrZprRz7m_cf73IZla6KOu62wtunUjCrb9wKkyNthWep8TfDeT8HW2B/pub?gid=1467172273&single=true&output=csv";
 const EVENT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqAv0S9Shfo2bXUlTuP4jtkZ75D-wt4qCl-P_GOFYMu53peSOEwy7EhbUSUEeBi_T0jehNRIbgp91M/pub?output=csv";
 
-// ▼ エラーの原因だった「papaparse」を使わずに自前でCSVを読み込む関数 ▼
 async function fetchAndParseCSV(url: string) {
   try {
     const res = await fetch(url);
@@ -796,33 +797,11 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         </nav>
         
         <div id="gallery-wrap" class="relative z-30 pt-0 mt-2 px-0 max-w-5xl mx-auto">
+            <!-- ▼ 以前の正常に動いていた「空のコンテナ」に戻しました ▼ -->
             <div id="gallery-grid" class="photo-grid">
-                {processedSpots.length === 0 ? (
-                    <div class="col-span-3 py-32 text-center text-[10px] font-bold text-gray-300 uppercase tracking-widest lang-jp">データがありません</div>
-                ) : (
-                    processedSpots.map((spot: any, index: number) => {
-                        const driveId = getDriveId(spot.image);
-                        const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
-                        const areaLabelJp = areaLabels[spot.area] ? areaLabels[spot.area].jp : '三原';
-                        const areaLabelEn = areaLabels[spot.area] ? areaLabels[spot.area].en : 'MIHARA';
-                        const slug = (spot.title || '').replace(/[\/\\]/g, '-');
-                        
-                        return (
-                            <a href={`/spot/${slug}/`} class={`photo-item block spot-card ${index < 12 ? '' : 'hidden'}`} data-area={spot.area}>
-                                <img src={imgUrl} loading="lazy" alt={spot.title} data-f-step="0" onerror={`handleImgErr(this, '${driveId}')`} />
-                                <div class="photo-overlay">
-                                    <span class="text-[9px] text-white font-bold tracking-widest uppercase mb-1 lang-jp">{areaLabelJp}</span>
-                                    <span class="text-[9px] text-white font-bold tracking-widest uppercase mb-1 lang-en">{areaLabelEn}</span>
-                                    <span class="text-sm text-white font-bold serif-custom drop-shadow-md lang-jp">{spot.title}</span>
-                                    <span class="text-sm text-white font-bold serif-custom drop-shadow-md lang-en">{spot.title_en || spot.title}</span>
-                                </div>
-                            </a>
-                        );
-                    })
-                )}
+                <div class="col-span-3 py-32 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
-            
-            <div id="load-more-area" class={`text-center py-10 ${processedSpots.length > 12 ? '' : 'hidden'}`}>
+            <div id="load-more-area" class="text-center py-10 hidden">
                 <button onclick="loadMoreItems()" class="bg-[#004098] text-white text-xs font-bold py-3 px-10 rounded-full hover:opacity-90 transition shadow-lg tracking-widest" data-i18n="load-more-btn">MORE PHOTOS</button>
             </div>
         </div>
@@ -843,70 +822,13 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-local" data-i18n="title-local">みはらさんぽログ</h2>
             <p class="text-xs sm:text-sm font-bold text-gray-500 mb-6 px-4 sm:px-6 leading-relaxed" id="desc-local" data-i18n="desc-local">ガイドブックには載らない、三原の何気ない日常と<br>新しい発見。歩いて見つける三原の魅力ログ。</p>
             
+            <!-- ▼ 以前の正常に動いていた「空のコンテナ」に戻しました ▼ -->
             <div id="local-scroll-container" class="horizontal-scroll-container text-left mb-0">
-                {processedLocal.length === 0 ? (
-                    <div class="w-full py-20 text-center bg-white rounded-xl border border-dashed border-gray-300 mx-6 sm:mx-0 flex flex-col items-center justify-center">
-                        <i class="fa-solid fa-person-walking text-4xl text-gray-200 mb-4"></i>
-                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest lang-jp">現在、お散歩コースを準備中です...</span>
-                    </div>
-                ) : (
-                    processedLocal.map((spot: any, index: number) => {
-                        const driveId = getDriveId(spot.image);
-                        const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w800');
-                        const areaLabelJp = areaLabels[spot.area] ? areaLabels[spot.area].jp : '三原';
-                        const areaLabelEn = areaLabels[spot.area] ? areaLabels[spot.area].en : 'MIHARA';
-                        const tagJp = spot.tag || "👟 みはらさんぽ";
-                        const tagEn = spot.tag_en || spot.tag || "👟 Mihara Walk";
-                        const safeDate = spot.date ? spot.date.split(' ')[0].replace(/\//g, '.') : '';
-                        const slug = (spot.title || '').replace(/[\/\\]/g, '-');
-                        const descStr = stripHtml(spot.desc);
-                        const descStrEn = stripHtml(spot.desc_en || spot.desc);
-
-                        return (
-                            <div class={`local-card-horizontal local-spot-card block ${index < 8 ? '' : 'hidden'}`} data-title={spot.title} ondragstart="return false;">
-                                <div class="local-card-img-wrap">
-                                    <div class="local-tag-badge lang-jp">{tagJp}</div>
-                                    <div class="local-tag-badge lang-en">{tagEn}</div>
-                                    <img src={imgUrl} loading="lazy" alt={spot.title} data-f-step="0" onerror={`handleImgErr(this, '${driveId}')`} />
-                                </div>
-                                <div class="local-card-content">
-                                    <h4 class="local-card-title lang-jp">{spot.title}</h4>
-                                    <h4 class="local-card-title lang-en">{spot.title_en || spot.title}</h4>
-                                    <p class="local-card-desc lang-jp">{descStr}</p>
-                                    <p class="local-card-desc lang-en">{descStrEn}</p>
-                                    
-                                    <div class="mt-auto border-t border-dashed border-gray-200 pt-2 pointer-events-auto">
-                                        <div class="flex justify-between items-center pointer-events-none">
-                                            <span class="local-area lang-jp"><i class="fa-solid fa-location-dot mr-1"></i> {areaLabelJp}</span>
-                                            <span class="local-area lang-en"><i class="fa-solid fa-location-dot mr-1"></i> {areaLabelEn}</span>
-                                            {safeDate ? <span class="text-[8px] text-gray-400 font-bold tracking-widest"><i class="fa-regular fa-clock mr-1"></i>{safeDate}</span> : null}
-                                        </div>
-                                        <a href={`/local-log/${slug}/`} class="local-read-link" onclick="event.stopPropagation()">
-                                            <span class="read-text lang-jp">さんぽログを読む</span>
-                                            <span class="read-text lang-en">READ MORE</span>
-                                            <span class="read-icon"><i class="fa-solid fa-arrow-right"></i></span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })
-                )}
-
-                {processedLocal.length > 8 && (
-                    <div id="local-more-card-btn" class="local-card-horizontal justify-center items-center bg-slate-50 border-2 border-dashed border-slate-300 hover:bg-slate-100 snap-start cursor-pointer" onclick="loadMoreLocalInsights()">
-                        <div class="flex flex-col items-center justify-center h-full w-full py-10 pointer-events-none">
-                            <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm mb-3">
-                                <i class="fa-solid fa-arrow-right text-[var(--palette-blue)]"></i>
-                            </div>
-                            <span class="text-[10px] font-bold text-[var(--palette-blue)] tracking-widest uppercase text-center leading-tight">MORE<br>LOGS</span>
-                        </div>
-                    </div>
-                )}
+                <div class="w-full text-center py-10 text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
             
             <div id="local-scroll-dots" class="scroll-dots-container"></div>
-            <div id="local-map-container" style={processedLocal.length === 0 ? "display:none;" : ""}></div>
+            <div id="local-map-container" style="display:none;"></div>
         </div>
     </section>
 
@@ -923,42 +845,9 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             <h2 class="serif-custom text-blue-900 text-2xl md:text-3xl mb-4" id="title-event" data-i18n="title-event">三原のイベント情報</h2>
             <p class="text-xs sm:text-sm font-bold text-gray-500 mb-8 px-4 sm:px-6 leading-relaxed" id="desc-event" data-i18n="desc-event">週末のお出かけにぴったりな、<br>三原市内のイベントや催し物をお届けします。</p>
             
-            <div id="event-empty-state" class="w-full py-16 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200 hidden">
-                <i class="fa-regular fa-calendar-xmark text-3xl text-gray-300 mb-3"></i>
-                <div class="text-xs font-bold text-gray-400 lang-jp">現在、予定されているイベントはありません。</div>
-                <div class="text-xs font-bold text-gray-400 lang-en">No upcoming events currently scheduled.</div>
-            </div>
-
+            <!-- ▼ 以前の正常に動いていた「空のコンテナ」に戻しました ▼ -->
             <div id="events-container" class="px-6 sm:px-0 grid gap-4 md:grid-cols-1 max-w-3xl mx-auto text-left">
-                {processedEvents.map((event: any, index: number) => {
-                    const safeDate = event.date_str || '開催日未定';
-                    const safeDateEn = event.date_str_en || safeDate;
-                    const slug = (event.title || '').replace(/[\/\\]/g, '-');
-                    
-                    return (
-                        <a href={`/event/${slug}/`} class="event-card event-card-item cursor-pointer block hidden" data-end-date={event.end_date} data-start-date={event.start_date}>
-                            <div class="event-date-box">
-                                <i class="fa-regular fa-calendar text-xl mb-1.5 opacity-70"></i>
-                                <span class="text-[12px] sm:text-[13px] font-bold leading-tight lang-jp" style="word-break: keep-all;">{safeDate}</span>
-                                <span class="text-[12px] sm:text-[13px] font-bold leading-tight lang-en" style="word-break: keep-all;">{safeDateEn}</span>
-                            </div>
-                            <div class="event-content-box">
-                                <h4 class="font-bold text-blue-900 text-[15px] sm:text-[17px] mb-2 leading-snug lang-jp">{event.title}</h4>
-                                <h4 class="font-bold text-blue-900 text-[15px] sm:text-[17px] mb-2 leading-snug lang-en">{event.title_en || event.title}</h4>
-                                <p class="text-xs text-gray-500 leading-relaxed mb-3 lang-jp" set:html={event.desc.replace(/\n/g, '<br>')}></p>
-                                <p class="text-xs text-gray-500 leading-relaxed mb-3 lang-en" set:html={(event.desc_en || event.desc).replace(/\n/g, '<br>')}></p>
-                                <div class="mt-auto flex justify-end">
-                                    <span class="text-[10px] font-bold text-blue-500 flex items-center gap-1 hover:text-blue-700 transition lang-jp">
-                                        詳細を見る <i class="fa-solid fa-chevron-right text-[8px] ml-0.5"></i>
-                                    </span>
-                                    <span class="text-[10px] font-bold text-blue-500 flex items-center gap-1 hover:text-blue-700 transition lang-en">
-                                        Details <i class="fa-solid fa-chevron-right text-[8px] ml-0.5"></i>
-                                    </span>
-                                </div>
-                            </div>
-                        </a>
-                    );
-                })}
+                <div class="w-full py-10 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" data-i18n="loading-text">Collecting memories...</div>
             </div>
 
             <div id="event-load-more-area" class="text-center py-10 hidden mt-4">
@@ -1045,12 +934,9 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         <p class="footer-produced">PRODUCED BY MICHIM | PHOTOS BY MIHARA LOVERS</p>
     </footer>
 
+    <!-- ▼ 元の「JavaScriptでカードを動的生成する」方式に戻しました ▼ -->
     <script is:inline>
         let currentLang = 'jp';
-
-        // =========================================================================
-        // 🚀 グローバル変数と初期化関数群 🚀
-        // =========================================================================
 
         function initAnimations() {
             gsap.registerPlugin(ScrollTrigger);
@@ -1301,9 +1187,9 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             }
 
             updateWeatherUI();
-            
-            // UI更新後に現在のタブで再描画（隠しているカードを再度制御する）
-            render(currentActiveArea);
+            if(spotsData.length > 0) render(currentActiveArea);
+            renderLocalInsights(); 
+            renderEvents(); 
         }
 
         window.toggleLanguage = function() {
@@ -1331,7 +1217,7 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         }
 
         // =========================================================================
-        // 🚀 新しいUI描画ロジック（SSG対応版） 🚀
+        // 🚀 マップ・カードの動的生成ロジック（元の方式） 🚀
         // =========================================================================
 
         let localMapInstance = null;
@@ -1348,7 +1234,7 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         };
         
         const ITEMS_PER_PAGE = 12;
-        let currentFilteredCards = [];
+        let currentFilteredData = [];
         let displayedCount = 0;
         let currentActiveArea = 'all';
         let mapInstance = null;
@@ -1357,17 +1243,26 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
         const EVENTS_PER_PAGE = 10;
         let eventsDisplayedCount = 0;
-        let validEventsCards = [];
 
         const LOCAL_ITEMS_PER_PAGE = 8;
         let localDisplayedCount = 0;
         
-        // ▼ マップ描画用のデータをJSONタグから取得 ▼
+        // ▼ マップ描画用のデータをJSONからパース ▼
         let spotsData = [];
         let localInsightsData = [];
+        let eventsData = [];
         
-        try { spotsData = JSON.parse(document.getElementById('spots-data-json')?.textContent || '[]'); } catch(e){}
-        try { localInsightsData = JSON.parse(document.getElementById('local-data-json')?.textContent || '[]'); } catch(e){}
+        function getDriveId(urlOrId) {
+            if (!urlOrId) return '';
+            const match = urlOrId.toString().match(/[-\w]{25,}/);
+            return match ? match[0] : '';
+        }
+
+        function getPrimaryImgUrl(driveId, urlOrId, size = 'w1000') {
+            if (driveId) return `https://lh3.googleusercontent.com/d/${driveId}=${size}`;
+            if (urlOrId && urlOrId.toString().startsWith('http')) return urlOrId.toString().replace('http://', 'https://');
+            return '';
+        }
 
         window.handleImgErr = function(img, driveId) {
             if (!img || !driveId) {
@@ -1422,25 +1317,33 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
 
         function escapeHtml(str) {
             if (!str) return '';
-            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+        
+        function stripHtml(html) {
+            let tmp = document.createElement("DIV");
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || "";
         }
 
         function updateMapMarkers() {
             if (!mapInstance || !markersClusterGroup) return;
             markersClusterGroup.clearLayers();
             let hasMarkers = false;
-            
-            const filteredData = currentActiveArea === 'all' ? spotsData : spotsData.filter(s => s.area === currentActiveArea);
 
-            filteredData.forEach(spot => {
+            currentFilteredData.forEach(spot => {
                 if (spot.lat && spot.lng) {
                     const lat = parseFloat(spot.lat); const lng = parseFloat(spot.lng);
                     if (isNaN(lat) || isNaN(lng)) return;
                     hasMarkers = true;
 
-                    const match = (spot.image||'').toString().match(/[-\w]{25,}/);
-                    const driveId = match ? match[0] : '';
-                    const imgUrl = driveId ? `https://lh3.googleusercontent.com/d/${driveId}=w500` : spot.image;
+                    const driveId = getDriveId(spot.image);
+                    const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
                     const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
                     
                     const titleStr = currentLang === 'en' ? (spot.title_en || spot.title) : spot.title;
@@ -1467,21 +1370,19 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in-view'); obs.unobserve(e.target); }});
         }, { threshold: 0.25 });
 
-        // ▼ JSでのDOM生成をやめ、すでに存在するHTML要素の表示/非表示を切り替える ▼
+        // ▼ PHOTO MAP の描画 ▼
         function render(filter) {
             currentActiveArea = filter; 
+            const grid = document.getElementById('gallery-grid');
             const loadMoreArea = document.getElementById('load-more-area');
-            const allCards = Array.from(document.querySelectorAll('.spot-card'));
-            
-            currentFilteredCards = allCards.filter(card => {
-                return filter === 'all' || card.getAttribute('data-area') === filter;
-            });
+            const filtered = filter === 'all' ? [...spotsData] : spotsData.filter(s => s.area === filter);
+            currentFilteredData = filtered;
 
-            allCards.forEach(card => card.classList.add('hidden'));
-            
+            if (grid) grid.innerHTML = '';
             displayedCount = 0;
 
-            if (currentFilteredCards.length === 0) {
+            if (currentFilteredData.length === 0) {
+                if (grid) grid.innerHTML = `<div class="col-span-3 py-32 text-center text-[10px] font-bold text-gray-300 uppercase tracking-widest">${currentLang === 'en' ? 'No Items Found' : 'データがありません'}</div>`;
                 if (loadMoreArea) loadMoreArea.classList.add('hidden');
             } else {
                 loadMoreItems();
@@ -1491,17 +1392,39 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
         }
 
         window.loadMoreItems = function() {
+            const grid = document.getElementById('gallery-grid');
             const loadMoreArea = document.getElementById('load-more-area');
-            const nextItems = currentFilteredCards.slice(displayedCount, displayedCount + ITEMS_PER_PAGE);
+            if (!grid) return;
 
-            nextItems.forEach((card) => {
-                card.classList.remove('hidden');
-                itemObserver.observe(card);
+            const nextItems = currentFilteredData.slice(displayedCount, displayedCount + ITEMS_PER_PAGE);
+
+            nextItems.forEach((spot) => {
+                const driveId = getDriveId(spot.image);
+                const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
+                const areaName = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
+                
+                const slug = (spot.title || '').replace(/[\/\\]/g, '-');
+                const item = document.createElement('a');
+                item.href = `/spot/${slug}/`;
+                item.className = 'photo-item block';
+                
+                const titleStr = currentLang === 'en' ? (spot.title_en || spot.title) : spot.title;
+                const safeAlt = escapeHtml(titleStr);
+                
+                item.innerHTML = `
+                    <img src="${imgUrl}" loading="lazy" alt="${safeAlt}" data-f-step="0" onerror="handleImgErr(this, '${driveId}')">
+                    <div class="photo-overlay">
+                        <span class="text-[9px] text-white font-bold tracking-widest uppercase mb-1">${areaName}</span>
+                        <span class="text-sm text-white font-bold serif-custom drop-shadow-md">${safeAlt}</span>
+                    </div>
+                `;
+                grid.appendChild(item);
+                itemObserver.observe(item);
             });
-            
             displayedCount += nextItems.length;
+            
             if (loadMoreArea) {
-                if (displayedCount < currentFilteredCards.length) loadMoreArea.classList.remove('hidden');
+                if (displayedCount < currentFilteredData.length) loadMoreArea.classList.remove('hidden');
                 else loadMoreArea.classList.add('hidden');
             }
         };
@@ -1514,168 +1437,326 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             localMarkersGroup = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 50, spiderfyOnMaxZoom: true });
             localMapInstance.addLayer(localMarkersGroup);
             localMapInstance.once('focus', function() { localMapInstance.scrollWheelZoom.enable(); });
-            
-            // HTMLに出力済みのデータからマーカーを作成
-            localInsightsData.forEach(spot => {
-                 if (spot.lat && spot.lng) {
-                    const lat = parseFloat(spot.lat); const lng = parseFloat(spot.lng);
-                    if (!isNaN(lat) && !isNaN(lng)) {
-                        const match = (spot.image||'').toString().match(/[-\w]{25,}/);
-                        const driveId = match ? match[0] : '';
-                        const imgUrl = driveId ? `https://lh3.googleusercontent.com/d/${driveId}=w500` : spot.image;
-                        const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][currentLang] : (currentLang==='en'?'MIHARA':'三原');
-                        const titleStr = currentLang === 'en' ? (spot.title_en || spot.title) : spot.title;
-                        const safeAlt = escapeHtml(titleStr);
-                        const slug = (spot.title || '').replace(/[\/\\]/g, '-');
-                        
-                        const popupContent = `
-                            <a href="/local-log/${slug}/" style="display:block; text-decoration:none; color:inherit;">
-                                <div class="popup-img-wrap"><img src="${imgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
-                                <div class="popup-info">
-                                    <span class="popup-area">${areaLabel}</span>
-                                    <div class="popup-title">${safeAlt}</div>
-                                    <div class="popup-more">${currentLang === 'en' ? 'Details' : '詳細を見る'} <i class="fa-solid fa-chevron-right text-[8px] ml-1"></i></div>
-                                </div>
-                            </a>`;
-                        
-                        const marker = L.marker([lat, lng]).bindPopup(popupContent);
-                        localMarkersGroup.addLayer(marker);
-                        localMarkersMap[spot.title] = marker;
-                    }
-                }
-            });
         }
 
         let isCardTapping = false;
 
+        // ▼ みはらさんぽログ の描画 ▼
         function renderLocalInsights() {
-            const allCards = Array.from(document.querySelectorAll('.local-spot-card'));
-            if(allCards.length === 0) return;
+            const container = document.getElementById('local-scroll-container');
+            const mapContainer = document.getElementById('local-map-container');
+            if (!container) return;
             
-            if (!localMapInstance) initLocalMap();
-
-            allCards.forEach(card => card.classList.add('hidden'));
+            container.innerHTML = '';
             localDisplayedCount = 0;
+
+            if (localInsightsData.length === 0) {
+                container.innerHTML = `
+                    <div class="w-full py-20 text-center bg-white rounded-xl border border-dashed border-gray-300 mx-6 sm:mx-0 flex flex-col items-center justify-center">
+                        <i class="fa-solid fa-person-walking text-4xl text-gray-200 mb-4"></i>
+                        <span class="text-[11px] font-bold text-gray-400 uppercase tracking-widest" data-i18n="local-empty">現在、お散歩コースを準備中です...</span>
+                    </div>
+                `;
+                const el = container.querySelector('[data-i18n="local-empty"]');
+                if (el && i18nData['local-empty']['normal'][currentLang]) {
+                    el.innerHTML = i18nData['local-empty']['normal'][currentLang];
+                }
+                if (mapContainer) mapContainer.style.display = 'none';
+                return;
+            }
+
+            if (mapContainer) mapContainer.style.display = 'block';
+            if (!localMapInstance) initLocalMap();
+            if (localMarkersGroup) localMarkersGroup.clearLayers();
+            localMarkersMap = {};
+
+            let scrollTimeout;
+            const handleScroll = () => {
+                if (isCardTapping) return; 
+
+                if (scrollTimeout) clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    if (isCardTapping) return;
+
+                    const cards = container.querySelectorAll('.local-card-horizontal');
+                    if (cards.length === 0) return;
+
+                    const maxScroll = container.scrollWidth - container.clientWidth;
+                    let activeIndex = 0;
+
+                    if (maxScroll > 0) {
+                        const scrollRatio = container.scrollLeft / maxScroll;
+                        const maxIndex = cards.length > 1 ? cards.length - 2 : 0; 
+                        activeIndex = Math.round(scrollRatio * maxIndex);
+                    }
+
+                    cards.forEach((c, index) => {
+                        if (index === activeIndex) {
+                            if (!c.classList.contains('active-card')) {
+                                c.classList.add('active-card');
+                                const title = c.dataset.title;
+                                if (title) { 
+                                    const marker = localMarkersMap[title];
+                                    if (marker && localMapInstance) {
+                                        localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
+                                        marker.openPopup();
+                                    }
+                                }
+                            }
+                        } else {
+                            c.classList.remove('active-card');
+                        }
+                    });
+
+                    const dots = document.querySelectorAll('#local-scroll-dots .scroll-dot');
+                    dots.forEach((dot, index) => {
+                        dot.classList.toggle('active', index === activeIndex);
+                    });
+                }, 50); 
+            };
+
+            container.removeEventListener('scroll', handleScroll);
+            container.addEventListener('scroll', handleScroll);
 
             loadMoreLocalInsights();
         }
 
         window.loadMoreLocalInsights = function() {
-            const allCards = Array.from(document.querySelectorAll('.local-spot-card'));
-            const moreBtn = document.getElementById('local-more-card-btn');
-            
-            const nextItems = allCards.slice(localDisplayedCount, localDisplayedCount + LOCAL_ITEMS_PER_PAGE);
-            
-            nextItems.forEach(card => {
-                card.classList.remove('hidden');
+            const container = document.getElementById('local-scroll-container');
+            if (!container) return;
+
+            const existingMoreBtn = document.getElementById('local-more-card-btn');
+            if (existingMoreBtn) existingMoreBtn.remove();
+
+            const nextItems = localInsightsData.slice(localDisplayedCount, localDisplayedCount + LOCAL_ITEMS_PER_PAGE);
+            let hasNewMarkers = false;
+
+            nextItems.forEach((spot) => {
+                const driveId = getDriveId(spot.image);
+                const imgUrl = getPrimaryImgUrl(driveId, spot.image, 'w800');
+                const lang = currentLang;
+                const title = (lang === 'en' && spot.title_en) ? spot.title_en : spot.title;
+                const desc = (lang === 'en' && spot.desc_en) ? spot.desc_en : spot.desc;
+                
+                const defaultTagJp = "👟 みはらさんぽ";
+                const defaultTagEn = "👟 Mihara Walk";
+                const tag = lang === 'en' ? (spot.tag_en || spot.tag || defaultTagEn) : (spot.tag || defaultTagJp);
+                
+                const areaLabel = areaLabels[spot.area] ? areaLabels[spot.area][lang] : (lang==='en'?'MIHARA':'三原');
+                const safeDate = spot.date ? escapeHtml(spot.date.split(' ')[0].replace(/\//g, '.')) : '';
+                const slug = (spot.title || '').replace(/[\/\\]/g, '-');
+                
+                const card = document.createElement('div');
+                card.className = 'local-card-horizontal block';
+                card.dataset.title = spot.title; 
+                card.ondragstart = () => false;
+                
+                card.onclick = (e) => { 
+                    if (window.isDragged) { e.preventDefault(); return; }
+                    
+                    isCardTapping = true; 
+
+                    const allCards = container.querySelectorAll('.local-card-horizontal');
+                    allCards.forEach(c => c.classList.remove('active-card'));
+                    card.classList.add('active-card');
+                    
+                    const marker = localMarkersMap[spot.title];
+                    if (marker && localMapInstance) {
+                        localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
+                        marker.openPopup();
+                    }
+
+                    const index = Array.from(allCards).indexOf(card);
+                    const dots = document.querySelectorAll('#local-scroll-dots .scroll-dot');
+                    dots.forEach((dot, i) => {
+                        dot.classList.toggle('active', i === index);
+                    });
+
+                    const containerLeft = container.getBoundingClientRect().left;
+                    const cardLeft = card.getBoundingClientRect().left;
+                    container.scrollBy({ left: cardLeft - containerLeft - 24, behavior: 'smooth' });
+
+                    setTimeout(() => { isCardTapping = false; }, 600);
+                };
+
+                const safeAlt = escapeHtml(title);
+                const safeDesc = stripHtml(desc);
+
+                card.innerHTML = `
+                    <div class="local-card-img-wrap">
+                        <div class="local-tag-badge">${escapeHtml(tag)}</div>
+                        <img src="${imgUrl}" loading="lazy" alt="${safeAlt}" data-f-step="0" onerror="handleImgErr(this, '${driveId}')">
+                    </div>
+                    <div class="local-card-content">
+                        <h4 class="local-card-title">${safeAlt}</h4>
+                        <p class="local-card-desc">${safeDesc}</p>
+                        
+                        <div class="mt-auto border-t border-dashed border-gray-200 pt-2 pointer-events-auto">
+                            <div class="flex justify-between items-center pointer-events-none">
+                                <span class="local-area"><i class="fa-solid fa-location-dot mr-1"></i> ${areaLabel}</span>
+                                ${safeDate ? `<span class="text-[8px] text-gray-400 font-bold tracking-widest"><i class="fa-regular fa-clock mr-1"></i>${safeDate}</span>` : ''}
+                            </div>
+                            <a href="/local-log/${slug}/" class="local-read-link" onclick="event.stopPropagation()">
+                                <span class="read-text">${lang === 'en' ? 'READ MORE' : 'さんぽログを読む'}</span>
+                                <span class="read-icon"><i class="fa-solid fa-arrow-right"></i></span>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+
+                if (spot.lat && spot.lng) {
+                    const lat = parseFloat(spot.lat); const lng = parseFloat(spot.lng);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        hasNewMarkers = true;
+                        const popupImgUrl = getPrimaryImgUrl(driveId, spot.image, 'w500');
+                        
+                        const popupContent = `
+                            <a href="/local-log/${slug}/" style="display:block; text-decoration:none; color:inherit;">
+                                <div class="popup-img-wrap"><img src="${popupImgUrl}" class="popup-img" data-f-step="0" onerror="handleImgErr(this, '${driveId}')"></div>
+                                <div class="popup-info">
+                                    <span class="popup-area">${areaLabel}</span>
+                                    <div class="popup-title">${safeAlt}</div>
+                                    <div class="popup-more">${lang === 'en' ? 'Details' : '詳細を見る'} <i class="fa-solid fa-chevron-right text-[8px] ml-1"></i></div>
+                                </div>
+                            </a>`;
+                        
+                        if (localMarkersGroup) {
+                            const marker = L.marker([lat, lng]).bindPopup(popupContent);
+                            localMarkersGroup.addLayer(marker);
+                            localMarkersMap[spot.title] = marker;
+                        }
+                    }
+                }
             });
-            
+
             localDisplayedCount += nextItems.length;
 
-            if (moreBtn) {
-                if (localDisplayedCount < allCards.length) {
-                    moreBtn.classList.remove('hidden');
-                    const container = document.getElementById('local-scroll-container');
-                    container.appendChild(moreBtn);
-                } else {
-                    moreBtn.classList.add('hidden');
-                }
+            if (localDisplayedCount < localInsightsData.length) {
+                const moreBtn = document.createElement('div');
+                moreBtn.id = 'local-more-card-btn';
+                moreBtn.className = 'local-card-horizontal justify-center items-center bg-slate-50 border-2 border-dashed border-slate-300 hover:bg-slate-100 snap-start';
+                moreBtn.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full w-full py-10 pointer-events-none">
+                        <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm mb-3">
+                            <i class="fa-solid fa-arrow-right text-[var(--palette-blue)]"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-[var(--palette-blue)] tracking-widest uppercase text-center leading-tight">MORE<br>LOGS</span>
+                    </div>
+                `;
+                moreBtn.onclick = () => {
+                    loadMoreLocalInsights();
+                    setTimeout(() => {
+                        container.scrollBy({ left: window.innerWidth * 0.4, behavior: 'smooth' });
+                    }, 100);
+                };
+                container.appendChild(moreBtn);
             }
 
             const dotsContainer = document.getElementById('local-scroll-dots');
             if (dotsContainer) {
+                const totalDots = localDisplayedCount;
                 let dotsHTML = '';
-                for (let i = 0; i < localDisplayedCount; i++) {
+                for (let i = 0; i < totalDots; i++) {
                     dotsHTML += `<div class="scroll-dot ${i === 0 ? 'active' : ''}"></div>`;
                 }
                 dotsContainer.innerHTML = dotsHTML;
             }
 
-            if (localMapInstance && localMarkersGroup && localDisplayedCount === nextItems.length) {
+            if (hasNewMarkers && localMapInstance && localMarkersGroup) {
                 setTimeout(() => {
                     localMapInstance.invalidateSize();
                     localMapInstance.fitBounds(localMarkersGroup.getBounds(), { padding: [30, 30], maxZoom: 14 });
                     
-                    const firstCard = nextItems[0];
-                    if (firstCard) {
-                        firstCard.classList.add('active-card');
-                        const title = firstCard.dataset.title;
-                        const marker = localMarkersMap[title];
-                        if (marker) {
-                            localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
-                            setTimeout(() => { marker.openPopup(); }, 500); 
+                    if (localDisplayedCount === nextItems.length) {
+                        const cards = container.querySelectorAll('.local-card-horizontal');
+                        cards.forEach(c => c.classList.remove('active-card'));
+                        const firstCard = cards[0];
+                        if (firstCard) {
+                            firstCard.classList.add('active-card');
+                            const title = firstCard.dataset.title;
+                            const marker = localMarkersMap[title];
+                            if (marker) {
+                                localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
+                                setTimeout(() => { marker.openPopup(); }, 500); 
+                            }
                         }
                     }
                 }, 300); 
             }
         };
 
+        // ▼ イベント情報 の描画 ▼
         function renderEvents(append = false) {
-            const allCards = Array.from(document.querySelectorAll('.event-card-item'));
+            const container = document.getElementById('events-container');
             const loadMoreArea = document.getElementById('event-load-more-area');
+            if (!container) return;
             
             if (!append) {
+                container.innerHTML = '';
                 eventsDisplayedCount = 0;
-                const today = new Date();
-                today.setHours(0, 0, 0, 0); 
-                
-                // 過去のイベントを除外
-                validEventsCards = allCards.filter(card => {
-                    const endDateStr = card.getAttribute('data-end-date');
-                    if (!endDateStr) return true;
-                    const endDate = new Date(endDateStr.replace(/-/g, '/')); 
-                    if (isNaN(endDate.getTime())) return true; 
-                    return endDate >= today; 
-                });
-
-                // 開催日が近い順にソート
-                validEventsCards.sort((a, b) => {
-                    const startAStr = a.getAttribute('data-start-date');
-                    const startBStr = b.getAttribute('data-start-date');
-                    let startA = startAStr ? new Date(startAStr.replace(/-/g, '/')).getTime() : Infinity;
-                    let startB = startBStr ? new Date(startBStr.replace(/-/g, '/')).getTime() : Infinity;
-                    if (isNaN(startA)) startA = Infinity;
-                    if (isNaN(startB)) startB = Infinity;
-                    
-                    let sortKeyA = startA < today.getTime() ? today.getTime() : startA;
-                    let sortKeyB = startB < today.getTime() ? today.getTime() : startB;
-                    
-                    if(sortKeyA === sortKeyB) {
-                        const endAStr = a.getAttribute('data-end-date');
-                        const endBStr = b.getAttribute('data-end-date');
-                        let endA = endAStr ? new Date(endAStr.replace(/-/g, '/')).getTime() : Infinity;
-                        let endB = endBStr ? new Date(endBStr.replace(/-/g, '/')).getTime() : Infinity;
-                        if (isNaN(endA)) endA = Infinity;
-                        if (isNaN(endB)) endB = Infinity;
-                        return endA - endB;
-                    }
-                    return sortKeyA - sortKeyB;
-                });
-
-                const container = document.getElementById('events-container');
-                allCards.forEach(c => c.remove()); 
-                validEventsCards.forEach(c => {
-                    c.classList.add('hidden');
-                    container.appendChild(c);
-                });
             }
 
-            if (validEventsCards.length === 0) {
-                document.getElementById('event-empty-state').classList.remove('hidden');
+            if (eventsData.length === 0) {
+                container.innerHTML = `
+                    <div class="w-full py-16 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                        <i class="fa-regular fa-calendar-xmark text-3xl text-gray-300 mb-3"></i>
+                        <div class="text-xs font-bold text-gray-400" data-i18n="event-empty">現在、予定されているイベントはありません。</div>
+                    </div>
+                `;
+                const el = container.querySelector('[data-i18n="event-empty"]');
+                if (el && i18nData['event-empty']['normal'][currentLang]) {
+                    el.innerHTML = i18nData['event-empty']['normal'][currentLang];
+                }
                 if (loadMoreArea) loadMoreArea.classList.add('hidden');
                 return;
-            } else {
-                const emptyState = document.getElementById('event-empty-state');
-                if(emptyState) emptyState.classList.add('hidden');
             }
 
-            const nextEvents = validEventsCards.slice(eventsDisplayedCount, eventsDisplayedCount + EVENTS_PER_PAGE);
-            nextEvents.forEach(card => card.classList.remove('hidden'));
+            const nextEvents = eventsData.slice(eventsDisplayedCount, eventsDisplayedCount + EVENTS_PER_PAGE);
+
+            nextEvents.forEach((event) => {
+                const lang = currentLang;
+                const title = (lang === 'en' && event.title_en) ? event.title_en : event.title;
+                const desc = (lang === 'en' && event.desc_en) ? event.desc_en : event.desc;
+                const dateStr = (lang === 'en' && event.date_str_en) ? event.date_str_en : event.date_str;
+
+                const safeTitle = escapeHtml(title);
+                const safeDesc = escapeHtml(desc).replace(/\n/g, '<br>');
+                const safeDate = escapeHtml(dateStr || '開催日未定');
+                
+                const slug = (event.title || '').replace(/[\/\\]/g, '-');
+                const detailUrl = `/event/${slug}/`;
+                
+                const card = document.createElement('a');
+                card.href = detailUrl;
+                card.className = 'event-card cursor-pointer block'; 
+
+                card.innerHTML = `
+                    <div class="event-date-box">
+                        <i class="fa-regular fa-calendar text-xl mb-1.5 opacity-70"></i>
+                        <span class="text-[12px] sm:text-[13px] font-bold leading-tight" style="word-break: keep-all;">${safeDate}</span>
+                    </div>
+                    <div class="event-content-box">
+                        <h4 class="font-bold text-blue-900 text-[15px] sm:text-[17px] mb-2 leading-snug">${safeTitle}</h4>
+                        <p class="text-xs text-gray-500 leading-relaxed mb-3">${safeDesc}</p>
+                        <div class="mt-auto flex justify-end">
+                            <span class="text-[10px] font-bold text-blue-500 flex items-center gap-1 hover:text-blue-700 transition">
+                                ${lang === 'en' ? 'Details' : '詳細を見る'} <i class="fa-solid fa-chevron-right text-[8px] ml-0.5"></i>
+                            </span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
             eventsDisplayedCount += nextEvents.length;
 
             if (loadMoreArea) {
-                if (eventsDisplayedCount < validEventsCards.length) loadMoreArea.classList.remove('hidden');
-                else loadMoreArea.classList.add('hidden');
+                if (eventsDisplayedCount < eventsData.length) {
+                    loadMoreArea.classList.remove('hidden');
+                } else {
+                    loadMoreArea.classList.add('hidden');
+                }
             }
         }
 
@@ -1725,81 +1806,7 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
                     if (Math.abs(walk) > 5) window.isDragged = true; 
                     scrollContainer.scrollLeft = window.scrollLeft - walk;
                 });
-
-                // さんぽログのスクロール処理
-                let scrollTimeout;
-                scrollContainer.addEventListener('scroll', () => {
-                    if (isCardTapping) return; 
-                    if (scrollTimeout) clearTimeout(scrollTimeout);
-                    scrollTimeout = setTimeout(() => {
-                        if (isCardTapping) return;
-                        const cards = scrollContainer.querySelectorAll('.local-spot-card:not(.hidden)');
-                        if (cards.length === 0) return;
-
-                        const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
-                        let activeIndex = 0;
-                        if (maxScroll > 0) {
-                            const scrollRatio = scrollContainer.scrollLeft / maxScroll;
-                            const maxIndex = cards.length > 1 ? cards.length - 2 : 0; 
-                            activeIndex = Math.round(scrollRatio * maxIndex);
-                        }
-
-                        cards.forEach((c, index) => {
-                            if (index === activeIndex) {
-                                if (!c.classList.contains('active-card')) {
-                                    c.classList.add('active-card');
-                                    const title = c.dataset.title;
-                                    if (title) { 
-                                        const marker = localMarkersMap[title];
-                                        if (marker && localMapInstance) {
-                                            localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
-                                            marker.openPopup();
-                                        }
-                                    }
-                                }
-                            } else {
-                                c.classList.remove('active-card');
-                            }
-                        });
-
-                        const dots = document.querySelectorAll('#local-scroll-dots .scroll-dot');
-                        dots.forEach((dot, index) => {
-                            dot.classList.toggle('active', index === activeIndex);
-                        });
-                    }, 50); 
-                });
             }
-
-            // Local Insights カードへのクリックイベント付与
-            document.querySelectorAll('.local-spot-card').forEach((card) => {
-                card.onclick = (e) => {
-                    if (window.isDragged) { e.preventDefault(); return; }
-                    isCardTapping = true; 
-                    const container = document.getElementById('local-scroll-container');
-                    const allCards = container.querySelectorAll('.local-spot-card:not(.hidden)');
-                    allCards.forEach(c => c.classList.remove('active-card'));
-                    card.classList.add('active-card');
-                    
-                    const title = card.getAttribute('data-title');
-                    const marker = localMarkersMap[title];
-                    if (marker && typeof localMapInstance !== 'undefined') {
-                        localMapInstance.setView(marker.getLatLng(), 15, { animate: true, duration: 0.5 });
-                        marker.openPopup();
-                    }
-
-                    const index = Array.from(allCards).indexOf(card);
-                    const dots = document.querySelectorAll('#local-scroll-dots .scroll-dot');
-                    dots.forEach((dot, i) => {
-                        dot.classList.toggle('active', i === index);
-                    });
-
-                    const containerLeft = container.getBoundingClientRect().left;
-                    const cardLeft = card.getBoundingClientRect().left;
-                    container.scrollBy({ left: cardLeft - containerLeft - 24, behavior: 'smooth' });
-
-                    setTimeout(() => { isCardTapping = false; }, 600);
-                };
-            });
         });
 
         window.addEventListener('load', () => {
@@ -1820,11 +1827,63 @@ const safeEventsJson = JSON.stringify(processedEvents).replace(/</g, '\\u003c');
             updateUI();
             rotateSlides();
             
-            // 初回表示（JSで生成するのではなく、隠れている要素を「見せる」処理）
-            render('all'); 
-            renderLocalInsights();
-            renderEvents();
+            // ▼ HTMLに埋め込んだJSONデータを読み込んでJSの変数にセット ▼
+            try {
+                const spotsText = document.getElementById('spots-data-json')?.textContent;
+                spotsData = JSON.parse(spotsText || '[]');
+                render('all'); 
+            } catch(e) { 
+                console.error('Spots parse error', e); 
+                const grid = document.getElementById('gallery-grid');
+                if (grid) grid.innerHTML = '<div class="col-span-3 py-10 text-center text-xs text-red-400">データの読み込みに失敗しました。</div>';
+            }
 
+            try {
+                const localText = document.getElementById('local-data-json')?.textContent;
+                localInsightsData = JSON.parse(localText || '[]');
+                renderLocalInsights();
+            } catch(e) { console.error('Local parse error', e); }
+
+            try {
+                const eventsText = document.getElementById('events-data-json')?.textContent;
+                let rawEventsData = JSON.parse(eventsText || '[]');
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); 
+
+                // 過去のイベントを除外
+                eventsData = rawEventsData.filter(e => {
+                    if (!e.end_date) return true; 
+                    const endDate = new Date(e.end_date.replace(/-/g, '/')); 
+                    if (isNaN(endDate.getTime())) return true; 
+                    return endDate >= today; 
+                });
+                
+                // 開催日が近い順にソート
+                eventsData.sort((a, b) => {
+                    const todayTime = today.getTime();
+                    let startA = a.start_date ? new Date(a.start_date.replace(/-/g, '/')).getTime() : Infinity;
+                    let startB = b.start_date ? new Date(b.start_date.replace(/-/g, '/')).getTime() : Infinity;
+                    if (isNaN(startA)) startA = Infinity;
+                    if (isNaN(startB)) startB = Infinity;
+
+                    let sortKeyA = startA < todayTime ? todayTime : startA;
+                    let sortKeyB = startB < todayTime ? todayTime : startB;
+
+                    if (sortKeyA === sortKeyB) {
+                        let endA = a.end_date ? new Date(a.end_date.replace(/-/g, '/')).getTime() : Infinity;
+                        let endB = b.end_date ? new Date(b.end_date.replace(/-/g, '/')).getTime() : Infinity;
+                        if (isNaN(endA)) endA = Infinity;
+                        if (isNaN(endB)) endB = Infinity;
+                        return endA - endB;
+                    }
+                    return sortKeyA - sortKeyB;
+                });
+
+                renderEvents();
+            } catch(e) { console.error('Events parse error', e); }
+
+            // ▼ タブのクリックイベント ▼
             document.querySelectorAll('.tab-item').forEach(tab => {
                 tab.addEventListener('click', () => {
                     const targetArea = tab.getAttribute('data-area');
