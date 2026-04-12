@@ -1518,11 +1518,18 @@ try {
                 const safeDesc = escapeHtml(desc).replace(/\n/g, '<br>');
                 const safeDate = escapeHtml(dateStr || '開催日未定');
                 
-                const slug = (event.title || '').replace(/[\/\\]/g, '-');
-                const detailUrl = `/event/${slug}/`;
+                // ▼ 変更部分：詳細ページではなく、スプレッドシートのURLを直接使います ▼
+                const detailUrl = event.url ? event.url : 'javascript:void(0)';
                 
                 const card = document.createElement('a');
                 card.href = detailUrl;
+                
+                // URLがある場合は、別のタブ（ウィンドウ）で開くようにします
+                if (event.url) {
+                    card.target = '_blank';
+                    card.rel = 'noopener noreferrer';
+                }
+                
                 card.className = 'event-card cursor-pointer block'; 
 
                 card.innerHTML = `
