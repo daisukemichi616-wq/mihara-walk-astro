@@ -406,29 +406,6 @@
                 まだ知らない三原の景色を、<br class="mobile-br">
                 みんなで描くフォトマップ
             </h1>
-            
-            <div class="mt-6 sm:mt-10 flex flex-col w-full max-w-2xl px-4 sm:px-6 reveal-on-load relative z-30">
-                <div class="flex flex-row justify-center items-baseline gap-4 sm:gap-10 w-full">
-                    <!-- ▼ 初期表示を 0 にして、ブラウザ側でカウントアップさせます ▼ -->
-                    <div class="flex items-baseline leading-none">
-                        <span id="pop-count" class="text-[3rem] sm:text-[4.5rem] font-normal text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom">0</span>
-                        <span class="text-xs sm:text-base text-white ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp serif-custom tracking-widest whitespace-nowrap">人</span>
-                    </div>
-                    
-                    <div class="flex items-baseline leading-none">
-                        <span id="house-count" class="text-[1.8rem] sm:text-[3rem] font-normal text-white/90 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom">0</span>
-                        <span class="text-[10px] sm:text-sm text-white/90 ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp serif-custom tracking-widest whitespace-nowrap">世帯</span>
-                        <span class="text-[10px] sm:text-sm text-white/90 ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-en hidden serif-custom tracking-widest whitespace-nowrap">Households</span>
-                    </div>
-                </div>
-
-                <div class="w-full text-right mt-1 sm:mt-2">
-                    <p class="text-[9px] sm:text-[11px] text-white/80 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] tracking-widest">
-                        <span class="lang-jp" id="pop-date-jp">※データ取得中...</span>
-                        <span class="lang-en hidden" id="pop-date-en">Loading...</span>
-                    </p>
-                </div>
-            </div>
         </div>
 
         <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-20 pointer-events-none translate-y-[1px] text-white">
@@ -447,11 +424,11 @@
             
             <div class="bg-blue-50/50 rounded-2xl p-6 sm:p-10 mb-10 border border-blue-100 reveal-up">
                 <div class="lang-jp text-[14px] sm:text-base font-bold text-gray-600 leading-[2.2] sm:leading-loose text-center px-1 sm:px-4">
-                    三原に住む約<span class="text-blue-600 text-lg sm:text-xl">8.6万人</span>、<br class="sm:hidden">それぞれの視点をひとつの形に。<br>
+                    三原に住む人々の、<br class="sm:hidden">それぞれの視点をひとつの形に。<br>
                     地元の人しか知らない隠れた魅力を集めて、<br class="sm:hidden">みんなで「フォトマップ」を作りませんか？
                 </div>
                 <div class="lang-en text-[13px] sm:text-sm font-bold text-gray-600 leading-[2.2] sm:leading-loose text-center px-1 sm:px-4">
-                    Bringing together the perspectives of about <span class="text-blue-600 text-base">86,000</span> Mihara residents.<br>
+                    Bringing together the perspectives of Mihara residents.<br>
                     Let's collect hidden charms known only to locals and create a "Photo Map" together!
                 </div>
             </div>
@@ -666,70 +643,6 @@
         // =========================================================================
         // 🚀 グローバル変数と初期化関数群 🚀
         // =========================================================================
-
-        // ▼ 追加：ブラウザ側で三原市のAPIから人口データを取得する関数 ▼
-        async function fetchPopulationData() {
-            const popApiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=8b68f856-ffe2-48ab-ab71-d011f7982816&limit=3000&sort=" + encodeURIComponent("_id desc");
-            try {
-                const response = await fetch(popApiUrl);
-                const popJson = await response.json();
-                
-                if (popJson.success && popJson.result && popJson.result.records) {
-                    const records = popJson.result.records;
-                    let latestDate = '';
-                    records.forEach(row => {
-                        const d = String(row['基準日'] || '');
-                        if (d && d > latestDate) latestDate = d;
-                    });
-
-                    let totalPop = 0;
-                    let totalHouse = 0;
-                    records.forEach(row => {
-                        if (String(row['基準日'] || '') === latestDate) {
-                            totalHouse += parseInt(row['世帯数'], 10) || 0;
-                            totalPop += (parseInt(row['男性[人]'], 10) || 0) + (parseInt(row['女性[人]'], 10) || 0);
-                        }
-                    });
-
-                    if (totalPop > 0) {
-                        const dateStr = latestDate.split('T')[0].replace(/-/g, '/');
-                        const [y, m, d] = dateStr.split('/');
-                        const formattedDateJp = `${y}年${parseInt(m)}月${parseInt(d)}日`;
-                        
-                        document.getElementById('pop-date-jp').textContent = `※${formattedDateJp} 現在`;
-                        document.getElementById('pop-date-en').textContent = `※As of ${dateStr}`;
-                        
-                        animateCount('pop-count', totalPop);
-                        animateCount('house-count', totalHouse);
-                        return;
-                    }
-                }
-                throw new Error('Invalid data');
-            } catch(e) {
-                console.error("Population API error:", e);
-                // エラー時のフォールバック値 (三原市のサーバーが落ちている場合などは直近データを表示)
-                document.getElementById('pop-date-jp').textContent = `※2024年2月29日 現在`;
-                document.getElementById('pop-date-en').textContent = `※As of 2024/02/29`;
-                animateCount('pop-count', 86452);
-                animateCount('house-count', 42103);
-            }
-        }
-
-        // カウントアップアニメーション用の関数
-        function animateCount(elementId, endVal) {
-            const el = document.getElementById(elementId);
-            if (!el) return;
-            const obj = { val: 0 };
-            gsap.to(obj, {
-                val: endVal,
-                duration: 3,
-                ease: "power2.out",
-                delay: 1.0,
-                onUpdate: () => {
-                    el.innerHTML = Math.round(obj.val).toLocaleString();
-                }
-            });
-        }
 
         function initAnimations() {
             gsap.registerPlugin(ScrollTrigger);
@@ -1599,7 +1512,6 @@
 
         window.addEventListener('load', () => {
             fetchWeather();
-            fetchPopulationData(); // ▼ 追加：ブラウザ起動時に人口データを取得！ ▼
             
             initAnimations();
             
