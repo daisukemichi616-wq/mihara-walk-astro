@@ -651,19 +651,20 @@
             const heroTitle = document.getElementById('hero-title');
 
             if (heroLabel && heroTitle) {
+                // ▼ 変更：待ち時間(delay)を短く、表示速度(duration)を速く、ぼかし(blur)を軽くしました ▼
                 gsap.fromTo(heroLabel, 
-                    { opacity: 0, filter: 'blur(10px)', scale: 1.1 }, 
-                    { opacity: 1, filter: 'blur(0px)', scale: 1, duration: 2.5, ease: "power2.out", delay: 0.3 }
+                    { opacity: 0, filter: 'blur(5px)', scale: 1.05 }, 
+                    { opacity: 1, filter: 'blur(0px)', scale: 1, duration: 1.2, ease: "power3.out", delay: 0.1 }
                 );
                 
                 gsap.fromTo(heroTitle, 
-                    { opacity: 0, filter: 'blur(15px)', y: 10 }, 
-                    { opacity: 1, filter: 'blur(0px)', y: 0, duration: 3, ease: "power2.out", delay: 0.8 }
+                    { opacity: 0, filter: 'blur(5px)', y: 10 }, 
+                    { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.5, ease: "power3.out", delay: 0.3 }
                 );
                 
                 gsap.fromTo('.reveal-on-load', 
                     { opacity: 0, y: 20 },
-                    { opacity: 1, y: 0, duration: 2, ease: "power2.out", delay: 1.2 }
+                    { opacity: 1, y: 0, duration: 1.5, ease: "power3.out", delay: 0.6 }
                 );
 
                 gsap.to('.hero-content', {
