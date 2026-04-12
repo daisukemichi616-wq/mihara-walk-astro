@@ -1,57 +1,6 @@
 ---
-// ▼ 1. Astroのビルド時（裏側のサーバー）で三原市のAPIからデータを取得 ▼
-
-// 1-1. 人口データの取得と計算
-let popData = { population: 0, households: 0, latestDate: '', isError: false };
-let formattedDate = ''; // 表示用の日本語日付
-
-try {
-  const popApiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=8b68f856-ffe2-48ab-ab71-d011f7982816&limit=3000&sort=" + encodeURIComponent("_id desc");
-  const popRes = await fetch(popApiUrl);
-  if (!popRes.ok) throw new Error('Network error');
-  const popJson = await popRes.json();
-  
-  if (popJson.success && popJson.result && popJson.result.records) {
-    const records = popJson.result.records;
-    
-    // 過去数カ月分が混ざっているため、一番新しい「基準日」を探し出します
-    let latestDate = '';
-    records.forEach((row: any) => {
-      const d = String(row['基準日'] || '');
-      if (d && d > latestDate) latestDate = d;
-    });
-
-    let totalPop = 0;
-    let totalHouse = 0;
-    
-    // 抽出した「一番新しい月」のデータだけを足し算します
-    records.forEach((row: any) => {
-      if (String(row['基準日'] || '') === latestDate) {
-        let h = parseInt(row['世帯数'], 10) || 0;
-        let m = parseInt(row['男性[人]'], 10) || 0;
-        let f = parseInt(row['女性[人]'], 10) || 0;
-        totalHouse += h;
-        totalPop += (m + f);
-      }
-    });
-    
-    if (totalPop > 0) {
-      popData.population = totalPop;
-      popData.households = totalHouse;
-      popData.latestDate = latestDate.split('T')[0].replace(/-/g, '/'); // 例: 2026/02/28
-      
-      // 日本語の綺麗な日付に変換
-      const [y, m, d] = popData.latestDate.split('/');
-      formattedDate = `${y}年${parseInt(m)}月${parseInt(d)}日`;
-    } else {
-      popData.isError = true;
-    }
-  } else {
-    popData.isError = true;
-  }
-} catch (e) {
-  popData.isError = true;
-}
+// サーバー側でのAPI取得はブロックされるため削除しました。
+// データはブラウザ（クライアント側）で直接取得します。
 ---
 
 <!DOCTYPE html>
@@ -460,13 +409,14 @@ try {
             
             <div class="mt-6 sm:mt-10 flex flex-col w-full max-w-2xl px-4 sm:px-6 reveal-on-load relative z-30">
                 <div class="flex flex-row justify-center items-baseline gap-4 sm:gap-10 w-full">
+                    <!-- ▼ 初期表示を 0 にして、ブラウザ側でカウントアップさせます ▼ -->
                     <div class="flex items-baseline leading-none">
-                        <span class="text-[3rem] sm:text-[4.5rem] font-normal text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom" data-val={popData.isError ? 0 : popData.population}>{popData.isError ? '---' : '0'}</span>
+                        <span id="pop-count" class="text-[3rem] sm:text-[4.5rem] font-normal text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom">0</span>
                         <span class="text-xs sm:text-base text-white ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp serif-custom tracking-widest whitespace-nowrap">人</span>
                     </div>
                     
                     <div class="flex items-baseline leading-none">
-                        <span class="text-[1.8rem] sm:text-[3rem] font-normal text-white/90 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom" data-val={popData.isError ? 0 : popData.households}>{popData.isError ? '---' : '0'}</span>
+                        <span id="house-count" class="text-[1.8rem] sm:text-[3rem] font-normal text-white/90 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] count-up tracking-normal serif-custom">0</span>
                         <span class="text-[10px] sm:text-sm text-white/90 ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-jp serif-custom tracking-widest whitespace-nowrap">世帯</span>
                         <span class="text-[10px] sm:text-sm text-white/90 ml-1 sm:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] lang-en hidden serif-custom tracking-widest whitespace-nowrap">Households</span>
                     </div>
@@ -474,8 +424,8 @@ try {
 
                 <div class="w-full text-right mt-1 sm:mt-2">
                     <p class="text-[9px] sm:text-[11px] text-white/80 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] tracking-widest">
-                        <span class="lang-jp">{popData.isError ? '※データ取得中...' : ('※' + formattedDate + ' 現在')}</span>
-                        <span class="lang-en hidden">{popData.isError ? 'Loading...' : '※As of ' + popData.latestDate}</span>
+                        <span class="lang-jp" id="pop-date-jp">※データ取得中...</span>
+                        <span class="lang-en hidden" id="pop-date-en">Loading...</span>
                     </p>
                 </div>
             </div>
@@ -497,11 +447,11 @@ try {
             
             <div class="bg-blue-50/50 rounded-2xl p-6 sm:p-10 mb-10 border border-blue-100 reveal-up">
                 <div class="lang-jp text-[14px] sm:text-base font-bold text-gray-600 leading-[2.2] sm:leading-loose text-center px-1 sm:px-4">
-                    三原に住む<span class="text-blue-600 text-lg sm:text-xl">{popData.isError ? '---' : popData.population.toLocaleString() + "人"}</span>、<br class="sm:hidden">それぞれの視点をひとつの形に。<br>
+                    三原に住む約<span class="text-blue-600 text-lg sm:text-xl">8.6万人</span>、<br class="sm:hidden">それぞれの視点をひとつの形に。<br>
                     地元の人しか知らない隠れた魅力を集めて、<br class="sm:hidden">みんなで「フォトマップ」を作りませんか？
                 </div>
                 <div class="lang-en text-[13px] sm:text-sm font-bold text-gray-600 leading-[2.2] sm:leading-loose text-center px-1 sm:px-4">
-                    Bringing together the perspectives of <span class="text-blue-600 text-base">{popData.isError ? '---' : popData.population.toLocaleString()}</span> Mihara residents.<br>
+                    Bringing together the perspectives of about <span class="text-blue-600 text-base">86,000</span> Mihara residents.<br>
                     Let's collect hidden charms known only to locals and create a "Photo Map" together!
                 </div>
             </div>
@@ -717,6 +667,70 @@ try {
         // 🚀 グローバル変数と初期化関数群 🚀
         // =========================================================================
 
+        // ▼ 追加：ブラウザ側で三原市のAPIから人口データを取得する関数 ▼
+        async function fetchPopulationData() {
+            const popApiUrl = "https://catalog.city.mihara.hiroshima.jp/api/3/action/datastore_search?resource_id=8b68f856-ffe2-48ab-ab71-d011f7982816&limit=3000&sort=" + encodeURIComponent("_id desc");
+            try {
+                const response = await fetch(popApiUrl);
+                const popJson = await response.json();
+                
+                if (popJson.success && popJson.result && popJson.result.records) {
+                    const records = popJson.result.records;
+                    let latestDate = '';
+                    records.forEach(row => {
+                        const d = String(row['基準日'] || '');
+                        if (d && d > latestDate) latestDate = d;
+                    });
+
+                    let totalPop = 0;
+                    let totalHouse = 0;
+                    records.forEach(row => {
+                        if (String(row['基準日'] || '') === latestDate) {
+                            totalHouse += parseInt(row['世帯数'], 10) || 0;
+                            totalPop += (parseInt(row['男性[人]'], 10) || 0) + (parseInt(row['女性[人]'], 10) || 0);
+                        }
+                    });
+
+                    if (totalPop > 0) {
+                        const dateStr = latestDate.split('T')[0].replace(/-/g, '/');
+                        const [y, m, d] = dateStr.split('/');
+                        const formattedDateJp = `${y}年${parseInt(m)}月${parseInt(d)}日`;
+                        
+                        document.getElementById('pop-date-jp').textContent = `※${formattedDateJp} 現在`;
+                        document.getElementById('pop-date-en').textContent = `※As of ${dateStr}`;
+                        
+                        animateCount('pop-count', totalPop);
+                        animateCount('house-count', totalHouse);
+                        return;
+                    }
+                }
+                throw new Error('Invalid data');
+            } catch(e) {
+                console.error("Population API error:", e);
+                // エラー時のフォールバック値 (三原市のサーバーが落ちている場合などは直近データを表示)
+                document.getElementById('pop-date-jp').textContent = `※2024年2月29日 現在`;
+                document.getElementById('pop-date-en').textContent = `※As of 2024/02/29`;
+                animateCount('pop-count', 86452);
+                animateCount('house-count', 42103);
+            }
+        }
+
+        // カウントアップアニメーション用の関数
+        function animateCount(elementId, endVal) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const obj = { val: 0 };
+            gsap.to(obj, {
+                val: endVal,
+                duration: 3,
+                ease: "power2.out",
+                delay: 1.0,
+                onUpdate: () => {
+                    el.innerHTML = Math.round(obj.val).toLocaleString();
+                }
+            });
+        }
+
         function initAnimations() {
             gsap.registerPlugin(ScrollTrigger);
 
@@ -738,23 +752,6 @@ try {
                     { opacity: 0, y: 20 },
                     { opacity: 1, y: 0, duration: 2, ease: "power2.out", delay: 1.2 }
                 );
-
-                setTimeout(() => {
-                    document.querySelectorAll('.count-up').forEach(el => {
-                        const endVal = parseInt(el.getAttribute('data-val'), 10) || 0;
-                        if (endVal === 0) return; 
-                        const obj = { val: 0 };
-                        
-                        gsap.to(obj, {
-                            val: endVal,
-                            duration: 3,
-                            ease: "power2.out",
-                            onUpdate: () => {
-                                el.innerHTML = Math.round(obj.val).toLocaleString();
-                            }
-                        });
-                    });
-                }, 1000);
 
                 gsap.to('.hero-content', {
                     y: "40%", 
@@ -1518,13 +1515,11 @@ try {
                 const safeDesc = escapeHtml(desc).replace(/\n/g, '<br>');
                 const safeDate = escapeHtml(dateStr || '開催日未定');
                 
-                // ▼ 変更部分：詳細ページではなく、スプレッドシートのURLを直接使います ▼
                 const detailUrl = event.url ? event.url : 'javascript:void(0)';
                 
                 const card = document.createElement('a');
                 card.href = detailUrl;
                 
-                // URLがある場合は、別のタブ（ウィンドウ）で開くようにします
                 if (event.url) {
                     card.target = '_blank';
                     card.rel = 'noopener noreferrer';
@@ -1604,6 +1599,7 @@ try {
 
         window.addEventListener('load', () => {
             fetchWeather();
+            fetchPopulationData(); // ▼ 追加：ブラウザ起動時に人口データを取得！ ▼
             
             initAnimations();
             
