@@ -1515,10 +1515,14 @@
                                 }).filter(e => e.title);
 
                                 eventsData = eventsData.filter(e => {
-                                    if (!e.end_date) return true; 
-                                    const endDate = new Date(e.end_date.replace(/-/g, '/')); 
-                                    if (isNaN(endDate.getTime())) return true; 
-                                    return endDate >= today; 
+                                    // ▼ 変更：終了日がない場合は開始日を基準にして判定する ▼
+                                    const targetDateStr = e.end_date || e.start_date;
+                                    if (!targetDateStr) return true; 
+                                    
+                                    const targetDate = new Date(targetDateStr.replace(/-/g, '/')); 
+                                    if (isNaN(targetDate.getTime())) return true; 
+                                    
+                                    return targetDate >= today; 
                                 });
                                 
                                 eventsData.sort((a, b) => {
