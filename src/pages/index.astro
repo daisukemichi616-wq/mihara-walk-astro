@@ -1398,6 +1398,8 @@
                                     if (parts.length >= 2) {
                                         clean.lat = parts[0].trim();
                                         clean.lng = parts[1].trim();
+                                    }
+                                }
                                 if (!clean.map_url) clean.map_url = clean['googleマップのurl'] || clean['googleマップのurl(共有リンク)'] || clean['googleマップのurl（共有リンク）'] || clean['地図url'] || clean['googlemap'] || '';
                                 return clean;
                             }).filter(s => s.title).reverse();
