@@ -247,7 +247,8 @@
         
         .local-card-horizontal {
             flex: none;
-            width: calc((100vw - 56px) / 3); 
+            /* ▼ 変更：ご提案の通り、スマホで1.2枚分くらい表示されるように幅を広げました ▼ */
+            width: 72vw; 
             scroll-snap-align: start;
             display: flex; flex-direction: column; background: #fff;
             border: 2px solid transparent; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -258,27 +259,29 @@
         .horizontal-scroll-container.active .local-card-horizontal { transition: none; transform: none; }
         .local-card-horizontal.active-card { border-color: var(--palette-blue); box-shadow: 0 8px 20px rgba(0,64,152,0.15); }
         @media (min-width: 640px) {
-            .local-card-horizontal { width: 180px; }
+            /* ▼ 変更：PCでも少し大きめに表示されるように調整 ▼ */
+            .local-card-horizontal { width: 220px; }
             .horizontal-scroll-container { margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; gap: 16px; }
         }
         @media (min-width: 1024px) { 
-            .local-card-horizontal { width: 220px; } 
+            .local-card-horizontal { width: 260px; } 
         }
 
         .local-card-img-wrap { position: relative; width: 100%; aspect-ratio: 3/4; background: #f1f5f9; overflow: hidden; pointer-events: none; }
         .local-card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; pointer-events: none; }
         .local-card-horizontal:hover .local-card-img-wrap img { transform: scale(1.05); }
-        .local-tag-badge { position: absolute; top: 6px; left: 6px; background: rgba(0,64,152,0.9); color: white; font-size: 8px; font-weight: 700; padding: 3px 6px; border-radius: 4px; z-index: 2; display: flex; align-items: center; gap: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        /* ▼ 変更：カードが大きくなった分、タグや余白、文字のサイズを読みやすく調整 ▼ */
+        .local-tag-badge { position: absolute; top: 8px; left: 8px; background: rgba(0,64,152,0.9); color: white; font-size: 9px; font-weight: 700; padding: 4px 8px; border-radius: 4px; z-index: 2; display: flex; align-items: center; gap: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
-        .local-card-content { flex: 1; padding: 8px; display: flex; flex-direction: column; justify-content: flex-start; pointer-events: none; }
-        .local-card-title { font-size: 0.75rem; font-weight: 700; color: var(--palette-blue); margin-bottom: 4px; font-family: 'Noto Serif JP', serif !important; line-height: 1.3; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-        .local-card-desc { font-size: 0.6rem; font-weight: 500; color: var(--text-sub); line-height: 1.4; margin-bottom: 6px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-        .local-area { font-size: 8px; font-weight: 700; color: #9ca3af; letter-spacing: 0.05em; text-transform: uppercase; pointer-events: none; }
+        .local-card-content { flex: 1; padding: 12px; display: flex; flex-direction: column; justify-content: flex-start; pointer-events: none; }
+        .local-card-title { font-size: 0.85rem; font-weight: 700; color: var(--palette-blue); margin-bottom: 4px; font-family: 'Noto Serif JP', serif !important; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+        .local-card-desc { font-size: 0.7rem; font-weight: 500; color: var(--text-sub); line-height: 1.6; margin-bottom: 8px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+        .local-area { font-size: 9px; font-weight: 700; color: #9ca3af; letter-spacing: 0.05em; text-transform: uppercase; pointer-events: none; }
         
         .local-read-link {
             display: flex; align-items: center; justify-content: flex-end; gap: 6px;
-            font-size: 9px; font-weight: 700; color: var(--palette-blue); text-decoration: none;
-            margin-top: 8px; position: relative; z-index: 10; cursor: pointer;
+            font-size: 10px; font-weight: 700; color: var(--palette-blue); text-decoration: none;
+            margin-top: 10px; position: relative; z-index: 10; cursor: pointer;
         }
         .local-read-link .read-text { position: relative; padding-bottom: 2px; }
         .local-read-link .read-text::after {
