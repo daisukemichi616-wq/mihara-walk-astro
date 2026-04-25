@@ -200,10 +200,12 @@
         .view-btn { padding: 8px 24px; border-radius: 40px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s; color: #64748b; display: flex; align-items: center; }
         .view-btn.active { background: white; color: var(--palette-blue); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         
-        .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px; background: #ffffff; padding: 1.5px; }
-        @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 2px; } }
+        /* ▼ 変更：スマホで2列、PCで4列にし、余白（gap/padding）を6pxに広げました ▼ */
+        .photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; background: #ffffff; padding: 6px; }
+        @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 6px; } }
         
-        .photo-item { position: relative; aspect-ratio: 1/1; background: #f3f4f6; overflow: hidden; cursor: pointer; display: block; text-decoration: none; border-radius: 0; box-shadow: none; }
+        /* ▼ 変更：余白ができたので、写真の角を少しだけ丸く（border-radius: 8px）して柔らかい印象にしました ▼ */
+        .photo-item { position: relative; aspect-ratio: 1/1; background: #f3f4f6; overflow: hidden; cursor: pointer; display: block; text-decoration: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .photo-item img { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
         
         .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 80%); opacity: 0; transition: opacity 0.6s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; pointer-events: none; }
@@ -476,7 +478,8 @@
         
         <div id="gallery-wrap" class="relative z-30 pt-0 mt-2 px-0 max-w-5xl mx-auto">
             <div id="gallery-grid" class="photo-grid">
-                <div class="col-span-3 py-32 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" id="gallery-loading-text">Collecting memories...</div>
+                <!-- ▼ 変更：列数が変わっても真ん中に表示されるように col-span-3 を col-span-full に変更 ▼ -->
+                <div class="col-span-full py-32 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest" id="gallery-loading-text">Collecting memories...</div>
             </div>
             <div id="load-more-area" class="text-center py-10 hidden">
                 <button onclick="loadMoreItems()" class="bg-[#004098] text-white text-xs font-bold py-3 px-10 rounded-full hover:opacity-90 transition shadow-lg tracking-widest">もっと写真を見る</button>
@@ -991,7 +994,8 @@
             displayedCount = 0;
 
             if (currentFilteredData.length === 0) {
-                if (grid) grid.innerHTML = `<div class="col-span-3 py-32 text-center text-[10px] font-bold text-gray-300 uppercase tracking-widest">データがありません</div>`;
+                // ▼ 変更：ここも col-span-full に変更 ▼
+                if (grid) grid.innerHTML = `<div class="col-span-full py-32 text-center text-[10px] font-bold text-gray-300 uppercase tracking-widest">データがありません</div>`;
                 if (loadMoreArea) loadMoreArea.classList.add('hidden');
             } else {
                 loadMoreItems();
@@ -1394,8 +1398,7 @@
                                     if (parts.length >= 2) {
                                         clean.lat = parts[0].trim();
                                         clean.lng = parts[1].trim();
-                                    }
-                                }
+                                if (!clean.map_url) clean.map_url = clean['googleマップのurl'] || clean['googleマップのurl(共有リンク)'] || clean['googleマップのurl（共有リンク）'] || clean['地図url'] || clean['googlemap'] || '';
                                 return clean;
                             }).filter(s => s.title).reverse();
                             
@@ -1404,7 +1407,8 @@
                     },
                     error: function(err) {
                         const grid = document.getElementById('gallery-grid');
-                        if (grid) grid.innerHTML = '<div class="col-span-3 py-10 text-center text-xs text-red-400">データの読み込みに失敗しました。</div>';
+                        // ▼ 変更：ここも col-span-full に変更 ▼
+                        if (grid) grid.innerHTML = '<div class="col-span-full py-10 text-center text-xs text-red-400">データの読み込みに失敗しました。</div>';
                     }
                 });
 
