@@ -204,9 +204,9 @@
         .photo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; background: #ffffff; padding: 6px; }
         @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 6px; } }
         
-        /* ▼ 変更：余白ができたので、写真の角を少しだけ丸く（border-radius: 8px）して柔らかい印象にしました ▼ */
-        .photo-item { position: relative; aspect-ratio: 1/1; background: #f3f4f6; overflow: hidden; cursor: pointer; display: block; text-decoration: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .photo-item img { width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        /* ▼ 変更：写真の比率を5:4に変更し、切り抜き位置を「中央（center）」に調整しました ▼ */
+        .photo-item { position: relative; aspect-ratio: 5/4; background: #f3f4f6; overflow: hidden; cursor: pointer; display: block; text-decoration: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
         
         .photo-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 80%); opacity: 0; transition: opacity 0.6s ease; display: flex; flex-direction: column; justify-content: flex-end; padding: 10px; pointer-events: none; }
         .photo-overlay span { transform: translateY(15px); opacity: 0; transition: transform 0.6s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.6s ease; }
